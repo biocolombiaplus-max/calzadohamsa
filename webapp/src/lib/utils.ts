@@ -19,9 +19,16 @@ export function slugify(text: string): string {
 
 const WA_COUNTRY = process.env.NEXT_PUBLIC_WHATSAPP_COUNTRY_CODE || '57';
 
-export function whatsappLinkTo(phone: string, message: string, countryCode = WA_COUNTRY): string {
-  const digits = phone.replace(/\D/g, '');
-  const fullNumber = digits.startsWith(countryCode) ? digits : `${countryCode}${digits}`;
+/**
+ * Construye un enlace wa.me válido a partir de un número escrito de cualquier
+ * forma (con espacios, guiones, +, ceros iniciales, con o sin el código de
+ * país ya incluido) y un código de país. Nunca duplica el código de país ni
+ * lo deja puesto dos veces.
+ */
+export function whatsappLinkTo(phone: string, message: string, countryCode?: string): string {
+  const cc = (countryCode || WA_COUNTRY).replace(/\D/g, '');
+  const digits = phone.replace(/\D/g, '').replace(/^0+/, '');
+  const fullNumber = cc && !digits.startsWith(cc) ? `${cc}${digits}` : digits;
   return `https://wa.me/${fullNumber}?text=${encodeURIComponent(message)}`;
 }
 
