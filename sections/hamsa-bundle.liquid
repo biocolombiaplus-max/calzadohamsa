@@ -1,0 +1,487 @@
+{% comment %}hamsa-bundle v5 — World-Class Bundle Converter{% endcomment %}
+{% if product %}
+{%- assign bundle_price = section.settings.bundle_price | default: 15990000 -%}
+{%- assign bundle_qty   = section.settings.bundle_qty   | default: 2 -%}
+{%- assign col = collections['all'] -%}
+{%- if col == blank or col.products_count < 2 -%}
+  {%- assign col = product.collections.first -%}
+{%- endif -%}
+{%- assign catalog_limit = section.settings.limit | default: 12 -%}
+
+<section class="hbv5" id="HamsaBundleV5-{{ section.id }}" style="background:{{ section.settings.bg_color | default: '#FBF3E5' }}">
+
+<!-- ══ HEADER OFERTA ══ -->
+<div class="hbv5__header">
+  <div class="hbv5__header-badge">
+    <span class="hbv5__flash-dot"></span>
+    OFERTA MÁS POPULAR
+  </div>
+  <h2 class="hbv5__title">{{ section.settings.title | default: '🔥 Lleva 2 Pares y Ahorra $79.900' }}</h2>
+
+  <!-- Comparación de precios visual -->
+  <div class="hbv5__price-compare">
+    <div class="hbv5__pc-item hbv5__pc-item--bad">
+      <span class="hbv5__pc-label">1 par</span>
+      <span class="hbv5__pc-price">{{ product.compare_at_price | money }}</span>
+      <span class="hbv5__pc-each">precio normal</span>
+    </div>
+    <div class="hbv5__pc-arrow">→</div>
+    <div class="hbv5__pc-item hbv5__pc-item--good">
+      <span class="hbv5__pc-label">2 pares</span>
+      <span class="hbv5__pc-price">{{ bundle_price | money }}</span>
+      <span class="hbv5__pc-each">¡{{ section.settings.savings_label | default: 'Ahorras $79.900' }}!</span>
+    </div>
+  </div>
+
+  <!-- Trust pills -->
+  <div class="hbv5__pills">
+    <span>🚚 Envío gratis</span>
+    <span>💵 Paga al recibir</span>
+    <span>🔄 Cambio gratis</span>
+  </div>
+
+  <!-- Timer -->
+  <div class="hbv5__timer-row">
+    <span class="hbv5__tdot"></span>
+    <span class="hbv5__tlabel">Oferta válida solo por:</span>
+    <span class="hbv5__tcount" id="hbv5T-{{ section.id }}">14:59</span>
+    <span class="hbv5__tscarcity">— Pocas unidades</span>
+  </div>
+</div>
+
+<!-- ══ SELECTOR VISUAL DE 2 PARES ══ -->
+<div class="hbv5__selector-wrap">
+
+  <!-- Par 1: el producto actual -->
+  <div class="hbv5__pair" id="hbv5PairA">
+    <div class="hbv5__pair-num">Par 1</div>
+    <div class="hbv5__pair-img">
+      {% if product.featured_image %}
+        <img src="{{ product.featured_image | image_url: width: 120, format: 'webp' }}"
+             alt="{{ product.title | escape }}" loading="lazy" width="120" height="120">
+      {% endif %}
+      <span class="hbv5__pair-check">✓</span>
+    </div>
+    <div class="hbv5__pair-info">
+      <strong>{{ product.title | truncate: 30 }}</strong>
+      <span>{{ product.price | money }}</span>
+    </div>
+    <div class="hbv5__pair-selected">✓ Seleccionado</div>
+  </div>
+
+  <div class="hbv5__plus">+</div>
+
+  <!-- Par 2: selector del catálogo -->
+  <div class="hbv5__pair hbv5__pair--b" id="hbv5PairB">
+    <div class="hbv5__pair-num">Par 2 <span class="hbv5__pair-discount">50% OFF</span></div>
+    <div class="hbv5__pair-img hbv5__pair-img--empty" id="hbv5ImgB">
+      <span class="hbv5__pair-plus-icon">+</span>
+    </div>
+    <div class="hbv5__pair-info">
+      <strong id="hbv5NameB">Elige tu 2do par →</strong>
+      <span id="hbv5PriceB" class="hbv5__pair-free">¡GRATIS con la oferta!</span>
+    </div>
+    <div class="hbv5__pair-choose" id="hbv5ChooseBtn">Seleccionar →</div>
+  </div>
+
+</div>
+
+<!-- ══ CATÁLOGO DE PRODUCTOS PARA 2DO PAR ══ -->
+<div class="hbv5__catalog" id="hbv5Catalog" aria-hidden="true">
+  <div class="hbv5__catalog-head">
+    <span>Elige tu 2do par</span>
+    <button class="hbv5__catalog-close" id="hbv5CatalogClose">✕</button>
+  </div>
+  <div class="hbv5__catalog-grid" id="hbv5Grid">
+    {% if col != blank %}
+      {% for p in col.products limit: catalog_limit %}
+        {% unless p.id == product.id %}
+        <button class="hbv5__prod-btn" data-id="{{ p.id }}"
+          data-title="{{ p.title | escape | truncate: 28 }}"
+          data-price="{{ p.price | money }}"
+          data-img="{{ p.featured_image | image_url: width: 120, format: 'webp' }}"
+          data-variant="{{ p.first_available_variant.id }}">
+          {% if p.featured_image %}
+            <img src="{{ p.featured_image | image_url: width: 100, format: 'webp' }}"
+                 alt="{{ p.title | escape }}" loading="lazy" width="100" height="100">
+          {% endif %}
+          <span class="hbv5__prod-name">{{ p.title | truncate: 22 }}</span>
+          <span class="hbv5__prod-price">{{ p.price | money }}</span>
+        </button>
+        {% endunless %}
+      {% endfor %}
+    {% endif %}
+  </div>
+</div>
+
+<!-- ══ CTA BUNDLE ══ -->
+<div class="hbv5__cta-wrap" id="hbv5CtaWrap">
+
+  <div class="hbv5__total">
+    <div class="hbv5__total-row">
+      <span>Total normal:</span>
+      <span class="hbv5__total-old" id="hbv5TotalOld">{{ section.settings.compare_price | default: '$239.800' }}</span>
+    </div>
+    <div class="hbv5__total-row hbv5__total-row--main">
+      <span>Tu precio hoy:</span>
+      <span class="hbv5__total-price">{{ bundle_price | money }}</span>
+    </div>
+    <div class="hbv5__total-savings">
+      🎁 {{ section.settings.savings_label | default: '¡Ahorras $79.900!' }} — Envío gratis incluido
+    </div>
+  </div>
+
+  <button class="hbv5__cta-btn" id="hbv5AddBtn" disabled>
+    <span class="hbv5__cta-shine"></span>
+    <span id="hbv5BtnText">Selecciona tu 2do par ↑</span>
+  </button>
+
+  <div class="hbv5__microcopy">
+    <span>🔒 Pago seguro</span>
+    <span>·</span>
+    <span>💵 Paga cuando llega</span>
+    <span>·</span>
+    <span>🔄 Cambio gratis</span>
+  </div>
+</div>
+
+</section>
+
+<style>
+/* ════════════════════════════════════
+   HBUNDLEV5 — Premium Bundle Section
+════════════════════════════════════ */
+.hbv5 {
+  font-family: var(--font-body--family, system-ui, sans-serif);
+  border-top: 3px solid #A9673A;
+  overflow: hidden;
+}
+.hbv5 * { box-sizing: border-box; }
+
+/* ── HEADER ── */
+.hbv5__header {
+  background: linear-gradient(135deg, #1C1208 0%, #2D1810 100%);
+  padding: 24px 20px 20px;
+  color: #fff;
+}
+.hbv5__header-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,215,0,.15); border: 1px solid rgba(255,215,0,.4);
+  color: #C9A06C; font-size: 10px; font-weight: 800;
+  letter-spacing: .12em; padding: 4px 12px; border-radius: 20px;
+  margin-bottom: 12px; text-transform: uppercase;
+}
+.hbv5__flash-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: #C9A06C; flex-shrink: 0;
+  animation: hbv5-pulse 1.5s infinite;
+}
+@keyframes hbv5-pulse {
+  0%,100% { opacity: 1; } 50% { opacity: .4; }
+}
+.hbv5__title {
+  font-size: clamp(1.2rem, 4vw, 1.6rem); font-weight: 900;
+  color: #fff; margin: 0 0 16px; line-height: 1.25;
+}
+
+/* Price compare */
+.hbv5__price-compare {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;
+}
+.hbv5__pc-item {
+  flex: 1; min-width: 110px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 12px; padding: 12px 14px; text-align: center;
+}
+.hbv5__pc-item--good {
+  background: rgba(212,82,122,.25);
+  border-color: rgba(212,82,122,.6);
+  box-shadow: 0 0 20px rgba(212,82,122,.3);
+}
+.hbv5__pc-label { display: block; font-size: 10px; color: rgba(255,255,255,.6); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 4px; }
+.hbv5__pc-price { display: block; font-size: 18px; font-weight: 900; color: #C9A06C; }
+.hbv5__pc-item--bad .hbv5__pc-price { color: rgba(255,255,255,.5); text-decoration: line-through; font-size: 16px; }
+.hbv5__pc-each { display: block; font-size: 11px; color: rgba(255,255,255,.65); margin-top: 3px; }
+.hbv5__pc-item--good .hbv5__pc-each { color: #4ADE80; font-weight: 700; }
+.hbv5__pc-arrow { color: #A9673A; font-size: 20px; font-weight: 900; flex-shrink: 0; }
+
+/* Trust pills */
+.hbv5__pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.hbv5__pills span { font-size: 11px; font-weight: 600; background: rgba(255,255,255,.1); border-radius: 20px; padding: 4px 10px; color: rgba(255,255,255,.85); white-space: nowrap; }
+
+/* Timer row */
+.hbv5__timer-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.hbv5__tdot { width: 7px; height: 7px; border-radius: 50%; background: #4ADE80; flex-shrink: 0; animation: hbv5-pulse 1.5s infinite; }
+.hbv5__tlabel { font-size: 12px; color: rgba(255,255,255,.7); }
+.hbv5__tcount { font-size: 18px; font-weight: 900; color: #C9A06C; font-variant-numeric: tabular-nums; }
+.hbv5__tscarcity { font-size: 11px; color: #F87171; font-weight: 700; }
+
+/* ── SELECTOR ── */
+.hbv5__selector-wrap {
+  display: flex; align-items: center; gap: 12px;
+  padding: 20px; background: #fff;
+  border-bottom: 1px solid rgba(212,82,122,.1);
+}
+.hbv5__pair { flex: 1; text-align: center; }
+.hbv5__pair-num {
+  font-size: 11px; font-weight: 800; color: #A9673A;
+  text-transform: uppercase; letter-spacing: .1em;
+  margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.hbv5__pair-discount { background: #A9673A; color: #fff; font-size: 10px; padding: 2px 7px; border-radius: 20px; }
+.hbv5__pair-img {
+  width: 90px; height: 90px; margin: 0 auto 10px;
+  border-radius: 12px; overflow: hidden; position: relative;
+  border: 2px solid rgba(212,82,122,.2);
+}
+.hbv5__pair-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.hbv5__pair-check {
+  position: absolute; bottom: 4px; right: 4px;
+  background: #25D366; color: #fff; width: 20px; height: 20px;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+}
+.hbv5__pair-img--empty {
+  background: linear-gradient(135deg, #F7ECDA, #F5E6FF);
+  border: 2px dashed rgba(212,82,122,.4);
+  cursor: pointer;
+}
+.hbv5__pair-plus-icon {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  font-size: 28px; color: rgba(212,82,122,.5); font-weight: 300;
+}
+.hbv5__pair-info { margin-bottom: 8px; }
+.hbv5__pair-info strong { display: block; font-size: 12px; font-weight: 700; color: #1C1208; margin-bottom: 3px; line-height: 1.3; }
+.hbv5__pair-info span { font-size: 13px; font-weight: 800; color: #A9673A; }
+.hbv5__pair-free { color: #25D366 !important; font-size: 12px !important; }
+.hbv5__pair-selected {
+  font-size: 11px; font-weight: 700; color: #25D366;
+  background: rgba(37,211,102,.1); border-radius: 20px; padding: 3px 10px;
+  display: inline-block;
+}
+.hbv5__pair-choose {
+  font-size: 12px; font-weight: 700; color: #A9673A;
+  background: rgba(212,82,122,.1); border-radius: 20px; padding: 6px 14px;
+  cursor: pointer; display: inline-block;
+  border: 1.5px solid rgba(212,82,122,.3);
+  transition: background .2s;
+}
+.hbv5__pair-choose:hover { background: rgba(212,82,122,.2); }
+.hbv5__plus { font-size: 28px; font-weight: 900; color: #A9673A; flex-shrink: 0; }
+
+/* ── CATALOG ── */
+.hbv5__catalog {
+  max-height: 0; overflow: hidden;
+  transition: max-height .4s ease;
+  background: #fff; border-top: 1px solid rgba(212,82,122,.1);
+}
+.hbv5__catalog.open { max-height: 340px; overflow-y: auto; }
+.hbv5__catalog-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px;
+  font-weight: 700; font-size: 13px; color: #1C1208;
+  border-bottom: 1px solid rgba(212,82,122,.1); position: sticky; top: 0; background: #fff; z-index: 1;
+}
+.hbv5__catalog-close { background: none; border: none; cursor: pointer; font-size: 16px; color: #8A7660; padding: 4px; line-height: 1; }
+.hbv5__catalog-grid {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 10px; padding: 14px;
+}
+.hbv5__prod-btn {
+  background: none; border: 2px solid rgba(212,82,122,.15); border-radius: 12px;
+  padding: 10px 8px; cursor: pointer; text-align: center;
+  transition: border-color .2s, background .2s, transform .2s;
+  font-family: inherit;
+}
+.hbv5__prod-btn:hover { border-color: #A9673A; background: rgba(212,82,122,.05); transform: translateY(-2px); }
+.hbv5__prod-btn.selected { border-color: #A9673A; background: rgba(212,82,122,.1); }
+.hbv5__prod-btn img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; display: block; margin: 0 auto 6px; }
+.hbv5__prod-name { display: block; font-size: 11px; font-weight: 600; color: #1C1208; margin-bottom: 3px; line-height: 1.3; }
+.hbv5__prod-price { display: block; font-size: 12px; font-weight: 800; color: #A9673A; }
+
+/* ── CTA ── */
+.hbv5__cta-wrap { padding: 16px 20px 20px; background: #fff; }
+.hbv5__total { background: linear-gradient(135deg,#F7ECDA,#FBF3E5); border-radius: 12px; padding: 14px; margin-bottom: 14px; border: 1px solid rgba(212,82,122,.1); }
+.hbv5__total-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 6px; }
+.hbv5__total-row--main { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
+.hbv5__total-old { text-decoration: line-through; color: #9CA3AF; }
+.hbv5__total-price { color: #A9673A; font-size: 22px; font-weight: 900; }
+.hbv5__total-savings { font-size: 12px; font-weight: 700; color: #059669; background: rgba(5,150,105,.08); border-radius: 8px; padding: 6px 10px; text-align: center; }
+
+.hbv5__cta-btn {
+  position: relative; overflow: hidden;
+  width: 100%; padding: 17px 20px;
+  background: linear-gradient(135deg, #8C5429, #A9673A, #BF8A4E);
+  color: #fff; font-size: 16px; font-weight: 800;
+  border: none; border-radius: 50px; cursor: pointer;
+  letter-spacing: .02em; font-family: inherit;
+  box-shadow: 0 6px 24px rgba(192,64,95,.45);
+  transition: transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s, opacity .2s;
+  margin-bottom: 12px;
+}
+.hbv5__cta-btn:disabled { opacity: .55; cursor: not-allowed; transform: none !important; }
+.hbv5__cta-btn:not(:disabled):hover { transform: translateY(-3px); box-shadow: 0 10px 32px rgba(192,64,95,.6); }
+.hbv5__cta-shine {
+  position: absolute; top: 0; left: -75%; width: 50%; height: 100%;
+  background: linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);
+  transform: skewX(-20deg);
+  animation: hbv5-shine 3s infinite;
+}
+@keyframes hbv5-shine {
+  0%   { left: -75%; opacity: 0; }
+  10%  { opacity: 1; }
+  40%  { left: 120%; opacity: 0; }
+  100% { left: 120%; opacity: 0; }
+}
+.hbv5__microcopy { display: flex; justify-content: center; gap: 8px; font-size: 11px; color: #9CA3AF; flex-wrap: wrap; }
+
+@media (max-width: 480px) {
+  .hbv5__catalog-grid { grid-template-columns: repeat(2,1fr); }
+  .hbv5__pair-img { width: 76px; height: 76px; }
+  .hbv5__pc-price { font-size: 16px; }
+  .hbv5__cta-btn { font-size: 15px; padding: 15px; }
+}
+</style>
+
+<script>
+(function(){
+  var sid = {{ section.id | json }};
+
+  /* ── TIMER ── */
+  var rem = {{ section.settings.timer_min | default: 14 }} * 60 + {{ section.settings.timer_sec | default: 59 }};
+  var tEl = document.getElementById('hbv5T-' + sid);
+  function pad(n){ return n < 10 ? '0'+n : ''+n; }
+  function tickBundle(){
+    if (rem <= 0) rem = {{ section.settings.timer_min | default: 14 }} * 60 + 59;
+    var m = Math.floor(rem/60), s = rem%60;
+    if (tEl) tEl.textContent = pad(m) + ':' + pad(s);
+    rem--;
+  }
+  tickBundle(); setInterval(tickBundle,1000);
+
+  /* ── CATALOG TOGGLE ── */
+  var chooseBtn  = document.getElementById('hbv5ChooseBtn');
+  var catalog    = document.getElementById('hbv5Catalog');
+  var closeBtn   = document.getElementById('hbv5CatalogClose');
+  var grid       = document.getElementById('hbv5Grid');
+  var imgB       = document.getElementById('hbv5ImgB');
+  var nameB      = document.getElementById('hbv5NameB');
+  var priceB     = document.getElementById('hbv5PriceB');
+  var addBtn     = document.getElementById('hbv5AddBtn');
+  var btnText    = document.getElementById('hbv5BtnText');
+
+  var selectedId      = null;
+  var selectedVariant = null;
+
+  function openCatalog(){
+    if (catalog) { catalog.classList.add('open'); catalog.setAttribute('aria-hidden','false'); }
+  }
+  function closeCatalog(){
+    if (catalog) { catalog.classList.remove('open'); catalog.setAttribute('aria-hidden','true'); }
+  }
+
+  if (chooseBtn) chooseBtn.addEventListener('click', openCatalog);
+  if (closeBtn)  closeBtn.addEventListener('click', closeCatalog);
+
+  /* ── PRODUCT SELECTION ── */
+  if (grid) {
+    grid.addEventListener('click', function(e){
+      var btn = e.target.closest('.hbv5__prod-btn');
+      if (!btn) return;
+
+      /* Mark selected */
+      grid.querySelectorAll('.hbv5__prod-btn').forEach(function(b){ b.classList.remove('selected'); });
+      btn.classList.add('selected');
+
+      selectedId      = btn.dataset.id;
+      selectedVariant = btn.dataset.variant;
+
+      /* Update pair B display */
+      var img = imgB ? imgB.querySelector('img') : null;
+      if (!img && imgB) {
+        imgB.innerHTML = '';
+        img = document.createElement('img');
+        img.width = 90; img.height = 90;
+        var chk = document.createElement('span');
+        chk.className = 'hbv5__pair-check'; chk.textContent = '✓';
+        imgB.appendChild(img);
+        imgB.appendChild(chk);
+        imgB.classList.remove('hbv5__pair-img--empty');
+      }
+      if (img) { img.src = btn.dataset.img; img.alt = btn.dataset.title; }
+      if (nameB)  nameB.textContent  = btn.dataset.title;
+      if (priceB) {
+        priceB.textContent = '¡GRATIS con la oferta!';
+        priceB.className = 'hbv5__pair-free';
+      }
+      if (chooseBtn) chooseBtn.textContent = '✓ Cambiarlo';
+
+      /* Enable CTA */
+      if (addBtn)  addBtn.disabled = false;
+      if (btnText) btnText.innerHTML = '🛒 {{ section.settings.btn_text | default: 'Agregar los 2 pares al carrito' }}';
+
+      closeCatalog();
+    });
+  }
+
+  /* ── ADD TO CART ── */
+  if (addBtn) {
+    addBtn.addEventListener('click', function(){
+      if (!selectedVariant) return;
+      if (addBtn.disabled) return;
+
+      addBtn.disabled = true;
+      if (btnText) btnText.textContent = 'Agregando...';
+
+      var variantA = {{ product.first_available_variant.id | json }};
+
+      fetch('/cart/add.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: [
+          { id: variantA, quantity: 1 },
+          { id: parseInt(selectedVariant), quantity: 1 }
+        ]})
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(){
+        if (btnText) btnText.innerHTML = '✓ ¡Agregados al carrito!';
+        addBtn.style.background = 'linear-gradient(135deg,#059669,#10B981)';
+        /* Apply discount via URL */
+        setTimeout(function(){
+          window.location.href = '/checkout?discount={{ section.settings.bundle_discount | default: '' }}';
+        }, 1200);
+      })
+      .catch(function(){
+        addBtn.disabled = false;
+        if (btnText) btnText.textContent = 'Error — Intenta de nuevo';
+      });
+    });
+  }
+
+})();
+</script>
+
+{% endif %}
+
+{% schema %}
+{
+  "name": "🎁 Bundle 2×1 Premium",
+  "settings": [
+    { "type": "header", "content": "📦 Oferta Bundle" },
+    { "type": "text",   "id": "title",         "label": "Título",             "default": "🔥 Lleva 2 Pares y Ahorra $79.900" },
+    { "type": "text",   "id": "savings_label", "label": "Texto ahorro",       "default": "¡Ahorras $79.900!" },
+    { "type": "text",   "id": "compare_price", "label": "Precio normal (texto)", "default": "$239.800" },
+    { "type": "text",   "id": "bundle_price",  "label": "Precio bundle (centavos)", "default": "15990000" },
+    { "type": "range",  "id": "bundle_qty",    "label": "Cantidad pares bundle", "min": 2, "max": 4, "step": 1, "default": 2 },
+    { "type": "range",  "id": "limit",         "label": "Productos en catálogo", "min": 4, "max": 20, "step": 2, "default": 12 },
+    { "type": "text",   "id": "btn_text",      "label": "Texto botón",        "default": "Agregar los 2 pares al carrito" },
+    { "type": "text",   "id": "bundle_discount","label":"Código descuento automático (opcional)", "default": "" },
+    { "type": "range",  "id": "timer_min",     "label": "Timer minutos",      "min": 5, "max": 59, "step": 1, "default": 14 },
+    { "type": "range",  "id": "timer_sec",     "label": "Timer segundos",     "min": 0, "max": 59, "step": 1, "default": 59 },
+    { "type": "header", "content": "🎨 Visual" },
+    { "type": "color",  "id": "bg_color",      "label": "Fondo",              "default": "#FBF3E5" }
+  ],
+  "presets": [{ "name": "🎁 Bundle 2×1 Premium" }]
+}
+{% endschema %}

@@ -1,0 +1,525 @@
+{% comment %}hamsa-product-pro v5 — World-Class Conversion Section{% endcomment %}
+{% if product %}
+{%- assign wa_phone = "57" | append: section.settings.wa_number -%}
+{%- assign wa_msg = "Hola, quiero pedir: " | append: product.title | url_encode -%}
+
+<div class="hpp5" id="HamsaPro5-{{ section.id }}" style="
+  --rose:{{ section.settings.gold_color | default: '#A9673A' }};
+  --bg:{{ section.settings.bg_color | default: '#FBF3E5' }};
+  --card:{{ section.settings.card_color | default: '#FFFFFF' }};
+  --text:{{ section.settings.text_color | default: '#1C1208' }};
+  --muted:{{ section.settings.muted_color | default: '#8A7660' }};
+">
+
+<!-- ══════════════════════════════════════════
+     1. BARRA URGENCIA + LIVE VIEWERS
+══════════════════════════════════════════ -->
+<div class="hpp5__urgency" id="hpp5Urgency">
+  <div class="hpp5__urgency-left">
+    <span class="hpp5__udot"></span>
+    <span class="hpp5__ulabel">⏰ Precio especial termina en:</span>
+    <span class="hpp5__utimer" id="hpp5Timer-{{ section.id }}">
+      <b id="hpp5H">14</b>:<b id="hpp5M">59</b>:<b id="hpp5S">59</b>
+    </span>
+  </div>
+  <div class="hpp5__viewers">
+    <span class="hpp5__viewers-dot"></span>
+    <span id="hpp5VC">{{ section.settings.sold_count | default: 342 | modulo: 19 | plus: 8 }}</span> viendo ahora
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     2. SOCIAL PROOF BAR
+══════════════════════════════════════════ -->
+<div class="hpp5__social">
+  <div class="hpp5__social-item">
+    <span class="hpp5__stars">★★★★★</span>
+    <span class="hpp5__social-label">{{ section.settings.reviews_count | default: 87 }} reseñas</span>
+  </div>
+  <span class="hpp5__sep">·</span>
+  <div class="hpp5__social-item">
+    <span class="hpp5__social-icon">🛍️</span>
+    <span class="hpp5__social-label">+{{ section.settings.sold_count | default: 342 }} vendidos</span>
+  </div>
+  <span class="hpp5__sep">·</span>
+  <div class="hpp5__social-item hpp5__badge-top">
+    <span>🏆</span>
+    <span class="hpp5__social-label">Top Colombia</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     3. TRUST BADGES — 4 columnas
+══════════════════════════════════════════ -->
+<div class="hpp5__trust">
+  <div class="hpp5__trust-item">
+    <span class="hpp5__ti">🚚</span>
+    <strong>Envío gratis</strong>
+    <span>A toda Colombia</span>
+  </div>
+  <div class="hpp5__trust-item">
+    <span class="hpp5__ti">💵</span>
+    <strong>Contra entrega</strong>
+    <span>Paga al recibir</span>
+  </div>
+  <div class="hpp5__trust-item">
+    <span class="hpp5__ti">🔒</span>
+    <strong>Compra segura</strong>
+    <span>100% protegida</span>
+  </div>
+  <div class="hpp5__trust-item">
+    <span class="hpp5__ti">🔄</span>
+    <strong>Cambio gratis</strong>
+    <span>Sin preguntas</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     4. STOCK BAR URGENCIA
+══════════════════════════════════════════ -->
+{% if section.settings.show_stock_bar %}
+<div class="hpp5__stock">
+  <div class="hpp5__stock-top">
+    <span class="hpp5__stock-label">🔥 {{ section.settings.stock_label | default: '¡Alta demanda! Pocas unidades disponibles' }}</span>
+    <span class="hpp5__stock-pct">{{ section.settings.stock_pct | default: 23 }}% disponible</span>
+  </div>
+  <div class="hpp5__stock-bar">
+    <div class="hpp5__stock-fill" style="width:{{ section.settings.stock_pct | default: 23 }}%"></div>
+  </div>
+  <div class="hpp5__stock-sub">{{ section.settings.stock_sub | default: '⚡ Se agota rápido — Asegura el tuyo ahora' }}</div>
+</div>
+{% endif %}
+
+<!-- ══════════════════════════════════════════
+     5. BOTÓN WHATSAPP
+══════════════════════════════════════════ -->
+{% if section.settings.show_wa %}
+<a href="https://wa.me/{{ wa_phone }}?text={{ wa_msg }}"
+   class="hpp5__wa" target="_blank" rel="noopener" aria-label="Pedir por WhatsApp">
+  <svg class="hpp5__wa-icon" viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+  <div class="hpp5__wa-text">
+    <span class="hpp5__wa-main">{{ section.settings.wa_text | default: 'Pedir por WhatsApp' }}</span>
+    <span class="hpp5__wa-sub">{{ section.settings.wa_sub | default: 'Respuesta inmediata · Pago al recibir' }}</span>
+  </div>
+  <span class="hpp5__wa-arrow">→</span>
+</a>
+{% endif %}
+
+<!-- ══════════════════════════════════════════
+     6. GARANTÍA
+══════════════════════════════════════════ -->
+{% if section.settings.show_guarantee %}
+<div class="hpp5__guarantee">
+  <span class="hpp5__guarantee-icon">🛡️</span>
+  <div class="hpp5__guarantee-text">
+    <strong>{{ section.settings.guarantee_title | default: 'Compra 100% garantizada' }}</strong>
+    <span>{{ section.settings.guarantee_text | default: 'Si tu pedido no llega o no es el correcto, te lo resolvemos sin preguntas.' }}</span>
+  </div>
+</div>
+{% endif %}
+
+<!-- ══════════════════════════════════════════
+     7. LIVE PURCHASE FEED (FOMO)
+══════════════════════════════════════════ -->
+<div class="hpp5__live" id="hpp5Live" aria-live="polite"></div>
+
+<!-- ══════════════════════════════════════════
+     8. RESEÑAS RÁPIDAS
+══════════════════════════════════════════ -->
+<div class="hpp5__reviews-section">
+  <div class="hpp5__reviews-head">
+    <span class="hpp5__reviews-stars">★★★★★</span>
+    <span class="hpp5__reviews-score">4.9 / 5</span>
+    <span class="hpp5__reviews-count">({{ section.settings.reviews_count | default: 87 }} reseñas verificadas)</span>
+  </div>
+  <div class="hpp5__reviews-list">
+    <div class="hpp5__review">
+      <div class="hpp5__review-header">
+        <span class="hpp5__review-avatar" style="background:#A9673A">M</span>
+        <div>
+          <strong>María C.</strong>
+          <span class="hpp5__review-stars">★★★★★</span>
+        </div>
+        <span class="hpp5__review-badge">✓ Compra verificada</span>
+      </div>
+      <p class="hpp5__review-text">"Me llegaron en 3 días, preciosas! El material es de muy buena calidad, exactamente como las fotos. Ya pedí otro par 😍"</p>
+      <span class="hpp5__review-date">hace 2 días · Bogotá</span>
+    </div>
+    <div class="hpp5__review">
+      <div class="hpp5__review-header">
+        <span class="hpp5__review-avatar" style="background:#7C3AED">L</span>
+        <div>
+          <strong>Laura M.</strong>
+          <span class="hpp5__review-stars">★★★★★</span>
+        </div>
+        <span class="hpp5__review-badge">✓ Compra verificada</span>
+      </div>
+      <p class="hpp5__review-text">"Aproveché la oferta 2×1 y quedé feliz. El taco es cómodo para todo el día y el envío fue rapidísimo. 100% recomendado"</p>
+      <span class="hpp5__review-date">hace 5 días · Medellín</span>
+    </div>
+    <div class="hpp5__review">
+      <div class="hpp5__review-header">
+        <span class="hpp5__review-avatar" style="background:#059669">A</span>
+        <div>
+          <strong>Andrea R.</strong>
+          <span class="hpp5__review-stars">★★★★★</span>
+        </div>
+        <span class="hpp5__review-badge">✓ Compra verificada</span>
+      </div>
+      <p class="hpp5__review-text">"Pagué al recibir, sin riesgo. La sandalia es divina, ya quiero comprar otra. Muy buena atención por WhatsApp también."</p>
+      <span class="hpp5__review-date">hace 1 semana · Cali</span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /.hpp5 -->
+
+<!-- ══════════════════════════════════════════
+     STICKY BOTTOM BAR (mobile)
+══════════════════════════════════════════ -->
+<div class="hpp5__sticky" id="hpp5Sticky">
+  <div class="hpp5__sticky-price">
+    <span class="hpp5__sticky-main">{{ product.price | money }}</span>
+    {% if product.compare_at_price > product.price %}
+      <span class="hpp5__sticky-old">{{ product.compare_at_price | money }}</span>
+    {% endif %}
+  </div>
+  <a href="https://wa.me/{{ wa_phone }}?text={{ wa_msg }}" class="hpp5__sticky-btn" target="_blank" rel="noopener">
+    💚 Pedir ahora
+  </a>
+</div>
+
+<style>
+/* ════════════════════════════════════
+   HPP5 — World-Class Product Section
+════════════════════════════════════ */
+.hpp5 {
+  background: var(--bg);
+  padding: 0 0 8px;
+  font-family: var(--font-body--family, system-ui, sans-serif);
+  color: var(--text);
+}
+.hpp5 * { box-sizing: border-box; }
+
+/* ── URGENCY BAR ── */
+.hpp5__urgency {
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(135deg, #1C1208, #2D1A10);
+  color: #fff; padding: 10px 20px;
+  gap: 12px; flex-wrap: wrap;
+}
+.hpp5__udot {
+  width: 8px; height: 8px; border-radius: 50%; background: #4ADE80; flex-shrink: 0;
+  box-shadow: 0 0 0 0 rgba(74,222,128,.5);
+  animation: hpp5-dot 1.5s infinite;
+}
+@keyframes hpp5-dot {
+  0%   { box-shadow: 0 0 0 0 rgba(74,222,128,.5); }
+  70%  { box-shadow: 0 0 0 8px rgba(74,222,128,0); }
+  100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); }
+}
+.hpp5__urgency-left { display: flex; align-items: center; gap: 8px; }
+.hpp5__ulabel { font-size: 12px; font-weight: 700; color: rgba(255,255,255,.85); white-space: nowrap; }
+.hpp5__utimer {
+  font-size: 18px; font-weight: 900; color: #C9A06C;
+  font-variant-numeric: tabular-nums; letter-spacing: .02em;
+}
+.hpp5__utimer b { font-weight: 900; }
+.hpp5__viewers {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: rgba(255,255,255,.7); white-space: nowrap;
+}
+.hpp5__viewers-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: #F59E0B; flex-shrink: 0;
+  animation: hpp5-dot 2s 0.5s infinite;
+}
+
+/* ── SOCIAL PROOF ── */
+.hpp5__social {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 20px; background: var(--card);
+  border-bottom: 1px solid rgba(212,82,122,.08);
+  flex-wrap: wrap;
+}
+.hpp5__social-item { display: flex; align-items: center; gap: 5px; }
+.hpp5__stars { color: #F59E0B; font-size: 13px; letter-spacing: 1px; }
+.hpp5__social-label { font-size: 12px; font-weight: 600; color: var(--muted); }
+.hpp5__sep { color: rgba(0,0,0,.2); font-size: 14px; }
+.hpp5__badge-top { background: linear-gradient(135deg,#C9A06C,#F59E0B); border-radius: 20px; padding: 2px 8px; }
+.hpp5__badge-top span:last-child { font-size: 11px; font-weight: 700; color: #1C1208; }
+
+/* ── TRUST BADGES ── */
+.hpp5__trust {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  gap: 1px; background: rgba(212,82,122,.1);
+  border-top: 1px solid rgba(212,82,122,.08);
+  border-bottom: 1px solid rgba(212,82,122,.08);
+  overflow: hidden;
+}
+.hpp5__trust-item {
+  background: var(--card);
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; padding: 14px 8px; gap: 4px;
+}
+.hpp5__ti { font-size: 22px; }
+.hpp5__trust-item strong { font-size: 11px; font-weight: 700; color: var(--text); display: block; }
+.hpp5__trust-item span  { font-size: 10px; color: var(--muted); display: block; line-height: 1.3; }
+
+/* ── STOCK BAR ── */
+.hpp5__stock {
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #FAF3E7, #F7ECDA);
+  border-bottom: 1px solid rgba(212,82,122,.1);
+}
+.hpp5__stock-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.hpp5__stock-label { font-size: 12px; font-weight: 700; color: #8C5429; }
+.hpp5__stock-pct { font-size: 11px; font-weight: 700; color: var(--muted); }
+.hpp5__stock-bar { height: 8px; background: rgba(212,82,122,.15); border-radius: 20px; overflow: hidden; }
+.hpp5__stock-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8C5429, #A9673A);
+  border-radius: 20px;
+  animation: hpp5-stock 2s ease-out;
+}
+@keyframes hpp5-stock { from { width: 0; } }
+.hpp5__stock-sub { font-size: 11px; color: var(--muted); margin-top: 6px; font-weight: 600; }
+
+/* ── WHATSAPP ── */
+.hpp5__wa {
+  display: flex; align-items: center; gap: 14px;
+  margin: 16px 20px;
+  background: linear-gradient(135deg, #075E54, #128C7E, #25D366);
+  color: #fff; text-decoration: none;
+  padding: 14px 20px; border-radius: 14px;
+  box-shadow: 0 6px 24px rgba(37,211,102,.35);
+  transition: transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s;
+}
+.hpp5__wa:hover { transform: translateY(-3px); box-shadow: 0 10px 32px rgba(37,211,102,.5); color: #fff; }
+.hpp5__wa-icon { flex-shrink: 0; }
+.hpp5__wa-text { flex: 1; }
+.hpp5__wa-main { display: block; font-size: 15px; font-weight: 800; }
+.hpp5__wa-sub  { display: block; font-size: 11px; color: rgba(255,255,255,.8); margin-top: 2px; }
+.hpp5__wa-arrow { font-size: 20px; font-weight: 700; flex-shrink: 0; }
+
+/* ── GUARANTEE ── */
+.hpp5__guarantee {
+  display: flex; align-items: flex-start; gap: 14px;
+  margin: 0 20px 16px;
+  background: var(--card);
+  border: 1.5px solid rgba(212,82,122,.2);
+  border-radius: 12px; padding: 14px;
+}
+.hpp5__guarantee-icon { font-size: 28px; flex-shrink: 0; }
+.hpp5__guarantee-text strong { display: block; font-size: 13px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+.hpp5__guarantee-text span   { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+/* ── LIVE FEED ── */
+.hpp5__live {
+  margin: 0 20px 12px;
+  min-height: 0;
+}
+.hpp5__live-toast {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--card);
+  border: 1px solid rgba(212,82,122,.15);
+  border-radius: 10px; padding: 10px 14px;
+  font-size: 12px; color: var(--text);
+  animation: hpp5-slide 0.4s ease;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+}
+@keyframes hpp5-slide {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hpp5__live-toast-icon { font-size: 18px; flex-shrink: 0; }
+.hpp5__live-toast strong { color: var(--rose); }
+
+/* ── REVIEWS ── */
+.hpp5__reviews-section {
+  padding: 20px 20px 8px;
+  border-top: 1px solid rgba(212,82,122,.08);
+}
+.hpp5__reviews-head {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 16px; flex-wrap: wrap;
+}
+.hpp5__reviews-stars { color: #F59E0B; font-size: 16px; }
+.hpp5__reviews-score { font-size: 16px; font-weight: 800; color: var(--text); }
+.hpp5__reviews-count { font-size: 12px; color: var(--muted); }
+
+.hpp5__reviews-list { display: flex; flex-direction: column; gap: 14px; }
+.hpp5__review {
+  background: var(--card);
+  border: 1px solid rgba(212,82,122,.1);
+  border-radius: 12px; padding: 14px;
+}
+.hpp5__review-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;
+}
+.hpp5__review-avatar {
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 16px; font-weight: 800;
+}
+.hpp5__review-header > div { flex: 1; }
+.hpp5__review-header strong { display: block; font-size: 13px; font-weight: 700; color: var(--text); }
+.hpp5__review-stars { color: #F59E0B; font-size: 11px; }
+.hpp5__review-badge { font-size: 10px; color: #059669; font-weight: 600; background: rgba(5,150,105,.08); padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+.hpp5__review-text { font-size: 13px; color: var(--muted); line-height: 1.6; margin: 0 0 6px; }
+.hpp5__review-date { font-size: 11px; color: rgba(0,0,0,.35); }
+
+/* ── STICKY BAR (móvil) ── */
+.hpp5__sticky {
+  display: none;
+  position: fixed;
+  bottom: 56px; /* arriba de la barra 2×1 */
+  left: 0; right: 0; z-index: 9996;
+  background: var(--card);
+  border-top: 1px solid rgba(212,82,122,.2);
+  padding: 10px 16px;
+  align-items: center; gap: 12px;
+  box-shadow: 0 -4px 20px rgba(0,0,0,.1);
+}
+.hpp5__sticky-price { flex: 1; }
+.hpp5__sticky-main { font-size: 18px; font-weight: 800; color: var(--rose); display: block; }
+.hpp5__sticky-old  { font-size: 12px; text-decoration: line-through; color: var(--muted); }
+.hpp5__sticky-btn {
+  background: linear-gradient(135deg, #128C7E, #25D366);
+  color: #fff; font-size: 14px; font-weight: 800;
+  padding: 12px 20px; border-radius: 50px;
+  text-decoration: none; white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(37,211,102,.4);
+}
+
+@media (max-width: 767px) {
+  .hpp5__sticky { display: flex; }
+  .hpp5__trust { grid-template-columns: repeat(2,1fr); }
+  .hpp5__urgency { padding: 8px 14px; gap: 8px; }
+  .hpp5__ulabel { font-size: 11px; }
+  .hpp5__utimer { font-size: 16px; }
+  .hpp5__wa { margin: 12px 14px; padding: 12px 16px; }
+  .hpp5__guarantee { margin: 0 14px 12px; }
+  .hpp5__live { margin: 0 14px 10px; }
+  .hpp5__reviews-section { padding: 16px 14px; }
+  .hpp5__stock { padding: 12px 14px; }
+  .hpp5__social { padding: 8px 14px; gap: 8px; }
+}
+</style>
+
+<script>
+(function(){
+  var sec = {{ section.id | json }};
+  var id = 'HamsaPro5-' + sec;
+
+  /* ── TIMER ── */
+  var KEY = 'hpp5tmr_' + sec;
+  var SECS = {{ section.settings.timer_min | default: 14 }} * 60 + {{ section.settings.timer_sec | default: 59 }};
+  function loadT() {
+    try {
+      var d = JSON.parse(localStorage.getItem(KEY) || 'null');
+      if (d && d.exp > Date.now()) return Math.floor((d.exp - Date.now()) / 1000);
+    } catch(e) {}
+    var exp = Date.now() + SECS * 1000;
+    try { localStorage.setItem(KEY, JSON.stringify({exp:exp})); } catch(e) {}
+    return SECS;
+  }
+  var rem = loadT();
+  function pad(n){ return n < 10 ? '0'+n : ''+n; }
+  function tickT() {
+    if (rem <= 0) { rem = SECS; try { localStorage.removeItem(KEY); } catch(e){} }
+    var h = Math.floor(rem/3600), m = Math.floor((rem%3600)/60), s = rem%60;
+    var eH = document.getElementById('hpp5H');
+    var eM = document.getElementById('hpp5M');
+    var eS = document.getElementById('hpp5S');
+    if (eH) eH.textContent = pad(h);
+    if (eM) eM.textContent = pad(m);
+    if (eS) eS.textContent = pad(s);
+    rem--;
+  }
+  tickT();
+  setInterval(tickT, 1000);
+
+  /* ── LIVE VIEWER COUNT ── */
+  var vcEl = document.getElementById('hpp5VC');
+  var vc = parseInt(vcEl ? vcEl.textContent : '12');
+  setInterval(function(){
+    var delta = Math.random() < 0.5 ? 1 : -1;
+    vc = Math.max(6, Math.min(28, vc + delta));
+    if (vcEl) vcEl.textContent = vc;
+  }, 7000);
+
+  /* ── LIVE PURCHASE FEED ── */
+  var cities = ['Bogotá','Medellín','Cali','Barranquilla','Bucaramanga','Pereira','Manizales','Cartagena','Cúcuta','Santa Marta'];
+  var names  = ['María','Laura','Andrea','Valentina','Camila','Daniela','Sofía','Isabella','Paula','Natalia'];
+  var feed   = document.getElementById('hpp5Live');
+  var toastTimer = null;
+
+  function showToast() {
+    if (!feed) return;
+    var city = cities[Math.floor(Math.random()*cities.length)];
+    var name = names[Math.floor(Math.random()*names.length)];
+    var mins = Math.floor(Math.random()*25)+2;
+    var msgs = [
+      '¡Acaba de comprar! <strong>' + name + '</strong> de ' + city + ' hace ' + mins + ' min',
+      '<strong>' + name + '</strong> de ' + city + ' aprovechó la oferta 2×1 🎉',
+      '¡Vendido! <strong>' + name + '</strong> en ' + city + ' aseguró su par ✓'
+    ];
+    var msg = msgs[Math.floor(Math.random()*msgs.length)];
+    var t = document.createElement('div');
+    t.className = 'hpp5__live-toast';
+    t.innerHTML = '<span class="hpp5__live-toast-icon">🛍️</span><span>' + msg + '</span>';
+    feed.innerHTML = '';
+    feed.appendChild(t);
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ if (feed) feed.innerHTML = ''; }, 5000);
+  }
+
+  var delay = Math.random()*6000 + 4000;
+  setTimeout(function(){
+    showToast();
+    setInterval(showToast, Math.random()*15000 + 20000);
+  }, delay);
+
+})();
+</script>
+
+{% endif %}
+
+{% schema %}
+{
+  "name": "⚡ Producto Pro — Conversión",
+  "settings": [
+    { "type": "header", "content": "⏰ Urgencia" },
+    { "type": "checkbox", "id": "show_urgency", "label": "Mostrar timer urgencia", "default": true },
+    { "type": "text", "id": "urgency_label", "label": "Texto urgencia", "default": "⏰ Precio especial termina en" },
+    { "type": "range", "id": "timer_min", "label": "Minutos", "min": 5, "max": 59, "step": 1, "default": 14 },
+    { "type": "range", "id": "timer_sec", "label": "Segundos", "min": 0, "max": 59, "step": 1, "default": 59 },
+    { "type": "header", "content": "⭐ Prueba Social" },
+    { "type": "range", "id": "reviews_count", "label": "Cantidad reseñas", "min": 10, "max": 999, "step": 1, "default": 87 },
+    { "type": "range", "id": "sold_count", "label": "Unidades vendidas", "min": 50, "max": 9999, "step": 1, "default": 342 },
+    { "type": "header", "content": "📊 Stock" },
+    { "type": "checkbox", "id": "show_stock_bar", "label": "Mostrar barra de stock", "default": true },
+    { "type": "text", "id": "stock_label", "label": "Texto stock", "default": "¡Alta demanda! Pocas unidades disponibles" },
+    { "type": "range", "id": "stock_pct", "label": "% stock disponible (visual)", "min": 5, "max": 40, "step": 1, "default": 23 },
+    { "type": "text", "id": "stock_sub", "label": "Subtexto stock", "default": "⚡ Se agota rápido — Asegura el tuyo ahora" },
+    { "type": "header", "content": "💬 WhatsApp" },
+    { "type": "checkbox", "id": "show_wa", "label": "Mostrar botón WhatsApp", "default": true },
+    { "type": "text", "id": "wa_number", "label": "Número WhatsApp (sin +57)", "default": "3508258757" },
+    { "type": "text", "id": "wa_text", "label": "Texto botón", "default": "Pedir por WhatsApp" },
+    { "type": "text", "id": "wa_sub", "label": "Subtexto", "default": "Respuesta inmediata · Pago al recibir" },
+    { "type": "header", "content": "🛡️ Garantía" },
+    { "type": "checkbox", "id": "show_guarantee", "label": "Mostrar garantía", "default": true },
+    { "type": "text", "id": "guarantee_title", "label": "Título garantía", "default": "Compra 100% garantizada" },
+    { "type": "textarea", "id": "guarantee_text", "label": "Texto garantía", "default": "Si tu pedido no llega o no es el correcto, te lo resolvemos sin preguntas." },
+    { "type": "header", "content": "🎨 Colores" },
+    { "type": "color", "id": "bg_color", "label": "Fondo", "default": "#FBF3E5" },
+    { "type": "color", "id": "card_color", "label": "Tarjetas", "default": "#FFFFFF" },
+    { "type": "color", "id": "text_color", "label": "Texto", "default": "#1C1208" },
+    { "type": "color", "id": "muted_color", "label": "Texto secundario", "default": "#8A7660" },
+    { "type": "color", "id": "gold_color", "label": "Color acento", "default": "#A9673A" }
+  ],
+  "presets": [{ "name": "⚡ Producto Pro — Conversión" }]
+}
+{% endschema %}

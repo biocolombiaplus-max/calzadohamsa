@@ -1,0 +1,429 @@
+{
+  "sections": {
+    "main": {
+      "type": "product-information",
+      "settings": {
+        "content_width": "content-center-aligned",
+        "desktop_media_position": "left",
+        "equal_columns": true,
+        "limit_details_width": false,
+        "gap": 48,
+        "enable_sticky_add_to_cart": true,
+        "color_scheme": "",
+        "padding-block-start": 24,
+        "padding-block-end": 0
+      }
+    },
+    "hamsa_urgency_top": {
+      "type": "hamsa-urgency-strip",
+      "settings": {
+        "bg_color": "#F7ECDA",
+        "text_color": "#A9673A",
+        "icon_color": "#A9673A",
+        "icon1": "🚚",
+        "item1": "Envío GRATIS a toda Colombia",
+        "icon2": "💵",
+        "item2": "Pago contra entrega disponible",
+        "icon3": "🔒",
+        "item3": "Compra 100% segura",
+        "icon4": "↩️",
+        "item4": "Cambio de talla gratis"
+      }
+    },
+    "hamsa_pro": {
+      "type": "hamsa-product-pro",
+      "settings": {
+        "show_urgency": true,
+        "urgency_label": "⏰ Precio especial de lanzamiento termina en",
+        "timer_min": 14,
+        "timer_sec": 59,
+        "reviews_count": 214,
+        "sold_count": 837,
+        "show_stock_bar": true,
+        "stock_label": "¡Alta demanda! Este modelo se agota rápido",
+        "stock_pct": 18,
+        "stock_sub": "⚡ Quedan pocas unidades en tu talla — asegura la tuya",
+        "show_wa": true,
+        "wa_number": "3508258757",
+        "wa_text": "Pedir esta sandalia por WhatsApp",
+        "wa_sub": "Respuesta inmediata · Pago al recibir",
+        "show_guarantee": true,
+        "guarantee_title": "Compra 100% garantizada",
+        "guarantee_text": "Si tu pedido no llega o la talla no queda perfecta, te la cambiamos sin costo ni preguntas.",
+        "bg_color": "#FBF3E5",
+        "card_color": "#FFFFFF",
+        "text_color": "#1C1208",
+        "muted_color": "#8A7660",
+        "gold_color": "#A9673A"
+      }
+    },
+    "hamsa_trust": {
+      "type": "hamsa-trust-bar",
+      "settings": {
+        "bg_color": "#FFFFFF",
+        "text_color": "#1C1208",
+        "accent_color": "#A9673A",
+        "border_color": "#E6D5BC",
+        "py": 18
+      },
+      "blocks": {
+        "t1": {
+          "type": "trust",
+          "settings": { "icon": "🚚", "title": "Envío GRATIS", "sub": "A toda Colombia" }
+        },
+        "t2": {
+          "type": "trust",
+          "settings": { "icon": "💵", "title": "Contra entrega", "sub": "Paga al recibir" }
+        },
+        "t3": {
+          "type": "trust",
+          "settings": { "icon": "↩️", "title": "Cambio gratis", "sub": "Sin complicaciones" }
+        },
+        "t4": {
+          "type": "trust",
+          "settings": { "icon": "🔒", "title": "Compra segura", "sub": "100% protegida" }
+        },
+        "t5": {
+          "type": "trust",
+          "settings": { "icon": "⭐", "title": "+2.400 clientas", "sub": "Nos recomiendan" }
+        }
+      },
+      "block_order": ["t1", "t2", "t3", "t4", "t5"]
+    },
+    "hamsa_social": {
+      "type": "hamsa-social-proof",
+      "settings": {
+        "bg_color": "#FBF3E5",
+        "card_color": "#FFFFFF",
+        "text_color": "#1C1208",
+        "accent_color": "#A9673A",
+        "show_counter": true,
+        "counter_start": 837,
+        "counter_label": "pares vendidos este mes",
+        "show_recent": true,
+        "pt": 32,
+        "pb": 32
+      },
+      "blocks": {
+        "p1": {
+          "type": "purchase",
+          "settings": {
+            "name": "Mariana G.",
+            "city": "Bogotá",
+            "flag": "🇨🇴",
+            "product": "Sandalia Hamsa Camel T.37",
+            "time": "3 minutos",
+            "delay": 1200
+          }
+        },
+        "p2": {
+          "type": "purchase",
+          "settings": {
+            "name": "Paula V.",
+            "city": "Medellín",
+            "flag": "🇨🇴",
+            "product": "Sandalia Hamsa Terracota T.38",
+            "time": "8 minutos",
+            "delay": 2600
+          }
+        },
+        "p3": {
+          "type": "purchase",
+          "settings": {
+            "name": "Sofía A.",
+            "city": "Cúcuta",
+            "flag": "🇨🇴",
+            "product": "Sandalia Hamsa Beige T.36",
+            "time": "14 minutos",
+            "delay": 4200
+          }
+        }
+      },
+      "block_order": ["p1", "p2", "p3"]
+    },
+    "hamsa_hiw": {
+      "type": "hamsa-how-it-works",
+      "settings": {
+        "bg_color": "#F5E6CE",
+        "card_color": "#FFFFFF",
+        "accent_color": "#A9673A",
+        "text_color": "#1C1208",
+        "muted_color": "#8A7660",
+        "eyebrow": "Tan fácil como 1, 2, 3",
+        "heading": "Tu pedido en 3 pasos simples",
+        "subtext": "Comprar tu sandalia Hamsa es rápido, seguro y sin complicaciones",
+        "cta_text": "Ver más modelos →",
+        "cta_url": "/collections/all",
+        "pt": 64,
+        "pb": 64
+      },
+      "blocks": {
+        "s1": {
+          "type": "step",
+          "settings": {
+            "icon": "👡",
+            "title": "Elige tu talla y color",
+            "text": "Usa la guía de tallas de abajo y selecciona el color que más te guste"
+          }
+        },
+        "s2": {
+          "type": "step",
+          "settings": {
+            "icon": "🛒",
+            "title": "Haz tu pedido",
+            "text": "Agrega al carrito o escríbenos por WhatsApp. Sin tarjeta de crédito requerida"
+          }
+        },
+        "s3": {
+          "type": "step",
+          "settings": {
+            "icon": "📦",
+            "title": "Recibe en casa",
+            "text": "Enviamos a toda Colombia en 2-5 días. Paga cuando el paquete llega a tu puerta"
+          }
+        },
+        "s4": {
+          "type": "step",
+          "settings": {
+            "icon": "💛",
+            "title": "Camina con estilo",
+            "text": "¡Disfruta tu sandalia! Cambio de talla gratis si algo no queda perfecto"
+          }
+        }
+      },
+      "block_order": ["s1", "s2", "s3", "s4"]
+    },
+    "hamsa_size": {
+      "type": "hamsa-size-selector",
+      "settings": {
+        "bg_color": "#FBF3E5",
+        "card_color": "#FFFFFF",
+        "accent_color": "#A9673A",
+        "text_color": "#1C1208",
+        "muted_color": "#8A7660",
+        "heading": "Encuentra tu talla perfecta",
+        "subtext": "Medidas exactas para que tu sandalia quede perfecta desde el primer día",
+        "tip": "¿Entre dos tallas? Si tienes pie ancho elige la más grande. Si es estrecho, la más pequeña. El primer cambio de talla es GRATIS.",
+        "wa_country": "57",
+        "wa_number": "3508258757",
+        "wa_message": "Hola! Necesito ayuda para elegir mi talla en Hamsa Shoes",
+        "pt": 48,
+        "pb": 48
+      }
+    },
+    "hamsa_flash": {
+      "type": "hamsa-flash-offer",
+      "settings": {
+        "badge": "⚡ OFERTA ACTIVA AHORA",
+        "eyebrow": "Aprovecha antes de que se agote",
+        "heading": "Lleva 2 Pares por Solo $159.900",
+        "price": "$159.900",
+        "compare_price": "$239.800",
+        "savings": "¡Ahorras $79.900!",
+        "timer_label": "La oferta termina en:",
+        "timer_hours": 23,
+        "timer_mins": 59,
+        "perk1": "Envío GRATIS a toda Colombia",
+        "perk2": "Pago contra entrega disponible",
+        "perk3": "Elige modelos, tallas y colores diferentes",
+        "perk4": "Cambio de talla sin costo",
+        "btn_url": "/pages/oferta-2x1",
+        "btn_text": "🔥 Quiero mis 2 pares ahora",
+        "wa_number": "3508258757",
+        "wa_text": "Pedir 2×1 por WhatsApp",
+        "wa_msg": "Hola! Quiero aprovechar la oferta 2x1 de Hamsa Shoes",
+        "pt": 64,
+        "pb": 64
+      }
+    },
+    "hamsa_testimonials": {
+      "type": "hamsa-home-testimonials",
+      "settings": {
+        "heading": "Ellas ya la tienen — y no paran de recomendarla",
+        "subtext": "Reseñas reales de clientas en toda Colombia",
+        "bg_color": "#FFFFFF",
+        "card_color": "#FBF3E5",
+        "text_color": "#1C1208",
+        "muted_color": "#8A7660",
+        "gold_color": "#A9673A",
+        "pt": 56,
+        "pb": 56,
+        "pt_mobile": 36,
+        "pb_mobile": 36
+      },
+      "blocks": {
+        "r1": {
+          "type": "review",
+          "settings": {
+            "name": "Valentina R.",
+            "city": "Bogotá",
+            "badge": "✅ Compra verificada",
+            "review": "Quedé enamorada desde que las abrí. Súper cómodas para caminar todo el día y el color es hermoso en persona."
+          }
+        },
+        "r2": {
+          "type": "review",
+          "settings": {
+            "name": "Daniela P.",
+            "city": "Cúcuta",
+            "badge": "✅ Compra verificada",
+            "review": "El pago contra entrega me dio toda la confianza para comprar. Llegaron en 3 días y la talla quedó perfecta."
+          }
+        },
+        "r3": {
+          "type": "review",
+          "settings": {
+            "name": "Camila T.",
+            "city": "Medellín",
+            "badge": "✅ Compra verificada",
+            "review": "Aproveché la oferta 2x1 y no me arrepiento. Excelente calidad, se sienten de verdad premium."
+          }
+        },
+        "r4": {
+          "type": "review",
+          "settings": {
+            "name": "Isabella G.",
+            "city": "Barranquilla",
+            "badge": "✅ Compra verificada",
+            "review": "Le escribí a WhatsApp con dudas de talla y me respondieron al momento. Muy buena atención y las sandalias son bellísimas."
+          }
+        },
+        "r5": {
+          "type": "review",
+          "settings": {
+            "name": "Natalia S.",
+            "city": "Cali",
+            "badge": "✅ Compra verificada",
+            "review": "Ya es mi segundo par. El cambio de talla fue gratis y sin complicaciones. Son mis favoritas para cualquier ocasión."
+          }
+        }
+      },
+      "block_order": ["r1", "r2", "r3", "r4", "r5"]
+    },
+    "product_recommendations": {
+      "type": "product-recommendations",
+      "settings": {
+        "product": "{{ closest.product }}",
+        "recommendation_type": "complementary",
+        "layout_type": "carousel",
+        "carousel_on_mobile": true,
+        "max_products": 8,
+        "columns": 4,
+        "mobile_columns": "2",
+        "columns_gap": 12,
+        "rows_gap": 24,
+        "icons_style": "arrow",
+        "icons_shape": "circle",
+        "section_width": "page-width",
+        "gap": 28,
+        "color_scheme": "scheme-1",
+        "padding-block-start": 48,
+        "padding-block-end": 56
+      },
+      "blocks": {
+        "header": {
+          "type": "text",
+          "name": "Encabezado",
+          "settings": {
+            "text": "<h2>Completa tu look</h2>"
+          }
+        },
+        "static-product-card": {
+          "type": "_product-card",
+          "static": true,
+          "settings": {
+            "product_card_gap": 4
+          },
+          "blocks": {
+            "product-card-gallery": {
+              "type": "_product-card-gallery",
+              "settings": {
+                "image_ratio": "adapt",
+                "border": "none",
+                "border_width": 1,
+                "border_opacity": 100,
+                "border_radius": 0,
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              }
+            },
+            "product_title": {
+              "type": "product-title",
+              "settings": {
+                "width": "fit-content",
+                "max_width": "normal",
+                "alignment": "left",
+                "type_preset": "rte",
+                "font": "var(--font-body--family)",
+                "font_size": "1rem",
+                "line_height": "normal",
+                "letter_spacing": "normal",
+                "case": "none",
+                "wrap": "pretty",
+                "color": "var(--color-foreground)",
+                "background": false,
+                "background_color": "#00000026",
+                "corner_radius": 0,
+                "padding-block-start": 4,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              }
+            },
+            "price": {
+              "type": "price",
+              "settings": {
+                "show_sale_price_first": true,
+                "show_installments": false,
+                "show_tax_info": false,
+                "type_preset": "h6",
+                "width": "100%",
+                "alignment": "left",
+                "font": "var(--font-body--family)",
+                "font_size": "1rem",
+                "line_height": "normal",
+                "letter_spacing": "normal",
+                "case": "none",
+                "color": "var(--color-foreground)",
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              }
+            }
+          },
+          "block_order": ["product-card-gallery", "product_title", "price"]
+        }
+      },
+      "block_order": ["header"]
+    },
+    "hamsa_spin": {
+      "type": "hamsa-spin-wheel",
+      "settings": {}
+    },
+    "hamsa_floating": {
+      "type": "hamsa-floating-badge",
+      "settings": {
+        "enabled": true,
+        "badge_url": "/pages/oferta-2x1",
+        "position": "right"
+      }
+    }
+  },
+  "order": [
+    "hamsa_urgency_top",
+    "main",
+    "hamsa_pro",
+    "hamsa_trust",
+    "hamsa_social",
+    "hamsa_hiw",
+    "hamsa_size",
+    "hamsa_flash",
+    "hamsa_testimonials",
+    "product_recommendations",
+    "hamsa_spin",
+    "hamsa_floating"
+  ]
+}

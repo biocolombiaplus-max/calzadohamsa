@@ -1,0 +1,49 @@
+{
+  "type": "footer",
+  "name": "Footer",
+  "sections": {
+    "hamsa_footer": {
+      "type": "hamsa-footer",
+      "settings": {
+        "brand_text": "Hamsa Shoes es una tienda de sandalias y zapatos femeninos elegantes con despachos desde Cúcuta a toda Colombia y Venezuela.",
+        "pill1": "🚚 Envío gratis",
+        "pill2": "💵 Contra entrega",
+        "pill3": "📦 Desde Cúcuta",
+        "links_title": "Navegación",
+        "footer_menu": "main-menu",
+        "help_title": "Información",
+        "help1": "📦 Envíos a toda Colombia",
+        "help2": "💬 Atención por WhatsApp",
+        "help3": "🔄 Cambios según políticas",
+        "help4": "🌍 Colombia y Venezuela",
+        "contact_title": "Contacto",
+        "contact_text": "Habla con nuestro equipo para resolver dudas, elegir talla o comprar por WhatsApp.",
+        "wa_btn_text": "Hablar por WhatsApp",
+        "wa_country": "57",
+        "wa_number": "3508258757",
+        "wa_message": "Hola, quiero información sobre Hamsa Shoes",
+        "trust1_title": "Envío gratis",
+        "trust1_text": "A toda Colombia",
+        "trust2_title": "Pago contra entrega",
+        "trust2_text": "Paga cuando recibas",
+        "trust3_title": "Compra segura",
+        "trust3_text": "Datos protegidos",
+        "trust4_title": "Atención WhatsApp",
+        "trust4_text": "Respuesta rápida",
+        "copyright_text": "© 2025 Hamsa Shoes. Todos los derechos reservados.",
+        "bg_color": "#1C1208",
+        "bg2_color": "#2A1A10",
+        "text_color": "#F5EDE4",
+        "muted_color": "#B8A898",
+        "gold_color": "#A9673A",
+        "border_color": "#3A2A1A",
+        "wa_color": "#25D366",
+        "pt": 56,
+        "pb": 48
+      }
+    }
+  },
+  "order": [
+    "hamsa_footer"
+  ]
+}
