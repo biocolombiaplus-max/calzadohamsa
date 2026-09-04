@@ -11,7 +11,9 @@ export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[] | null>(null);
 
   useEffect(() => {
-    getAllProducts().then(setProducts);
+    getAllProducts()
+      .then(setProducts)
+      .catch(() => setProducts([]));
   }, []);
 
   return (

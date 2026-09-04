@@ -25,7 +25,9 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[] | null>(null);
 
   useEffect(() => {
-    getAllOrders().then(setOrders);
+    getAllOrders()
+      .then(setOrders)
+      .catch(() => setOrders([]));
   }, []);
 
   async function handleStatusChange(id: string, status: OrderStatus) {

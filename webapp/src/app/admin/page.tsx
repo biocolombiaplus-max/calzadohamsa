@@ -17,14 +17,18 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     (async () => {
-      const [products, orders] = await Promise.all([getAllProducts(), getAllOrders()]);
-      setStats({
-        products: products.length,
-        activeProducts: products.filter((p) => p.active).length,
-        orders: orders.length,
-        pendingOrders: orders.filter((o) => o.status === 'pendiente').length,
-        revenue: orders.reduce((sum, o) => sum + o.total, 0),
-      });
+      try {
+        const [products, orders] = await Promise.all([getAllProducts(), getAllOrders()]);
+        setStats({
+          products: products.length,
+          activeProducts: products.filter((p) => p.active).length,
+          orders: orders.length,
+          pendingOrders: orders.filter((o) => o.status === 'pendiente').length,
+          revenue: orders.reduce((sum, o) => sum + o.total, 0),
+        });
+      } catch {
+        setStats({ products: 0, activeProducts: 0, orders: 0, pendingOrders: 0, revenue: 0 });
+      }
     })();
   }, []);
 
