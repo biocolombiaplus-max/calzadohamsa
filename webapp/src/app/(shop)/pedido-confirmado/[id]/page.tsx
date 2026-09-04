@@ -44,7 +44,9 @@ export default function OrderConfirmationPage() {
 
   const waMessage = `Hola! Acabo de hacer el pedido *${order.orderNumber}*\n\n${itemsSummary}\n\nTotal: ${formatPrice(
     order.total,
-  )}\nMétodo de pago: ${order.paymentMethod === 'contra_entrega' ? 'Pago contra entrega' : 'Transferencia'}\n\nMis datos:\n${order.customer.name}\n${order.customer.phone}\n${order.customer.address}, ${order.customer.city}, ${order.customer.department}`;
+  )}\nMétodo de pago: ${order.paymentMethod === 'contra_entrega' ? 'Pago contra entrega' : 'Transferencia'}\n\nMis datos:\n${order.customer.name}\n${order.customer.phone}\n${order.customer.address}, ${order.customer.city}, ${order.customer.department}${
+    order.customer.locationUrl ? `\n\n📍 Mi ubicación: ${order.customer.locationUrl}` : ''
+  }`;
 
   return (
     <div className="container-page py-14">
@@ -93,6 +95,16 @@ export default function OrderConfirmationPage() {
           <div className="mt-4 border-t border-border pt-3 text-sm text-muted">
             <p>{order.customer.name} · {order.customer.phone}</p>
             <p>{order.customer.address}, {order.customer.city}, {order.customer.department}</p>
+            {order.customer.locationUrl && (
+              <a
+                href={order.customer.locationUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-1 inline-block text-primary hover:underline"
+              >
+                📍 Ver mi ubicación en el mapa
+              </a>
+            )}
           </div>
         </div>
 

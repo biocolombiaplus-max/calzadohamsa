@@ -1,6 +1,6 @@
 import { collection, doc, getDoc, getDocs, addDoc, updateDoc, orderBy, query, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { db } from './firebase';
-import type { Order, OrderInput, OrderStatus } from './types';
+import type { Carrier, Order, OrderInput, OrderStatus } from './types';
 import { generateOrderNumber } from './utils';
 
 const COLLECTION = 'orders';
@@ -16,6 +16,8 @@ function toOrder(id: string, data: any): Order {
     customer: data.customer,
     paymentMethod: data.paymentMethod,
     status: data.status ?? 'pendiente',
+    carrier: data.carrier || undefined,
+    trackingNumber: data.trackingNumber || undefined,
     createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toMillis() : Date.now(),
   };
 }
@@ -44,4 +46,14 @@ export async function getAllOrders(): Promise<Order[]> {
 
 export async function updateOrderStatus(id: string, status: OrderStatus): Promise<void> {
   await updateDoc(doc(db, COLLECTION, id), { status });
+}
+
+export async function updateOrderShipping(
+  id: string,
+  shipping: { carrier?: Carrier; trackingNumber?: string },
+): Promise<void> {
+  await updateDoc(doc(db, COLLECTION, id), {
+    carrier: shipping.carrier ?? '',
+    trackingNumber: shipping.trackingNumber ?? '',
+  });
 }

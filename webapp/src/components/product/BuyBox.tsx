@@ -1,21 +1,21 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import type { Product } from '@/lib/types';
 import { classNames, formatPrice, whatsappLinkTo } from '@/lib/utils';
 import { useCartStore } from '@/lib/cart-store';
 import { useSiteSettings } from '@/lib/settings-context';
 import UrgencyTimer from './UrgencyTimer';
+import QuickBuyModal from './QuickBuyModal';
 
 export default function BuyBox({ product }: { product: Product }) {
-  const router = useRouter();
   const { whatsappCountryCode, whatsappNumber } = useSiteSettings();
   const addItem = useCartStore((s) => s.addItem);
   const [size, setSize] = useState(product.sizes[0] ?? '');
   const [color, setColor] = useState(product.colors[0]?.name ?? '');
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+  const [showQuickBuy, setShowQuickBuy] = useState(false);
 
   const hasDiscount = !!product.compareAtPrice && product.compareAtPrice > product.price;
   const stockPct = useMemo(() => Math.min(100, Math.max(6, product.stock)), [product.stock]);
@@ -40,8 +40,7 @@ export default function BuyBox({ product }: { product: Product }) {
   }
 
   function handleBuyNow() {
-    addItem(buildItem());
-    router.push('/checkout');
+    setShowQuickBuy(true);
   }
 
   const waMessage = `Hola, quiero pedir: ${product.title}${size ? ` (talla ${size})` : ''}${
@@ -133,7 +132,7 @@ export default function BuyBox({ product }: { product: Product }) {
 
       <div className="space-y-3">
         <button onClick={handleBuyNow} className="btn-primary w-full text-base">
-          ⚡ Comprar ahora
+          💵 Comprar — Pago contra entrega
         </button>
         <button onClick={handleAddToCart} className="btn-secondary w-full">
           {added ? '✓ Agregado al carrito' : '🛒 Agregar al carrito'}
@@ -155,6 +154,8 @@ export default function BuyBox({ product }: { product: Product }) {
           Si tu pedido no llega o no es el correcto, te lo resolvemos sin preguntas.
         </p>
       </div>
+
+      {showQuickBuy && <QuickBuyModal item={buildItem()} onClose={() => setShowQuickBuy(false)} />}
     </div>
   );
 }

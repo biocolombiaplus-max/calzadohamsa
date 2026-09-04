@@ -6,14 +6,9 @@ import Link from 'next/link';
 import { useCartStore } from '@/lib/cart-store';
 import { createOrder } from '@/lib/orders';
 import { formatPrice } from '@/lib/utils';
+import { DEPARTMENTS } from '@/lib/departments';
 import type { PaymentMethod } from '@/lib/types';
-
-const DEPARTMENTS = [
-  'Antioquia', 'Atlántico', 'Bogotá D.C.', 'Bolívar', 'Boyacá', 'Caldas', 'Caquetá', 'Cauca',
-  'Cesar', 'Córdoba', 'Cundinamarca', 'Chocó', 'Huila', 'La Guajira', 'Magdalena', 'Meta',
-  'Nariño', 'Norte de Santander', 'Quindío', 'Risaralda', 'Santander', 'Sucre', 'Tolima',
-  'Valle del Cauca', 'Otro',
-];
+import LocationCapture from '@/components/product/LocationCapture';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -23,6 +18,7 @@ export default function CheckoutPage() {
   const [error, setError] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('contra_entrega');
   const [form, setForm] = useState({ name: '', phone: '', address: '', city: '', department: '', note: '' });
+  const [locationUrl, setLocationUrl] = useState('');
 
   useEffect(() => setMounted(true), []);
 
@@ -53,7 +49,7 @@ export default function CheckoutPage() {
         subtotal: total,
         shipping: 0,
         total,
-        customer: form,
+        customer: locationUrl ? { ...form, locationUrl } : form,
         paymentMethod,
         status: 'pendiente',
       });
@@ -145,6 +141,8 @@ export default function CheckoutPage() {
               placeholder="Indicaciones adicionales para tu entrega"
             />
           </div>
+
+          <LocationCapture value={locationUrl} onCapture={setLocationUrl} />
 
           <div>
             <p className="mb-2 text-sm font-semibold text-ink">Método de pago</p>

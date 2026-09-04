@@ -47,7 +47,19 @@ export interface OrderCustomer {
   city: string;
   department: string;
   note?: string;
+  locationUrl?: string;
 }
+
+export const CARRIERS = [
+  'Interrapidísimo',
+  'Coordinadora',
+  'Servientrega',
+  'TCC',
+  'Envía',
+  'Otra',
+] as const;
+
+export type Carrier = (typeof CARRIERS)[number];
 
 export interface Order {
   id: string;
@@ -59,6 +71,8 @@ export interface Order {
   customer: OrderCustomer;
   paymentMethod: PaymentMethod;
   status: OrderStatus;
+  carrier?: Carrier;
+  trackingNumber?: string;
   createdAt: number;
 }
 
