@@ -40,10 +40,31 @@ const config: Config = {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.6' },
         },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+        glow: {
+          '0%, 100%': { boxShadow: '0 0 0 0 rgb(var(--color-primary) / 0.35)' },
+          '50%': { boxShadow: '0 0 0 8px rgb(var(--color-primary) / 0)' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-6px)' },
+        },
+        popIn: {
+          '0%': { transform: 'scale(0.6)', opacity: '0' },
+          '70%': { transform: 'scale(1.08)', opacity: '1' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
       },
       animation: {
         marquee: 'marquee 28s linear infinite',
         pulseSoft: 'pulseSoft 1.8s ease-in-out infinite',
+        shimmer: 'shimmer 2.8s linear infinite',
+        glow: 'glow 2.4s ease-in-out infinite',
+        float: 'float 3s ease-in-out infinite',
+        popIn: 'popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both',
       },
     },
   },
