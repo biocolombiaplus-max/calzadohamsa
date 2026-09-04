@@ -1,8 +1,9 @@
 # Hamsa Shoes — Tienda Online (Next.js + Firebase + Vercel)
 
 Tienda de ecommerce completa, sin Shopify: Next.js 14 + Tailwind para el front,
-Firebase (Firestore + Storage + Auth) como backend, lista para desplegar en Vercel
-desde este mismo repositorio de GitHub.
+Firebase (Firestore + Auth) como backend, Cloudinary para las fotos de
+producto, lista para desplegar en Vercel desde este mismo repositorio de
+GitHub. Ningún servicio usado aquí requiere tarjeta de crédito.
 
 Incluye:
 - Página de inicio, catálogo, ficha de producto (con timer de urgencia, prueba
@@ -20,10 +21,22 @@ Incluye:
 1. Ve a [Firebase Console](https://console.firebase.google.com/) → **Crear proyecto**.
 2. Dentro del proyecto, activa:
    - **Firestore Database** (modo producción, elige una región cercana, ej. `southamerica-east1`).
-   - **Storage**.
    - **Authentication** → método **Correo/Contraseña**.
+
+   (Firebase **Storage** no se usa — ahora exige el plan de pago Blaze incluso
+   para uso gratuito, así que las fotos de producto se hospedan en Cloudinary,
+   ver paso 1.b.)
 3. Ve a **Configuración del proyecto → Tus apps → Agregar app Web (`</>`)**.
    Copia los valores del objeto `firebaseConfig`.
+
+## 1.b. Crear cuenta en Cloudinary (fotos de producto, gratis, sin tarjeta)
+
+1. Ve a [cloudinary.com](https://cloudinary.com) → **Sign up free** (con correo o Google, no pide tarjeta).
+2. En el dashboard, copia tu **Cloud name** (aparece arriba, ej. `dxxxx1234`).
+3. Ve a **Settings (⚙️) → Upload → Upload presets → Add upload preset**.
+   - **Signing Mode**: cámbialo a **Unsigned**.
+   - Dale un nombre corto (ej. `hamsa_productos`) y **Save**.
+4. Guarda esos dos valores (Cloud name y el nombre del preset) para el siguiente paso.
 
 ## 2. Configurar variables de entorno
 
@@ -33,9 +46,9 @@ Dentro de `webapp/`:
 cp .env.local.example .env.local
 ```
 
-Completa `.env.local` con los valores de Firebase del paso anterior y los
-datos de tu WhatsApp (`NEXT_PUBLIC_WHATSAPP_NUMBER`, sin el 0 inicial ni el
-código de país).
+Completa `.env.local` con los valores de Firebase y Cloudinary de los pasos
+anteriores, y los datos de tu WhatsApp (`NEXT_PUBLIC_WHATSAPP_NUMBER`, sin el
+0 inicial ni el código de país).
 
 ## 3. Instalar dependencias y correr localmente
 
@@ -49,18 +62,18 @@ Abre http://localhost:3000
 
 ## 4. Publicar las reglas de seguridad
 
-Instala el CLI de Firebase (una sola vez) y publica `firestore.rules` y `storage.rules`:
+Instala el CLI de Firebase (una sola vez) y publica `firestore.rules`:
 
 ```bash
 npm install -g firebase-tools
 firebase login
-firebase init firestore storage   # selecciona tu proyecto, usa los archivos ya existentes
-firebase deploy --only firestore:rules,storage:rules
+firebase init firestore   # selecciona tu proyecto, usa el archivo ya existente
+firebase deploy --only firestore:rules
 ```
 
-Si prefieres no usar el CLI, puedes pegar el contenido de `firestore.rules` y
-`storage.rules` directamente en la consola de Firebase (Firestore → Reglas /
-Storage → Reglas) y publicar desde ahí.
+Si prefieres no usar el CLI, puedes pegar el contenido de `firestore.rules`
+directamente en la consola de Firebase (Firestore Database → Reglas) y
+publicar desde ahí.
 
 ## 5. Crear tu primer usuario administrador
 
@@ -99,8 +112,9 @@ aquí apuntando Vercel a esta subcarpeta (paso siguiente).
 2. En **Root Directory**, selecciona `webapp` (muy importante, porque el
    proyecto Next.js vive en esa subcarpeta y no en la raíz del repo).
 3. En **Environment Variables**, agrega las mismas variables de tu
-   `.env.local` (las `NEXT_PUBLIC_FIREBASE_*`, `NEXT_PUBLIC_STORE_NAME`,
-   `NEXT_PUBLIC_WHATSAPP_COUNTRY_CODE`, `NEXT_PUBLIC_WHATSAPP_NUMBER`).
+   `.env.local` (las `NEXT_PUBLIC_FIREBASE_*`, `NEXT_PUBLIC_CLOUDINARY_*`,
+   `NEXT_PUBLIC_STORE_NAME`, `NEXT_PUBLIC_WHATSAPP_COUNTRY_CODE`,
+   `NEXT_PUBLIC_WHATSAPP_NUMBER`).
 4. Click **Deploy**. En unos minutos tendrás tu tienda en una URL
    `tu-proyecto.vercel.app` — puedes conectar tu dominio propio desde
    **Project Settings → Domains**.
@@ -133,8 +147,7 @@ webapp/
     components/         → componentes de la tienda (Hero, ProductCard, CartDrawer, etc.)
     components/admin/   → formulario de productos, sidebar, guard de autenticación
     components/product/ → galería, timer, guía de tallas, etc. de la ficha de producto
-    lib/                → Firebase, tipos, carrito (zustand), productos, pedidos, utilidades
+    lib/                → Firebase, Cloudinary, tipos, carrito (zustand), productos, pedidos, utilidades
   firestore.rules
-  storage.rules
   scripts/seed.ts
 ```
