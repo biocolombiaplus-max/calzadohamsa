@@ -1,11 +1,18 @@
 'use client';
 
-import { whatsappLink } from '@/lib/utils';
+import { useSiteSettings } from '@/lib/settings-context';
+import { whatsappLinkTo } from '@/lib/utils';
 
 export default function FloatingWhatsApp() {
+  const { whatsappCountryCode, whatsappNumber, storeName } = useSiteSettings();
+
   return (
     <a
-      href={whatsappLink('Hola, quiero información sobre sus sandalias')}
+      href={whatsappLinkTo(
+        whatsappNumber,
+        `Hola, quiero información sobre ${storeName}`,
+        whatsappCountryCode,
+      )}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Comprar por WhatsApp"

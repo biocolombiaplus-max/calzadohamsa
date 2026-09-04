@@ -1,19 +1,18 @@
+'use client';
+
 import Link from 'next/link';
-import { whatsappLink } from '@/lib/utils';
+import { useSiteSettings } from '@/lib/settings-context';
+import { whatsappLinkTo } from '@/lib/utils';
 
 export default function HomeCTA() {
+  const { cta, storeName, whatsappCountryCode, whatsappNumber } = useSiteSettings();
+
   return (
     <section className="bg-ink py-16 text-center text-cream">
       <div className="container-page">
-        <p className="mb-2 text-xs font-bold uppercase tracking-widest text-primary-light">
-          ¿Lista para lucir increíble?
-        </p>
-        <h2 className="mx-auto max-w-xl font-heading text-3xl font-bold sm:text-4xl">
-          Tu sandalia perfecta te está esperando
-        </h2>
-        <p className="mx-auto mt-3 max-w-lg text-sm text-cream/70">
-          Más de 2.400 mujeres colombianas ya las tienen. Paga al recibir, envío gratis, cambio de talla sin costo.
-        </p>
+        <p className="mb-2 text-xs font-bold uppercase tracking-widest text-primary-light">{cta.eyebrow}</p>
+        <h2 className="mx-auto max-w-xl font-heading text-3xl font-bold sm:text-4xl">{cta.heading}</h2>
+        <p className="mx-auto mt-3 max-w-lg text-sm text-cream/70">{cta.text}</p>
 
         <div className="mx-auto mt-5 flex flex-wrap justify-center gap-3 text-xs font-semibold">
           <span className="rounded-full bg-white/10 px-3 py-1.5">✓ Envío gratis</span>
@@ -22,11 +21,11 @@ export default function HomeCTA() {
         </div>
 
         <div className="mt-7 flex flex-wrap justify-center gap-4">
-          <Link href="/catalogo" className="btn-primary">
-            🛍️ Comprar ahora — Envío gratis
+          <Link href={cta.buttonUrl} className="btn-primary">
+            {cta.buttonText}
           </Link>
           <a
-            href={whatsappLink('Hola, quiero comprar en Hamsa Shoes')}
+            href={whatsappLinkTo(whatsappNumber, `Hola, quiero comprar en ${storeName}`, whatsappCountryCode)}
             target="_blank"
             rel="noopener noreferrer"
             className="btn-whatsapp"

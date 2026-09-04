@@ -13,8 +13,14 @@ Incluye:
 - Ruleta de descuento (exit intent), botón flotante de WhatsApp, badge de oferta.
 - **Panel administrativo** en `/admin` para agregar/editar/eliminar productos
   (con subida de fotos) y gestionar pedidos, sin tocar código.
-- Paleta cálida terracota/camel/beige, diseño responsive y optimizado con
-  `next/image`.
+- **Configuración del sitio** en `/admin/configuracion`: edita en vivo el
+  nombre de la tienda, logo, número de WhatsApp, colores de marca, textos e
+  imágenes del inicio, barra de confianza, beneficios, testimonios, CTA final
+  y footer — sin necesidad de tocar código ni volver a desplegar.
+- Paleta cálida terracota/camel/beige (editable desde el panel), diseño
+  responsive y optimizado con `next/image`.
+- Enlace discreto "Iniciar sesión" al final del footer público, para entrar
+  al panel administrativo sin recordar la URL.
 
 ## 1. Crear el proyecto en Firebase
 

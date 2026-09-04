@@ -28,5 +28,12 @@ service cloud.firestore {
       allow read: if request.auth != null && request.auth.uid == uid;
       allow write: if isAdmin();
     }
+
+    // Configuración del sitio (textos, colores, WhatsApp, etc.): lectura
+    // pública, escritura solo administradores.
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
   }
 }

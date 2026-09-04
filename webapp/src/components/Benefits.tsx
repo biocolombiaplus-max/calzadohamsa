@@ -1,19 +1,16 @@
-const BENEFITS = [
-  { icon: '⭐', title: 'Calidad garantizada', text: 'Materiales premium, cambio fácil si algo no queda perfecto.' },
-  { icon: '🛡️', title: 'Pago 100% seguro', text: 'Transferencia o paga al recibir tu pedido.' },
-  { icon: '💵', title: 'Contra entrega', text: 'Paga cuando el paquete llega a tu puerta. Sin riesgo.' },
-  { icon: '🚚', title: 'Envío gratis Colombia', text: 'A toda Colombia sin costo adicional. Llegamos a tu ciudad.' },
-];
+'use client';
+
+import { useSiteSettings } from '@/lib/settings-context';
 
 export default function Benefits() {
+  const { benefitsHeading, benefits } = useSiteSettings();
+
   return (
     <section className="bg-cream py-14">
       <div className="container-page">
-        <h2 className="mb-8 text-center font-heading text-2xl font-bold text-ink sm:text-3xl">
-          ¿Por qué +2.400 mujeres eligen Hamsa?
-        </h2>
+        <h2 className="mb-8 text-center font-heading text-2xl font-bold text-ink sm:text-3xl">{benefitsHeading}</h2>
         <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
-          {BENEFITS.map((b) => (
+          {benefits.map((b) => (
             <div key={b.title} className="rounded-card bg-white p-6 text-center shadow-soft">
               <div className="mb-3 text-3xl">{b.icon}</div>
               <h3 className="mb-1 text-sm font-bold text-ink">{b.title}</h3>

@@ -10,6 +10,7 @@ const LINKS = [
   { href: '/admin', label: '📊 Panel', exact: true },
   { href: '/admin/productos', label: '👡 Productos' },
   { href: '/admin/pedidos', label: '📦 Pedidos' },
+  { href: '/admin/configuracion', label: '⚙️ Configuración' },
 ];
 
 export default function AdminSidebar() {

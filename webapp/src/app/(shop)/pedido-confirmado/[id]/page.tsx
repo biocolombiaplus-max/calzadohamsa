@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { getOrderById } from '@/lib/orders';
-import { formatPrice, whatsappLink } from '@/lib/utils';
+import { formatPrice, whatsappLinkTo } from '@/lib/utils';
+import { useSiteSettings } from '@/lib/settings-context';
 import type { Order } from '@/lib/types';
 
 export default function OrderConfirmationPage() {
   const params = useParams<{ id: string }>();
+  const { whatsappCountryCode, whatsappNumber } = useSiteSettings();
   const [order, setOrder] = useState<Order | null | undefined>(undefined);
 
   useEffect(() => {
@@ -59,7 +61,12 @@ export default function OrderConfirmationPage() {
           <p className="mb-3 text-sm font-bold text-ink">
             📲 Un último paso — confirma tu pedido por WhatsApp para que lo alistemos hoy mismo:
           </p>
-          <a href={whatsappLink(waMessage)} target="_blank" rel="noopener noreferrer" className="btn-whatsapp w-full">
+          <a
+            href={whatsappLinkTo(whatsappNumber, waMessage, whatsappCountryCode)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-whatsapp w-full"
+          >
             💬 Confirmar pedido por WhatsApp
           </a>
         </div>

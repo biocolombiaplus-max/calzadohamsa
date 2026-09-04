@@ -5,15 +5,17 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        cream: '#FBF3E5',
-        'cream-alt': '#F5E6CE',
-        ink: '#1C1208',
-        muted: '#8A7660',
-        border: '#E6D5BC',
+        // Estos leen de variables CSS (definidas en globals.css) para poder
+        // cambiarse en vivo desde /admin/configuracion sin recompilar.
+        cream: 'rgb(var(--color-cream) / <alpha-value>)',
+        'cream-alt': 'rgb(var(--color-cream-alt) / <alpha-value>)',
+        ink: 'rgb(var(--color-ink) / <alpha-value>)',
+        muted: 'rgb(var(--color-muted) / <alpha-value>)',
+        border: 'rgb(var(--color-border) / <alpha-value>)',
         primary: {
-          DEFAULT: '#A9673A',
-          hover: '#8C5429',
-          light: '#C9A06C',
+          DEFAULT: 'rgb(var(--color-primary) / <alpha-value>)',
+          hover: 'rgb(var(--color-primary-hover) / <alpha-value>)',
+          light: 'rgb(var(--color-primary-light) / <alpha-value>)',
         },
         whatsapp: '#25D366',
         urgent: '#E2472D',

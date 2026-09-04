@@ -2,17 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Colores de marca en "r g b" (sin comas) para soportar opacidad de Tailwind.
+     Estos son los valores por defecto; el panel /admin/configuracion los
+     sobrescribe en tiempo real vía JavaScript cuando hay ajustes guardados. */
+  --color-primary: 169 103 58;
+  --color-primary-hover: 140 84 41;
+  --color-primary-light: 201 160 108;
+  --color-cream: 251 243 229;
+  --color-cream-alt: 245 230 206;
+  --color-ink: 28 18 8;
+  --color-muted: 138 118 96;
+  --color-border: 230 213 188;
+}
+
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  background-color: #fbf3e5;
-  color: #1c1208;
+  background-color: rgb(var(--color-cream));
+  color: rgb(var(--color-ink));
 }
 
 ::selection {
-  background-color: #a9673a;
+  background-color: rgb(var(--color-primary));
   color: #fff;
 }
 

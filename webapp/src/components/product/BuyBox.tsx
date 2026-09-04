@@ -3,12 +3,14 @@
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import type { Product } from '@/lib/types';
-import { classNames, formatPrice, whatsappLink } from '@/lib/utils';
+import { classNames, formatPrice, whatsappLinkTo } from '@/lib/utils';
 import { useCartStore } from '@/lib/cart-store';
+import { useSiteSettings } from '@/lib/settings-context';
 import UrgencyTimer from './UrgencyTimer';
 
 export default function BuyBox({ product }: { product: Product }) {
   const router = useRouter();
+  const { whatsappCountryCode, whatsappNumber } = useSiteSettings();
   const addItem = useCartStore((s) => s.addItem);
   const [size, setSize] = useState(product.sizes[0] ?? '');
   const [color, setColor] = useState(product.colors[0]?.name ?? '');
@@ -136,7 +138,12 @@ export default function BuyBox({ product }: { product: Product }) {
         <button onClick={handleAddToCart} className="btn-secondary w-full">
           {added ? '✓ Agregado al carrito' : '🛒 Agregar al carrito'}
         </button>
-        <a href={whatsappLink(waMessage)} target="_blank" rel="noopener noreferrer" className="btn-whatsapp w-full">
+        <a
+          href={whatsappLinkTo(whatsappNumber, waMessage, whatsappCountryCode)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-whatsapp w-full"
+        >
           💬 Pedir por WhatsApp
         </a>
         <p className="text-center text-xs text-muted">Respuesta inmediata · Pago al recibir</p>

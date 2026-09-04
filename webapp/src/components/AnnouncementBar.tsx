@@ -1,14 +1,11 @@
-const ITEMS = [
-  '🚚 ENVÍO GRATIS a toda Colombia',
-  '💵 PAGO CONTRA ENTREGA — paga al recibir',
-  '✨ +2.400 mujeres ya las tienen',
-  '↩️ CAMBIO DE TALLA sin costo',
-  '🔒 COMPRA 100% GARANTIZADA',
-  '⚡ DESPACHO en 24-48 horas',
-];
+'use client';
+
+import { useSiteSettings } from '@/lib/settings-context';
 
 export default function AnnouncementBar() {
-  const loop = [...ITEMS, ...ITEMS];
+  const { announcementMessages } = useSiteSettings();
+  const loop = [...announcementMessages, ...announcementMessages];
+
   return (
     <div className="overflow-hidden bg-primary py-2.5 text-white">
       <div className="flex w-max animate-marquee gap-10 whitespace-nowrap text-xs font-bold uppercase tracking-widest">

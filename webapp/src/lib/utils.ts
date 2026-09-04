@@ -18,12 +18,6 @@ export function slugify(text: string): string {
 }
 
 const WA_COUNTRY = process.env.NEXT_PUBLIC_WHATSAPP_COUNTRY_CODE || '57';
-const WA_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '';
-
-export function whatsappLink(message: string): string {
-  const phone = `${WA_COUNTRY}${WA_NUMBER}`.replace(/\D/g, '');
-  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-}
 
 export function whatsappLinkTo(phone: string, message: string, countryCode = WA_COUNTRY): string {
   const digits = phone.replace(/\D/g, '');
@@ -42,4 +36,15 @@ export function generateOrderNumber(): string {
 
 export function classNames(...values: Array<string | false | null | undefined>): string {
   return values.filter(Boolean).join(' ');
+}
+
+export function hexToRgbChannels(hex: string): string {
+  const clean = hex.replace('#', '').trim();
+  const normalized = clean.length === 3 ? clean.split('').map((c) => c + c).join('') : clean;
+  const bigint = parseInt(normalized, 16);
+  if (normalized.length !== 6 || Number.isNaN(bigint)) return '0 0 0';
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return `${r} ${g} ${b}`;
 }

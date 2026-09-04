@@ -1,13 +1,14 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useCartStore } from '@/lib/cart-store';
-
-const STORE_NAME = process.env.NEXT_PUBLIC_STORE_NAME || 'Hamsa Shoes';
+import { useSiteSettings } from '@/lib/settings-context';
 
 export default function Header() {
   const [mounted, setMounted] = useState(false);
+  const { storeName, logoUrl } = useSiteSettings();
   const totalItems = useCartStore((s) => s.totalItems());
   const openCart = useCartStore((s) => s.open);
 
@@ -16,8 +17,14 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-cream/95 backdrop-blur">
       <div className="container-page flex h-16 items-center justify-between sm:h-20">
-        <Link href="/" className="font-heading text-2xl font-bold tracking-tight text-ink sm:text-3xl">
-          {STORE_NAME}
+        <Link href="/" className="flex items-center font-heading text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+          {logoUrl ? (
+            <span className="relative block h-9 w-32 sm:h-11 sm:w-40">
+              <Image src={logoUrl} alt={storeName} fill className="object-contain object-left" />
+            </span>
+          ) : (
+            storeName
+          )}
         </Link>
 
         <nav className="hidden items-center gap-8 text-sm font-semibold text-ink md:flex">

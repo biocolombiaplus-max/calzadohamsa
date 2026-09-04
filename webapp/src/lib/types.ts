@@ -63,3 +63,75 @@ export interface Order {
 }
 
 export type OrderInput = Omit<Order, 'id' | 'createdAt' | 'orderNumber'>;
+
+export interface TrustItem {
+  icon: string;
+  title: string;
+  sub: string;
+}
+
+export interface BenefitItem {
+  icon: string;
+  title: string;
+  text: string;
+}
+
+export interface TestimonialItem {
+  name: string;
+  city: string;
+  review: string;
+}
+
+export interface SiteColors {
+  primary: string;
+  primaryHover: string;
+  primaryLight: string;
+  cream: string;
+  creamAlt: string;
+  ink: string;
+  muted: string;
+  border: string;
+}
+
+export interface SiteSettings {
+  storeName: string;
+  logoUrl: string;
+  whatsappCountryCode: string;
+  whatsappNumber: string;
+  colors: SiteColors;
+  announcementMessages: string[];
+  hero: {
+    eyebrow: string;
+    heading: string;
+    subtext: string;
+    image: string;
+    badge1: string;
+    badge2: string;
+    badge3: string;
+    button1Text: string;
+    button1Url: string;
+    button2Text: string;
+    button2Url: string;
+  };
+  trustItems: TrustItem[];
+  benefitsHeading: string;
+  benefits: BenefitItem[];
+  testimonialsHeading: string;
+  testimonialsSubtext: string;
+  testimonials: TestimonialItem[];
+  cta: {
+    eyebrow: string;
+    heading: string;
+    text: string;
+    buttonText: string;
+    buttonUrl: string;
+  };
+  footer: {
+    brandText: string;
+    contactText: string;
+    instagram: string;
+    facebook: string;
+    tiktok: string;
+    copyrightText: string;
+  };
+}
