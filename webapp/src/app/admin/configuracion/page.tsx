@@ -64,8 +64,8 @@ function ImageUploadField({
     try {
       const url = await uploadProductImage(file, folder);
       onChange(url);
-    } catch {
-      alert('No se pudo subir la imagen. Verifica tu configuración de Cloudinary.');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'No se pudo subir la imagen.');
     } finally {
       setUploading(false);
       e.target.value = '';

@@ -37,8 +37,13 @@ export default function ProductForm({ product }: { product?: Product }) {
   const [colors, setColors] = useState<ProductColor[]>(product?.colors ?? []);
   const [images, setImages] = useState<string[]>(product?.images ?? []);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  const [customSize, setCustomSize] = useState('');
+  const [customColorName, setCustomColorName] = useState('');
+  const [customColorHex, setCustomColorHex] = useState('#A9673A');
 
   function handleTitleChange(value: string) {
     setTitle(value);
@@ -49,34 +54,63 @@ export default function ProductForm({ product }: { product?: Product }) {
     setSizes((s) => (s.includes(size) ? s.filter((x) => x !== size) : [...s, size].sort()));
   }
 
+  function addCustomSize() {
+    const value = customSize.trim();
+    if (!value) return;
+    if (!sizes.includes(value)) setSizes((s) => [...s, value]);
+    setCustomSize('');
+  }
+
   function toggleQuickColor(color: ProductColor) {
     setColors((c) =>
       c.some((x) => x.name === color.name) ? c.filter((x) => x.name !== color.name) : [...c, color],
     );
   }
 
+  function addCustomColor() {
+    const name = customColorName.trim();
+    if (!name) return;
+    if (colors.some((c) => c.name.toLowerCase() === name.toLowerCase())) {
+      setColors((c) => c.map((x) => (x.name.toLowerCase() === name.toLowerCase() ? { ...x, hex: customColorHex } : x)));
+    } else {
+      setColors((c) => [...c, { name, hex: customColorHex }]);
+    }
+    setCustomColorName('');
+  }
+
+  function removeColor(name: string) {
+    setColors((c) => c.filter((x) => x.name !== name));
+  }
+
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     if (!slug) {
-      setError('Escribe primero el título del producto (necesitamos el slug para guardar las fotos).');
+      setUploadError('Escribe primero el título del producto (lo necesitamos para organizar las fotos).');
       return;
     }
     setUploading(true);
-    setError('');
-    try {
-      const uploaded: string[] = [];
-      for (const file of Array.from(files)) {
+    setUploadError('');
+    const uploaded: string[] = [];
+    let failedCount = 0;
+    let lastErrorMessage = '';
+    for (const file of Array.from(files)) {
+      try {
         const url = await uploadProductImage(file, slug);
         uploaded.push(url);
+      } catch (err) {
+        failedCount += 1;
+        lastErrorMessage = err instanceof Error ? err.message : 'Error desconocido';
       }
-      setImages((prev) => [...prev, ...uploaded]);
-    } catch {
-      setError('Hubo un problema subiendo las imágenes. Intenta de nuevo.');
-    } finally {
-      setUploading(false);
-      e.target.value = '';
     }
+    if (uploaded.length > 0) setImages((prev) => [...prev, ...uploaded]);
+    if (failedCount > 0) {
+      setUploadError(
+        `No se pudo subir ${failedCount === files.length ? '' : `${failedCount} de ${files.length} `}foto(s). ${lastErrorMessage}`,
+      );
+    }
+    setUploading(false);
+    e.target.value = '';
   }
 
   async function handleRemoveImage(url: string) {
@@ -189,14 +223,20 @@ export default function ProductForm({ product }: { product?: Product }) {
               <input type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" disabled={uploading} />
             </label>
           </div>
-          <p className="text-xs text-muted">Sube varias fotos a la vez. La primera será la foto principal.</p>
+          {uploadError && (
+            <p className="mb-2 rounded-lg bg-urgent/10 p-3 text-sm text-urgent">{uploadError}</p>
+          )}
+          <p className="text-xs text-muted">
+            Sube varias fotos a la vez. La primera será la foto principal. Cada foto se optimiza y redimensiona
+            automáticamente para que la tienda cargue rápido, sin que tengas que editarla antes.
+          </p>
         </div>
 
         <div className="rounded-card bg-white p-6 shadow-soft">
           <h2 className="mb-4 font-heading text-lg font-bold text-ink">Tallas y colores</h2>
 
           <p className="mb-2 text-sm font-semibold text-ink">Tallas disponibles</p>
-          <div className="mb-5 flex flex-wrap gap-2">
+          <div className="mb-3 flex flex-wrap gap-2">
             {COMMON_SIZES.map((s) => (
               <button
                 key={s}
@@ -209,10 +249,39 @@ export default function ProductForm({ product }: { product?: Product }) {
                 {s}
               </button>
             ))}
+            {sizes
+              .filter((s) => !COMMON_SIZES.includes(s))
+              .map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => toggleSize(s)}
+                  className="flex h-10 items-center gap-1 rounded-lg border-2 border-primary bg-primary px-3 text-sm font-semibold text-white"
+                >
+                  {s} <span className="text-xs">✕</span>
+                </button>
+              ))}
+          </div>
+          <div className="mb-5 flex gap-2">
+            <input
+              value={customSize}
+              onChange={(e) => setCustomSize(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  addCustomSize();
+                }
+              }}
+              placeholder="Talla personalizada (ej: XL, 43, única)"
+              className="flex-1 rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
+            />
+            <button type="button" onClick={addCustomSize} className="btn-secondary px-4 py-2 text-sm">
+              + Agregar
+            </button>
           </div>
 
           <p className="mb-2 text-sm font-semibold text-ink">Colores disponibles</p>
-          <div className="flex flex-wrap gap-2">
+          <div className="mb-3 flex flex-wrap gap-2">
             {QUICK_COLORS.map((c) => (
               <button
                 key={c.name}
@@ -226,6 +295,42 @@ export default function ProductForm({ product }: { product?: Product }) {
                 {c.name}
               </button>
             ))}
+            {colors
+              .filter((c) => !QUICK_COLORS.some((q) => q.name === c.name))
+              .map((c) => (
+                <button
+                  key={c.name}
+                  type="button"
+                  onClick={() => removeColor(c.name)}
+                  className="flex items-center gap-2 rounded-full border-2 border-primary bg-primary-light/20 px-3 py-1.5 text-xs font-semibold"
+                >
+                  <span className="h-4 w-4 rounded-full border border-border" style={{ backgroundColor: c.hex }} />
+                  {c.name} <span>✕</span>
+                </button>
+              ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              type="color"
+              value={customColorHex}
+              onChange={(e) => setCustomColorHex(e.target.value)}
+              className="h-10 w-12 cursor-pointer rounded-lg border border-border"
+            />
+            <input
+              value={customColorName}
+              onChange={(e) => setCustomColorName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  addCustomColor();
+                }
+              }}
+              placeholder="Nombre del color (ej: Rosa palo)"
+              className="flex-1 rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
+            />
+            <button type="button" onClick={addCustomColor} className="btn-secondary px-4 py-2 text-sm">
+              + Agregar
+            </button>
           </div>
         </div>
       </div>

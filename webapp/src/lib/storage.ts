@@ -6,29 +6,50 @@
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
-export async function uploadProductImage(file: File, productSlug: string): Promise<string> {
+// Redimensiona (sin recortar ni deformar), comprime y sirve en el formato
+// más liviano posible (WebP/AVIF) automáticamente, vía transformación de
+// Cloudinary en la propia URL — no cuesta nada extra y no requiere ningún
+// paso manual del lado del admin.
+const AUTO_OPTIMIZE = 'c_limit,w_1600,h_1600,q_auto,f_auto';
+
+function withAutoOptimization(url: string): string {
+  return url.replace('/image/upload/', `/image/upload/${AUTO_OPTIMIZE}/`);
+}
+
+export async function uploadProductImage(file: File, _productSlug: string): Promise<string> {
   if (!CLOUD_NAME || !UPLOAD_PRESET) {
     throw new Error(
       'Cloudinary no está configurado. Agrega NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME y NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET (ver README.md).',
     );
   }
 
+  // Deliberadamente solo se envían "file" y "upload_preset": son los dos
+  // únicos parámetros que Cloudinary permite sin restricción en TODAS las
+  // cuentas para subidas "unsigned". Parámetros como "folder" pueden ser
+  // rechazados según el modo de carpetas de la cuenta (cuentas nuevas usan
+  // "Dynamic Folder Mode" por defecto), así que se evitan para máxima
+  // compatibilidad.
   const formData = new FormData();
   formData.append('file', file);
   formData.append('upload_preset', UPLOAD_PRESET);
-  formData.append('folder', `products/${productSlug}`);
 
   const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
     method: 'POST',
     body: formData,
   });
 
+  const data = await response.json().catch(() => null);
+
   if (!response.ok) {
-    throw new Error('No se pudo subir la imagen a Cloudinary.');
+    const message = data?.error?.message || `No se pudo subir la imagen (error ${response.status}).`;
+    throw new Error(message);
   }
 
-  const data = (await response.json()) as { secure_url: string };
-  return data.secure_url;
+  if (!data?.secure_url) {
+    throw new Error('Cloudinary no devolvió la URL de la imagen. Intenta de nuevo.');
+  }
+
+  return withAutoOptimization(data.secure_url as string);
 }
 
 export async function deleteProductImage(_url: string): Promise<void> {
