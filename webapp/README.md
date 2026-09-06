@@ -120,14 +120,33 @@ aquí apuntando Vercel a esta subcarpeta (paso siguiente).
 3. En **Environment Variables**, agrega las mismas variables de tu
    `.env.local` (las `NEXT_PUBLIC_FIREBASE_*`, `NEXT_PUBLIC_CLOUDINARY_*`,
    `NEXT_PUBLIC_STORE_NAME`, `NEXT_PUBLIC_WHATSAPP_COUNTRY_CODE`,
-   `NEXT_PUBLIC_WHATSAPP_NUMBER` y, si vas a usar pago en línea,
-   `NEXT_PUBLIC_WOMPI_PUBLIC_KEY` + `WOMPI_INTEGRITY_SECRET`).
+   `NEXT_PUBLIC_WHATSAPP_NUMBER`, `NEXT_PUBLIC_SITE_URL` y, si vas a usar
+   pago en línea, `NEXT_PUBLIC_WOMPI_PUBLIC_KEY` + `WOMPI_INTEGRITY_SECRET`).
 4. Click **Deploy**. En unos minutos tendrás tu tienda en una URL
    `tu-proyecto.vercel.app` — puedes conectar tu dominio propio desde
    **Project Settings → Domains**.
 
 Cada vez que hagas `git push` a la rama conectada, Vercel vuelve a desplegar
 automáticamente.
+
+## Favicon y vista previa al compartir el link
+
+Al entrar al sitio, el ícono de la pestaña del navegador y la imagen que
+aparece al compartir `calzadohamsa.com` (WhatsApp, Facebook, iMessage,
+etc.) se generan automáticamente a partir de tu logo y el nombre de la
+tienda — no necesitas subir nada aparte. Si ya tienes un logo en
+`/admin/configuracion`, se usa ese mismo logo (recortado/centrado
+automáticamente); si no, se genera un ícono de respaldo con la inicial del
+nombre de tu tienda sobre tu color primario, así que nunca se ve el ícono
+genérico de Next.js.
+
+Esto vive en `src/app/icon.tsx` (ícono del navegador), `src/app/apple-icon.tsx`
+(ícono al agregar a inicio en iPhone) y `src/app/opengraph-image.tsx` (la
+tarjeta que se ve al compartir el link). Si cambias el logo o el color
+primario en el admin, estas imágenes se actualizan solas (se regeneran
+cada hora como máximo). Recuerda configurar `NEXT_PUBLIC_SITE_URL` en
+Vercel con tu dominio real para que las vistas previas usen la URL
+correcta.
 
 ## Cómo funciona el checkout (sin pasarela de pago)
 
