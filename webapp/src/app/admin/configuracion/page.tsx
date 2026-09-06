@@ -4,7 +4,17 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { DEFAULT_SETTINGS, getSiteSettings, updateSiteSettings } from '@/lib/settings';
 import { uploadProductImage } from '@/lib/storage';
-import type { SiteSettings, TrustItem, BenefitItem, TestimonialItem } from '@/lib/types';
+import { getDepartamentos, getMunicipios } from '@/lib/colombia';
+import type {
+  SiteSettings,
+  TrustItem,
+  BenefitItem,
+  TestimonialItem,
+  DepartmentRate,
+  ShippingException,
+} from '@/lib/types';
+
+const DEPARTAMENTOS = getDepartamentos();
 
 function Section({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
   return (
@@ -121,6 +131,10 @@ export default function ConfiguracionPage() {
     setSettings((s) => (s ? { ...s, [key]: { ...s[key], [field]: value } } : s));
   }
 
+  function updateShipping<F extends keyof SiteSettings['shipping']>(field: F, value: SiteSettings['shipping'][F]) {
+    setSettings((s) => (s ? { ...s, shipping: { ...s.shipping, [field]: value } } : s));
+  }
+
   async function handleSave() {
     if (!settings) return;
     setSaving(true);
@@ -173,6 +187,113 @@ export default function ConfiguracionPage() {
               placeholder="3001234567"
             />
           </Field>
+        </div>
+      </Section>
+
+      <Section
+        title="Envíos y oferta 2×1"
+        description="Costo de envío según departamento/municipio, y el precio del combo 2×1"
+      >
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Costo de envío por defecto (si el departamento no tiene tarifa propia)">
+            <input
+              type="number"
+              min={0}
+              value={settings.shipping.defaultRate}
+              onChange={(e) => updateShipping('defaultRate', Number(e.target.value))}
+              className={inputClass}
+            />
+          </Field>
+          <Field label="Precio del combo 2×1 (2 pares)">
+            <input
+              type="number"
+              min={0}
+              value={settings.bundle2x1.price}
+              onChange={(e) => update('bundle2x1', { price: Number(e.target.value) })}
+              className={inputClass}
+            />
+          </Field>
+        </div>
+
+        <div>
+          <p className="mb-2 text-sm font-semibold text-ink">Tarifas por departamento</p>
+          <ListEditor<DepartmentRate>
+            items={settings.shipping.rates}
+            onChange={(items) => updateShipping('rates', items)}
+            empty={{ department: '', rate: settings.shipping.defaultRate }}
+            renderRow={(item, onEdit) => (
+              <>
+                <select
+                  value={item.department}
+                  onChange={(e) => onEdit({ ...item, department: e.target.value })}
+                  className={`${inputClass} bg-white`}
+                >
+                  <option value="">Departamento...</option>
+                  {DEPARTAMENTOS.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  min={0}
+                  value={item.rate}
+                  onChange={(e) => onEdit({ ...item, rate: Number(e.target.value) })}
+                  className={inputClass}
+                  placeholder="Costo de envío"
+                />
+              </>
+            )}
+          />
+        </div>
+
+        <div>
+          <p className="mb-2 text-sm font-semibold text-ink">
+            Excepciones por municipio (anulan la tarifa del departamento)
+          </p>
+          <ListEditor<ShippingException>
+            items={settings.shipping.exceptions}
+            onChange={(items) => updateShipping('exceptions', items)}
+            empty={{ department: '', municipio: '', rate: 0 }}
+            renderRow={(item, onEdit) => (
+              <>
+                <select
+                  value={item.department}
+                  onChange={(e) => onEdit({ ...item, department: e.target.value, municipio: '' })}
+                  className={`${inputClass} bg-white`}
+                >
+                  <option value="">Departamento...</option>
+                  {DEPARTAMENTOS.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={item.municipio}
+                  disabled={!item.department}
+                  onChange={(e) => onEdit({ ...item, municipio: e.target.value })}
+                  className={`${inputClass} bg-white disabled:opacity-50`}
+                >
+                  <option value="">{item.department ? 'Municipio...' : 'Elige depto.'}</option>
+                  {getMunicipios(item.department).map((m) => (
+                    <option key={m} value={m}>
+                      {m}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  min={0}
+                  value={item.rate}
+                  onChange={(e) => onEdit({ ...item, rate: Number(e.target.value) })}
+                  className={inputClass}
+                  placeholder="Costo de envío"
+                />
+              </>
+            )}
+          />
         </div>
       </Section>
 

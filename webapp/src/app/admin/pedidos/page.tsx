@@ -14,6 +14,12 @@ const STATUSES: { value: OrderStatus; label: string }[] = [
   { value: 'cancelado', label: 'Cancelado' },
 ];
 
+const PAYMENT_LABELS: Record<Order['paymentMethod'], string> = {
+  contra_entrega: '💵 Contra entrega',
+  transferencia: '🏦 Transferencia',
+  wompi: '⚡ Wompi (en línea)',
+};
+
 const STATUS_COLORS: Record<OrderStatus, string> = {
   pendiente: 'bg-urgent/10 text-urgent',
   confirmado: 'bg-primary-light/20 text-primary-hover',
@@ -215,11 +221,18 @@ function OrderCard({
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
         <div className="text-sm">
-          <span className="text-muted">Total: </span>
-          <span className="font-bold text-primary">{formatPrice(order.total)}</span>
-          <span className="ml-3 text-muted">
-            {order.paymentMethod === 'contra_entrega' ? '💵 Contra entrega' : '🏦 Transferencia'}
+          <span className="text-muted">Subtotal: </span>
+          <span className="font-semibold text-ink">{formatPrice(order.subtotal)}</span>
+          <span className="ml-3 text-muted">Envío: </span>
+          <span className="font-semibold text-ink">
+            {order.shipping > 0 ? formatPrice(order.shipping) : 'GRATIS'}
           </span>
+          <span className="ml-3 text-muted">Total: </span>
+          <span className="font-bold text-primary">{formatPrice(order.total)}</span>
+          <span className="ml-3 text-muted">{PAYMENT_LABELS[order.paymentMethod]}</span>
+          {order.paymentReference && (
+            <span className="ml-3 text-xs text-muted">Ref: {order.paymentReference}</span>
+          )}
         </div>
         <a
           href={whatsappLinkTo(order.customer.phone, buildStatusMessage(order, storeName))}

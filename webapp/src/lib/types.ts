@@ -97,6 +97,23 @@ export interface TestimonialItem {
   review: string;
 }
 
+export interface DepartmentRate {
+  department: string;
+  rate: number;
+}
+
+export interface ShippingException {
+  department: string;
+  municipio: string;
+  rate: number;
+}
+
+export interface ShippingSettings {
+  defaultRate: number;
+  rates: DepartmentRate[];
+  exceptions: ShippingException[];
+}
+
 export interface SiteColors {
   primary: string;
   primaryHover: string;
@@ -127,6 +144,10 @@ export interface SiteSettings {
     button1Url: string;
     button2Text: string;
     button2Url: string;
+  };
+  shipping: ShippingSettings;
+  bundle2x1: {
+    price: number;
   };
   trustItems: TrustItem[];
   benefitsHeading: string;

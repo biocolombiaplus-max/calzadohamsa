@@ -1,17 +1,22 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useCartStore } from '@/lib/cart-store';
 import { createOrder } from '@/lib/orders';
 import { formatPrice } from '@/lib/utils';
-import { DEPARTMENTS } from '@/lib/departments';
+import { getDepartamentos, getMunicipios } from '@/lib/colombia';
+import { getShippingRate } from '@/lib/shipping';
+import { useSiteSettings } from '@/lib/settings-context';
 import type { PaymentMethod } from '@/lib/types';
 import LocationCapture from '@/components/product/LocationCapture';
 
+const DEPARTAMENTOS = getDepartamentos();
+
 export default function CheckoutPage() {
   const router = useRouter();
+  const settings = useSiteSettings();
   const [mounted, setMounted] = useState(false);
   const { items, subtotal, clear } = useCartStore();
   const [submitting, setSubmitting] = useState(false);
@@ -19,6 +24,10 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('contra_entrega');
   const [form, setForm] = useState({ name: '', phone: '', address: '', city: '', department: '', note: '' });
   const [locationUrl, setLocationUrl] = useState('');
+
+  const municipios = useMemo(() => getMunicipios(form.department), [form.department]);
+  const shippingCost = form.department ? getShippingRate(settings.shipping, form.department, form.city) : 0;
+  const total = subtotal() + shippingCost;
 
   useEffect(() => setMounted(true), []);
 
@@ -29,7 +38,7 @@ export default function CheckoutPage() {
   if (!mounted || items.length === 0) return null;
 
   function updateField<K extends keyof typeof form>(key: K, value: string) {
-    setForm((f) => ({ ...f, [key]: value }));
+    setForm((f) => (key === 'department' ? { ...f, department: value, city: '' } : { ...f, [key]: value }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -43,12 +52,12 @@ export default function CheckoutPage() {
 
     setSubmitting(true);
     try {
-      const total = subtotal();
+      const itemsSubtotal = subtotal();
       const { id } = await createOrder({
         items,
-        subtotal: total,
-        shipping: 0,
-        total,
+        subtotal: itemsSubtotal,
+        shipping: shippingCost,
+        total: itemsSubtotal + shippingCost,
         customer: locationUrl ? { ...form, locationUrl } : form,
         paymentMethod,
         status: 'pendiente',
@@ -105,15 +114,6 @@ export default function CheckoutPage() {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-semibold text-ink">Ciudad *</label>
-              <input
-                required
-                value={form.city}
-                onChange={(e) => updateField('city', e.target.value)}
-                className="w-full rounded-lg border border-border px-4 py-3 focus:border-primary focus:outline-none"
-              />
-            </div>
-            <div>
               <label className="mb-1 block text-sm font-semibold text-ink">Departamento *</label>
               <select
                 required
@@ -122,14 +122,37 @@ export default function CheckoutPage() {
                 className="w-full rounded-lg border border-border bg-white px-4 py-3 focus:border-primary focus:outline-none"
               >
                 <option value="">Selecciona...</option>
-                {DEPARTMENTS.map((d) => (
+                {DEPARTAMENTOS.map((d) => (
                   <option key={d} value={d}>
                     {d}
                   </option>
                 ))}
               </select>
             </div>
+            <div>
+              <label className="mb-1 block text-sm font-semibold text-ink">Municipio *</label>
+              <select
+                required
+                disabled={!form.department}
+                value={form.city}
+                onChange={(e) => updateField('city', e.target.value)}
+                className="w-full rounded-lg border border-border bg-white px-4 py-3 focus:border-primary focus:outline-none disabled:opacity-50"
+              >
+                <option value="">{form.department ? 'Selecciona...' : 'Elige depto. primero'}</option>
+                {municipios.map((m) => (
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
+          {form.department && (
+            <p className="-mt-2 text-xs text-muted">
+              🚚 Envío a {form.city || form.department}:{' '}
+              <span className="font-semibold text-ink">{formatPrice(shippingCost)}</span>
+            </p>
+          )}
 
           <div>
             <label className="mb-1 block text-sm font-semibold text-ink">Nota (opcional)</label>
@@ -177,7 +200,7 @@ export default function CheckoutPage() {
           {error && <p className="rounded-lg bg-urgent/10 p-3 text-sm text-urgent">{error}</p>}
 
           <button type="submit" disabled={submitting} className="btn-primary w-full text-base disabled:opacity-60">
-            {submitting ? 'Procesando...' : `Confirmar pedido — ${formatPrice(subtotal())}`}
+            {submitting ? 'Procesando...' : `Confirmar pedido — ${formatPrice(total)}`}
           </button>
           <p className="text-center text-xs text-muted">🔒 Tus datos están seguros y protegidos</p>
         </form>
@@ -203,11 +226,13 @@ export default function CheckoutPage() {
           </div>
           <div className="flex justify-between text-sm text-muted">
             <span>Envío</span>
-            <span className="font-semibold text-primary">GRATIS</span>
+            <span className="font-semibold text-ink">
+              {form.department ? formatPrice(shippingCost) : 'Elige tu ubicación'}
+            </span>
           </div>
           <div className="mt-2 flex justify-between border-t border-border pt-3 text-base font-bold text-ink">
             <span>Total</span>
-            <span>{formatPrice(subtotal())}</span>
+            <span>{formatPrice(total)}</span>
           </div>
           <Link href="/carrito" className="mt-4 block text-center text-sm text-muted hover:text-primary">
             ← Volver al carrito

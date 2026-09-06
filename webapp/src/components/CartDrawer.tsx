@@ -93,7 +93,7 @@ export default function CartDrawer() {
               <span>Subtotal</span>
               <span>{formatPrice(subtotal())}</span>
             </div>
-            <p className="mb-3 text-xs text-muted">Envío gratis calculado en el checkout</p>
+            <p className="mb-3 text-xs text-muted">Envío calculado en el checkout según tu ciudad</p>
             <Link href="/checkout" onClick={close} className="btn-primary w-full">
               Finalizar compra →
             </Link>

@@ -1,6 +1,0 @@
-export const DEPARTMENTS = [
-  'Antioquia', 'Atlántico', 'Bogotá D.C.', 'Bolívar', 'Boyacá', 'Caldas', 'Caquetá', 'Cauca',
-  'Cesar', 'Córdoba', 'Cundinamarca', 'Chocó', 'Huila', 'La Guajira', 'Magdalena', 'Meta',
-  'Nariño', 'Norte de Santander', 'Quindío', 'Risaralda', 'Santander', 'Sucre', 'Tolima',
-  'Valle del Cauca', 'Otro',
-];

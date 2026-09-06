@@ -1,13 +1,17 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { createOrder } from '@/lib/orders';
-import { DEPARTMENTS } from '@/lib/departments';
+import { getDepartamentos, getMunicipios } from '@/lib/colombia';
+import { getShippingRate } from '@/lib/shipping';
+import { useSiteSettings } from '@/lib/settings-context';
 import { formatPrice } from '@/lib/utils';
 import { generatePaymentReference, redirectToWompiCheckout } from '@/lib/wompi';
 import type { CartItem } from '@/lib/types';
 import LocationCapture from './LocationCapture';
+
+const DEPARTAMENTOS = getDepartamentos();
 
 export default function QuickBuyModal({
   items,
@@ -15,6 +19,7 @@ export default function QuickBuyModal({
   discountLabel,
   title = '💵 Compra contra entrega',
   mode = 'cod',
+  freeShipping = false,
   onClose,
 }: {
   items: CartItem[];
@@ -22,19 +27,29 @@ export default function QuickBuyModal({
   discountLabel?: string;
   title?: string;
   mode?: 'cod' | 'wompi';
+  freeShipping?: boolean;
   onClose: () => void;
 }) {
   const router = useRouter();
+  const settings = useSiteSettings();
   const [form, setForm] = useState({ name: '', phone: '', address: '', city: '', department: '', note: '' });
   const [locationUrl, setLocationUrl] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const total = totalOverride ?? subtotal;
+  const municipios = useMemo(() => getMunicipios(form.department), [form.department]);
+
+  const itemsTotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const subtotal = totalOverride ?? itemsTotal;
+  const shippingCost = freeShipping
+    ? 0
+    : form.department
+      ? getShippingRate(settings.shipping, form.department, form.city)
+      : 0;
+  const total = subtotal + shippingCost;
 
   function updateField<K extends keyof typeof form>(key: K, value: string) {
-    setForm((f) => ({ ...f, [key]: value }));
+    setForm((f) => (key === 'department' ? { ...f, department: value, city: '' } : { ...f, [key]: value }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -53,7 +68,7 @@ export default function QuickBuyModal({
         const { id } = await createOrder({
           items,
           subtotal,
-          shipping: 0,
+          shipping: shippingCost,
           total,
           customer: locationUrl ? { ...form, locationUrl } : form,
           paymentMethod: 'wompi',
@@ -73,7 +88,7 @@ export default function QuickBuyModal({
       const { id } = await createOrder({
         items,
         subtotal,
-        shipping: 0,
+        shipping: shippingCost,
         total,
         customer: locationUrl ? { ...form, locationUrl } : form,
         paymentMethod: 'contra_entrega',
@@ -118,6 +133,12 @@ export default function QuickBuyModal({
               <span>{discountLabel}</span>
             </div>
           )}
+          <div className="flex items-center justify-between border-t border-border pt-2 text-sm text-muted">
+            <span>Envío</span>
+            <span className={freeShipping ? 'font-bold text-primary' : 'font-semibold text-ink'}>
+              {freeShipping ? 'GRATIS' : form.department ? formatPrice(shippingCost) : 'Elige tu ubicación'}
+            </span>
+          </div>
           <div className="flex items-center justify-between border-t border-border pt-2 font-bold text-ink">
             <span>Total</span>
             <span className="text-primary">{formatPrice(total)}</span>
@@ -148,13 +169,6 @@ export default function QuickBuyModal({
             className="w-full rounded-lg border border-border px-4 py-3 text-sm focus:border-primary focus:outline-none"
           />
           <div className="grid grid-cols-2 gap-3">
-            <input
-              required
-              placeholder="Ciudad *"
-              value={form.city}
-              onChange={(e) => updateField('city', e.target.value)}
-              className="w-full rounded-lg border border-border px-4 py-3 text-sm focus:border-primary focus:outline-none"
-            />
             <select
               required
               value={form.department}
@@ -162,13 +176,32 @@ export default function QuickBuyModal({
               className="w-full rounded-lg border border-border bg-white px-3 py-3 text-sm focus:border-primary focus:outline-none"
             >
               <option value="">Departamento *</option>
-              {DEPARTMENTS.map((d) => (
+              {DEPARTAMENTOS.map((d) => (
                 <option key={d} value={d}>
                   {d}
                 </option>
               ))}
             </select>
+            <select
+              required
+              disabled={!form.department}
+              value={form.city}
+              onChange={(e) => updateField('city', e.target.value)}
+              className="w-full rounded-lg border border-border bg-white px-3 py-3 text-sm focus:border-primary focus:outline-none disabled:opacity-50"
+            >
+              <option value="">{form.department ? 'Municipio *' : 'Elige depto. primero'}</option>
+              {municipios.map((m) => (
+                <option key={m} value={m}>
+                  {m}
+                </option>
+              ))}
+            </select>
           </div>
+          {!freeShipping && form.department && (
+            <p className="-mt-1 text-xs text-muted">
+              🚚 Envío a {form.city || form.department}: <span className="font-semibold text-ink">{formatPrice(shippingCost)}</span>
+            </p>
+          )}
           <input
             placeholder="Nota (opcional)"
             value={form.note}

@@ -21,7 +21,7 @@ export default function Footer() {
           <h3 className="font-heading text-xl font-bold">{storeName}</h3>
           <p className="mt-3 text-sm leading-relaxed text-cream/70">{footer.brandText}</p>
           <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
-            <span className="rounded-full bg-white/10 px-3 py-1">🚚 Envío gratis</span>
+            <span className="rounded-full bg-white/10 px-3 py-1">🔥 2×1 con envío gratis</span>
             <span className="rounded-full bg-white/10 px-3 py-1">💵 Contra entrega</span>
           </div>
           {socialLinks.length > 0 && (
@@ -54,7 +54,7 @@ export default function Footer() {
         <div>
           <h4 className="mb-3 text-sm font-bold uppercase tracking-wide text-primary-light">Información</h4>
           <ul className="space-y-2 text-sm text-cream/80">
-            <li>📦 Envíos a toda Colombia</li>
+            <li>📦 Envíos a toda Colombia — costo según tu ciudad</li>
             <li>💬 Atención por WhatsApp</li>
             <li>🔄 Cambio de talla gratis</li>
           </ul>

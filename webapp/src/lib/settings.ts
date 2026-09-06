@@ -20,7 +20,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     border: '#E6D5BC',
   },
   announcementMessages: [
-    '🚚 ENVÍO GRATIS a toda Colombia',
+    '🔥 2×1 en sandalias — $159.900 + ENVÍO GRATIS',
     '💵 PAGO CONTRA ENTREGA — paga al recibir',
     '✨ +2.400 mujeres ya las tienen',
     '↩️ CAMBIO DE TALLA sin costo',
@@ -31,9 +31,9 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     eyebrow: '✨ Colección 2025 — Nuevos ingresos',
     heading: 'Sandalias que te hacen brillar',
     subtext:
-      'Diseños exclusivos para la mujer colombiana. Envío gratis · Pago al recibir · Cambio de talla gratis.',
+      'Diseños exclusivos para la mujer colombiana. Pago al recibir · Envío a todo el país · Cambio de talla gratis.',
     image: '/hero-placeholder.svg',
-    badge1: '🚚 Envío gratis',
+    badge1: '🔥 2×1 con envío gratis',
     badge2: '💵 Contra entrega',
     badge3: '⭐ +2.400 felices',
     button1Text: '🛍️ Ver colección',
@@ -41,8 +41,16 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     button2Text: '🔥 Oferta 2×1',
     button2Url: '/oferta-2x1',
   },
+  shipping: {
+    defaultRate: 15000,
+    rates: [],
+    exceptions: [],
+  },
+  bundle2x1: {
+    price: 159900,
+  },
   trustItems: [
-    { icon: '🚚', title: 'Envío GRATIS', sub: 'A toda Colombia' },
+    { icon: '🔥', title: '2×1 + envío GRATIS', sub: 'Solo en la oferta especial' },
     { icon: '💵', title: 'Contra entrega', sub: 'Paga al recibir' },
     { icon: '↩️', title: 'Cambio gratis', sub: 'Sin complicaciones' },
     { icon: '🔒', title: 'Compra segura', sub: '100% protegida' },
@@ -51,9 +59,9 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   benefitsHeading: '¿Por qué +2.400 mujeres eligen Hamsa?',
   benefits: [
     { icon: '⭐', title: 'Calidad garantizada', text: 'Materiales premium, cambio fácil si algo no queda perfecto.' },
-    { icon: '🛡️', title: 'Pago 100% seguro', text: 'Transferencia o paga al recibir tu pedido.' },
+    { icon: '🛡️', title: 'Pago 100% seguro', text: 'Contra entrega o en línea con Wompi.' },
     { icon: '💵', title: 'Contra entrega', text: 'Paga cuando el paquete llega a tu puerta. Sin riesgo.' },
-    { icon: '🚚', title: 'Envío gratis Colombia', text: 'A toda Colombia sin costo adicional. Llegamos a tu ciudad.' },
+    { icon: '🔥', title: '2×1 con envío gratis', text: 'Lleva 2 pares por $159.900 y el envío corre por nuestra cuenta.' },
   ],
   testimonialsHeading: 'Ellas ya lo tienen — y no paran de recomendarnos',
   testimonialsSubtext: 'Reseñas reales de clientas en toda Colombia',
@@ -84,9 +92,9 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   cta: {
     eyebrow: '¿Lista para lucir increíble?',
     heading: 'Tu sandalia perfecta te está esperando',
-    text: 'Más de 2.400 mujeres colombianas ya las tienen. Paga al recibir, envío gratis, cambio de talla sin costo.',
-    buttonText: '🛍️ Comprar ahora — Envío gratis',
-    buttonUrl: '/catalogo',
+    text: 'Más de 2.400 mujeres colombianas ya las tienen. Paga al recibir, cambio de talla sin costo, y llévate 2 pares con envío gratis.',
+    buttonText: '🔥 Ver oferta 2×1',
+    buttonUrl: '/oferta-2x1',
   },
   footer: {
     brandText:
@@ -108,6 +116,13 @@ function mergeWithDefaults(data: Partial<SiteSettings> | undefined): SiteSetting
     hero: { ...DEFAULT_SETTINGS.hero, ...data.hero },
     cta: { ...DEFAULT_SETTINGS.cta, ...data.cta },
     footer: { ...DEFAULT_SETTINGS.footer, ...data.footer },
+    shipping: {
+      ...DEFAULT_SETTINGS.shipping,
+      ...data.shipping,
+      rates: data.shipping?.rates ?? DEFAULT_SETTINGS.shipping.rates,
+      exceptions: data.shipping?.exceptions ?? DEFAULT_SETTINGS.shipping.exceptions,
+    },
+    bundle2x1: { ...DEFAULT_SETTINGS.bundle2x1, ...data.bundle2x1 },
     announcementMessages: data.announcementMessages?.length ? data.announcementMessages : DEFAULT_SETTINGS.announcementMessages,
     trustItems: data.trustItems?.length ? data.trustItems : DEFAULT_SETTINGS.trustItems,
     benefits: data.benefits?.length ? data.benefits : DEFAULT_SETTINGS.benefits,

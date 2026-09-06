@@ -138,15 +138,43 @@ abre WhatsApp con todo el resumen del pedido ya escrito, para que la clienta
 lo confirme y ustedes lo alisten de inmediato. Todos los pedidos también
 quedan visibles y gestionables desde `/admin/pedidos`.
 
+## Envíos por departamento y municipio
+
+Las compras de **un solo par** cobran envío según la ciudad de la clienta;
+el combo 2×1 siempre incluye envío gratis. El checkout (`/checkout`) y el
+modal de compra rápida piden **departamento y municipio** con selects
+dependientes (usa la lista completa y oficial de Colombia — 33
+departamentos y ~1.100 municipios, vía el paquete `colombia-territorial`),
+calculan el costo en vivo y lo suman al total.
+
+Tú controlas las tarifas desde **`/admin/configuracion` → "Envíos y oferta
+2×1"**:
+
+- **Costo de envío por defecto**: se usa para cualquier departamento sin
+  tarifa propia.
+- **Tarifas por departamento**: agrega una fila por cada departamento con
+  un costo distinto (ej. Bogotá $10.000, zonas apartadas $25.000).
+- **Excepciones por municipio**: para un municipio puntual que necesite un
+  precio distinto al de su departamento (ej. envío gratis en tu propia
+  ciudad).
+
+Si no configuras nada, todo el país usa el costo por defecto (15.000 COP
+de fábrica).
+
 ## Oferta 2x1 (`/oferta-2x1`)
 
 Página dedicada donde la clienta elige 2 pares (modelo, talla y color de
-cada uno) y ve el descuento aplicado automáticamente: paga solo el par más
-caro, el más económico es gratis, y hay temporizador de urgencia + "envío
-gratis solo por hoy". Al completar la selección aparecen dos botones:
+cada uno). El precio del combo es un valor fijo — **$159.900 por defecto**,
+editable en **`/admin/configuracion` → "Envíos y oferta 2×1" → "Precio del
+combo 2×1"** — con envío siempre gratis y temporizador de urgencia. Se usa
+"2×1" como gancho de marketing, pero el precio real es ese valor fijo (no
+un descuento literal de "paga uno, lleva dos"); si el valor de las dos
+tallas/colores elegidos ya es menor al precio del combo, la clienta nunca
+paga de más (se cobra el menor de los dos). Al completar la selección
+aparecen dos botones:
 
 - **⚡ Pagar ahora y ahorra 5% más** → pasarela **Wompi** (tarjeta, PSE,
-  Nequi), con 5% de descuento adicional sobre el total del 2x1.
+  Nequi), con 5% de descuento adicional sobre el precio del combo.
 - **💵 Pago contra entrega** → abre el formulario rápido de siempre y al
   confirmar redirige a la página de confirmación (con botón a WhatsApp).
 

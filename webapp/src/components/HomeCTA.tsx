@@ -15,7 +15,7 @@ export default function HomeCTA() {
         <p className="mx-auto mt-3 max-w-lg text-sm text-cream/70">{cta.text}</p>
 
         <div className="mx-auto mt-5 flex flex-wrap justify-center gap-3 text-xs font-semibold">
-          <span className="rounded-full bg-white/10 px-3 py-1.5">✓ Envío gratis</span>
+          <span className="rounded-full bg-white/10 px-3 py-1.5">✓ 2×1 con envío gratis</span>
           <span className="rounded-full bg-white/10 px-3 py-1.5">✓ Pago contra entrega</span>
           <span className="rounded-full bg-white/10 px-3 py-1.5">✓ Cambio de talla gratis</span>
         </div>
