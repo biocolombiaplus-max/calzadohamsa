@@ -1,13 +1,18 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
 import { useSiteSettings } from '@/lib/settings-context';
 import { whatsappLinkTo } from '@/lib/utils';
 
 export default function FloatingWhatsApp() {
   const { whatsappCountryCode, whatsappNumber, storeName } = useSiteSettings();
+  const pathname = usePathname();
+  const hasStickyBuyBar = pathname?.startsWith('/producto/');
 
   return (
-    <div className="fixed bottom-5 left-5 z-30 animate-float">
+    <div
+      className={`fixed bottom-5 left-5 z-30 animate-float ${hasStickyBuyBar ? 'hidden lg:block' : ''}`}
+    >
       <a
         href={whatsappLinkTo(
           whatsappNumber,

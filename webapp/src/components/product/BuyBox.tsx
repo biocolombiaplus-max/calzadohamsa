@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import type { Product } from '@/lib/types';
 import { classNames, formatPrice, whatsappLinkTo } from '@/lib/utils';
@@ -9,7 +10,7 @@ import UrgencyTimer from './UrgencyTimer';
 import QuickBuyModal from './QuickBuyModal';
 
 export default function BuyBox({ product }: { product: Product }) {
-  const { whatsappCountryCode, whatsappNumber } = useSiteSettings();
+  const { whatsappCountryCode, whatsappNumber, trustItems, bundle2x1 } = useSiteSettings();
   const addItem = useCartStore((s) => s.addItem);
   const [size, setSize] = useState(product.sizes[0] ?? '');
   const [color, setColor] = useState(product.colors[0]?.name ?? '');
@@ -18,6 +19,9 @@ export default function BuyBox({ product }: { product: Product }) {
   const [showQuickBuy, setShowQuickBuy] = useState(false);
 
   const hasDiscount = !!product.compareAtPrice && product.compareAtPrice > product.price;
+  const discountPercent = hasDiscount
+    ? Math.round((1 - product.price / (product.compareAtPrice as number)) * 100)
+    : 0;
   const stockPct = useMemo(() => Math.min(100, Math.max(6, product.stock)), [product.stock]);
 
   function buildItem() {
@@ -52,16 +56,22 @@ export default function BuyBox({ product }: { product: Product }) {
       <UrgencyTimer />
 
       <div>
-        <div className="flex items-center gap-3">
-          <span className="text-3xl font-extrabold text-primary">{formatPrice(product.price)}</span>
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-3xl font-extrabold text-primary sm:text-4xl">{formatPrice(product.price)}</span>
           {hasDiscount && (
-            <span className="text-lg text-muted line-through">{formatPrice(product.compareAtPrice as number)}</span>
+            <>
+              <span className="text-lg text-muted line-through">{formatPrice(product.compareAtPrice as number)}</span>
+              <span className="rounded-full bg-urgent px-2.5 py-1 text-xs font-extrabold text-white">
+                -{discountPercent}%
+              </span>
+            </>
           )}
         </div>
-        <div className="mt-1 flex items-center gap-3 text-xs text-muted">
-          <span className="text-primary">★★★★★</span>
-          <span>{product.reviewsCount ?? 87} reseñas</span>
-          <span>·</span>
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
+          <span className="flex items-center gap-1 text-primary">
+            ★★★★★ <span className="text-ink">{product.reviewsCount ?? 87} reseñas</span>
+          </span>
+          <span className="hidden sm:inline">·</span>
           <span>{product.soldCount ?? 342} vendidos</span>
         </div>
       </div>
@@ -76,6 +86,17 @@ export default function BuyBox({ product }: { product: Product }) {
           </div>
         </div>
       )}
+
+      <Link
+        href="/oferta-2x1"
+        className="flex items-center justify-between gap-2 rounded-card bg-gradient-to-r from-urgent/10 to-primary/10 px-4 py-3 text-xs font-semibold text-ink transition-colors hover:from-urgent/15 hover:to-primary/15 sm:text-sm"
+      >
+        <span>
+          🔥 Lleva <strong>2 pares</strong> por{' '}
+          <strong className="text-primary">{formatPrice(bundle2x1.price)}</strong> + envío gratis
+        </span>
+        <span className="shrink-0 font-bold text-primary">Ver oferta →</span>
+      </Link>
 
       {product.sizes.length > 0 && (
         <div>
@@ -117,22 +138,22 @@ export default function BuyBox({ product }: { product: Product }) {
         </div>
       )}
 
-      <div>
-        <p className="mb-2 text-sm font-semibold text-ink">Cantidad</p>
-        <div className="flex w-max items-center rounded-lg border border-border">
-          <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="h-11 w-11 text-lg">
+      <div className="flex items-center gap-4">
+        <p className="text-sm font-semibold text-ink">Cantidad</p>
+        <div className="flex items-center rounded-lg border border-border">
+          <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="h-10 w-10 text-lg">
             −
           </button>
-          <span className="w-10 text-center font-semibold">{quantity}</span>
-          <button onClick={() => setQuantity((q) => q + 1)} className="h-11 w-11 text-lg">
+          <span className="w-8 text-center font-semibold">{quantity}</span>
+          <button onClick={() => setQuantity((q) => q + 1)} className="h-10 w-10 text-lg">
             +
           </button>
         </div>
       </div>
 
       <div className="space-y-3">
-        <button onClick={handleBuyNow} className="btn-primary w-full text-base">
-          💵 Comprar — Pago contra entrega
+        <button onClick={handleBuyNow} className="btn-primary w-full text-base shadow-lift">
+          💵 Comprar ya — Pago contra entrega
         </button>
         <button onClick={handleAddToCart} className="btn-secondary w-full">
           {added ? '✓ Agregado al carrito' : '🛒 Agregar al carrito'}
@@ -145,8 +166,19 @@ export default function BuyBox({ product }: { product: Product }) {
         >
           💬 Pedir por WhatsApp
         </a>
-        <p className="text-center text-xs text-muted">Respuesta inmediata · Pago al recibir</p>
+        <p className="text-center text-xs text-muted">Respuesta inmediata · Sin tarjeta, sin anticipo</p>
       </div>
+
+      {trustItems.length > 0 && (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-y border-border py-3 text-xs text-muted">
+          {trustItems.slice(0, 4).map((item) => (
+            <span key={item.title} className="flex items-center gap-1.5">
+              <span>{item.icon}</span>
+              <span className="font-semibold text-ink">{item.title}</span>
+            </span>
+          ))}
+        </div>
+      )}
 
       <div className="rounded-card border border-border bg-cream-alt p-4">
         <p className="text-sm font-bold text-ink">🛡️ Compra 100% garantizada</p>

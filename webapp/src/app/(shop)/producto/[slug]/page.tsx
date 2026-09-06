@@ -10,9 +10,9 @@ import ProductGallery from '@/components/product/ProductGallery';
 import BuyBox from '@/components/product/BuyBox';
 import SocialProofTicker from '@/components/product/SocialProofTicker';
 import SizeGuide from '@/components/product/SizeGuide';
+import Accordion, { AccordionItem } from '@/components/product/Accordion';
 import RelatedProducts from '@/components/product/RelatedProducts';
 import HowItWorks from '@/components/HowItWorks';
-import TrustBar from '@/components/TrustBar';
 
 export default function ProductPage() {
   const params = useParams<{ slug: string }>();
@@ -43,21 +43,31 @@ export default function ProductPage() {
     );
   }
 
+  const hasDiscount = !!product.compareAtPrice && product.compareAtPrice > product.price;
+  const discountPercent = hasDiscount
+    ? Math.round((1 - product.price / (product.compareAtPrice as number)) * 100)
+    : 0;
+
   return (
     <div>
-      <TrustBar />
-
-      <div className="container-page py-8">
-        <nav className="mb-6 text-xs text-muted">
+      <div className="container-page py-6 sm:py-8">
+        <nav className="mb-5 text-xs text-muted sm:mb-6">
           <Link href="/" className="hover:text-primary">Inicio</Link> /{' '}
           <Link href="/catalogo" className="hover:text-primary">Catálogo</Link> /{' '}
           <span className="text-ink">{product.title}</span>
         </nav>
 
-        <div className="grid gap-10 lg:grid-cols-2">
-          <ProductGallery images={product.images} title={product.title} />
+        <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
+          <div>
+            <ProductGallery images={product.images} title={product.title} discountPercent={discountPercent} />
+          </div>
 
           <div>
+            {product.collection && (
+              <span className="mb-2 inline-block rounded-full bg-cream-alt px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-muted">
+                {product.collection}
+              </span>
+            )}
             <h1 className="font-heading text-2xl font-bold text-ink sm:text-3xl">{product.title}</h1>
             <div className="mt-4">
               <SocialProofTicker productTitle={product.title} />
@@ -68,15 +78,26 @@ export default function ProductPage() {
           </div>
         </div>
 
-        {product.description && (
-          <div className="mx-auto mt-12 max-w-3xl">
-            <h2 className="mb-3 font-heading text-xl font-bold text-ink">Detalles del producto</h2>
-            <p className="whitespace-pre-line text-sm leading-relaxed text-muted">{product.description}</p>
-          </div>
-        )}
-
-        <div className="mx-auto mt-8 max-w-3xl">
-          <SizeGuide />
+        <div className="mx-auto mt-12 max-w-3xl">
+          <Accordion>
+            {product.description && (
+              <AccordionItem title="📋 Detalles del producto" defaultOpen>
+                <p className="whitespace-pre-line">{product.description}</p>
+              </AccordionItem>
+            )}
+            <AccordionItem title="📏 Guía de tallas — Encuentra la tuya">
+              <SizeGuide />
+            </AccordionItem>
+            <AccordionItem title="🚚 Envíos y cambios">
+              <ul className="space-y-2">
+                <li>• Envío calculado según tu departamento y municipio al finalizar la compra.</li>
+                <li>• Llevando 2 pares (cualquier modelo, talla o color) el envío es GRATIS.</li>
+                <li>• Pagas cuando recibes tu pedido — sin tarjeta, sin anticipo.</li>
+                <li>• Despacho en 24-48 horas hábiles desde que confirmamos tu pedido.</li>
+                <li>• Primer cambio de talla sin costo si no te queda perfecta.</li>
+              </ul>
+            </AccordionItem>
+          </Accordion>
         </div>
       </div>
 

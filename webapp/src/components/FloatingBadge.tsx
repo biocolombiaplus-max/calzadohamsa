@@ -1,14 +1,19 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
 export default function FloatingBadge({ href = '/oferta-2x1' }: { href?: string }) {
   const [dismissed, setDismissed] = useState(false);
+  const pathname = usePathname();
+  const hasStickyBuyBar = pathname?.startsWith('/producto/');
   if (dismissed) return null;
 
   return (
-    <div className="fixed bottom-5 right-5 z-30 animate-popIn">
+    <div
+      className={`fixed bottom-5 right-5 z-30 animate-popIn ${hasStickyBuyBar ? 'hidden lg:block' : ''}`}
+    >
       <div className="relative animate-float">
         <Link
           href={href}
