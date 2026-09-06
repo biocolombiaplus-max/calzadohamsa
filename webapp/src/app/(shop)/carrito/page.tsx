@@ -4,11 +4,15 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useCartStore } from '@/lib/cart-store';
+import { useSiteSettings } from '@/lib/settings-context';
+import { computeBundlePricing } from '@/lib/bundle';
 import { formatPrice } from '@/lib/utils';
 
 export default function CarritoPage() {
   const [mounted, setMounted] = useState(false);
-  const { items, removeItem, updateQuantity, subtotal } = useCartStore();
+  const { items, removeItem, updateQuantity } = useCartStore();
+  const settings = useSiteSettings();
+  const bundle = computeBundlePricing(items, settings.bundle2x1.price);
 
   useEffect(() => setMounted(true), []);
 
@@ -82,17 +86,30 @@ export default function CarritoPage() {
 
         <div className="h-fit rounded-card bg-white p-6 shadow-soft">
           <h2 className="mb-4 font-heading text-lg font-bold text-ink">Resumen</h2>
+          {bundle.pairsCount > 0 && (
+            <div className="mb-3 rounded-lg bg-primary-light/15 px-3 py-2 text-xs font-bold text-primary">
+              🎉 2×1 aplicado — ahorras {formatPrice(bundle.savings)}
+            </div>
+          )}
           <div className="flex justify-between text-sm text-muted">
             <span>Subtotal</span>
-            <span>{formatPrice(subtotal())}</span>
+            <span className={bundle.savings > 0 ? 'line-through' : ''}>{formatPrice(bundle.subtotal)}</span>
           </div>
+          {bundle.savings > 0 && (
+            <div className="flex justify-between text-sm text-muted">
+              <span>Con 2×1</span>
+              <span className="font-semibold text-primary">{formatPrice(bundle.discountedSubtotal)}</span>
+            </div>
+          )}
           <div className="flex justify-between text-sm text-muted">
             <span>Envío</span>
-            <span className="font-semibold text-primary">GRATIS</span>
+            <span className="font-semibold text-primary">
+              {bundle.hasFreeShipping ? 'GRATIS' : 'Se calcula en el checkout'}
+            </span>
           </div>
           <div className="mt-3 flex justify-between border-t border-border pt-3 text-base font-bold text-ink">
             <span>Total</span>
-            <span>{formatPrice(subtotal())}</span>
+            <span>{formatPrice(bundle.discountedSubtotal)}</span>
           </div>
           <Link href="/checkout" className="btn-primary mt-5 w-full">
             Finalizar compra →

@@ -12,6 +12,7 @@ import type {
   TestimonialItem,
   DepartmentRate,
   ShippingException,
+  CollectionMenuItem,
 } from '@/lib/types';
 
 const DEPARTAMENTOS = getDepartamentos();
@@ -170,6 +171,16 @@ export default function ConfiguracionPage() {
           folder="site"
           onChange={(url) => update('logoUrl', url)}
         />
+        <Field label="Tamaño del logo en el encabezado (alto en píxeles, 40-140)">
+          <input
+            type="number"
+            min={40}
+            max={140}
+            value={settings.logoHeight}
+            onChange={(e) => update('logoHeight', Number(e.target.value))}
+            className={inputClass}
+          />
+        </Field>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Código de país WhatsApp">
             <input
@@ -295,6 +306,39 @@ export default function ConfiguracionPage() {
             )}
           />
         </div>
+      </Section>
+
+      <Section
+        title="Menú de colecciones"
+        description='Aparece como "Colecciones" en el menú (con submenú en desktop, y en el menú móvil). El "Valor de colección" debe coincidir exactamente con el campo "Colección" que escribes al crear cada producto.'
+      >
+        <ListEditor<CollectionMenuItem>
+          items={settings.collectionsMenu}
+          onChange={(items) => update('collectionsMenu', items)}
+          empty={{ label: '', value: '' }}
+          renderRow={(item, onEdit) => (
+            <>
+              <input
+                value={item.label}
+                onChange={(e) => onEdit({ ...item, label: e.target.value })}
+                className={inputClass}
+                placeholder="Nombre en el menú (ej: Sandalias planas)"
+              />
+              <input
+                value={item.value}
+                onChange={(e) => onEdit({ ...item, value: e.target.value })}
+                className={inputClass}
+                placeholder="Valor de colección (ej: sandalias)"
+              />
+            </>
+          )}
+        />
+        {settings.collectionsMenu.length === 0 && (
+          <p className="text-xs text-muted">
+            Todavía no has agregado colecciones al menú — el menú &ldquo;Colecciones&rdquo; no se mostrará hasta
+            que agregues al menos una.
+          </p>
+        )}
       </Section>
 
       <Section title="Colores de la marca" description="Se aplican en todo el sitio al instante">

@@ -4,11 +4,15 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useCartStore } from '@/lib/cart-store';
+import { useSiteSettings } from '@/lib/settings-context';
+import { computeBundlePricing } from '@/lib/bundle';
 import { formatPrice } from '@/lib/utils';
 
 export default function CartDrawer() {
   const [mounted, setMounted] = useState(false);
-  const { items, isOpen, close, removeItem, updateQuantity, subtotal } = useCartStore();
+  const { items, isOpen, close, removeItem, updateQuantity } = useCartStore();
+  const settings = useSiteSettings();
+  const bundle = computeBundlePricing(items, settings.bundle2x1.price);
 
   useEffect(() => setMounted(true), []);
   useEffect(() => {
@@ -89,11 +93,26 @@ export default function CartDrawer() {
 
         {items.length > 0 && (
           <div className="border-t border-border px-5 py-4">
+            {bundle.pairsCount > 0 && (
+              <div className="mb-3 rounded-lg bg-primary-light/15 px-3 py-2 text-xs font-bold text-primary">
+                🎉 2×1 aplicado — ahorras {formatPrice(bundle.savings)} + envío gratis
+              </div>
+            )}
+            {bundle.savings > 0 && (
+              <div className="mb-1 flex items-center justify-between text-sm text-muted line-through">
+                <span>Subtotal</span>
+                <span>{formatPrice(bundle.subtotal)}</span>
+              </div>
+            )}
             <div className="mb-3 flex items-center justify-between text-base font-bold text-ink">
-              <span>Subtotal</span>
-              <span>{formatPrice(subtotal())}</span>
+              <span>Total</span>
+              <span className={bundle.savings > 0 ? 'text-primary' : ''}>
+                {formatPrice(bundle.discountedSubtotal)}
+              </span>
             </div>
-            <p className="mb-3 text-xs text-muted">Envío calculado en el checkout según tu ciudad</p>
+            <p className="mb-3 text-xs text-muted">
+              {bundle.hasFreeShipping ? '🚚 Envío GRATIS por tu 2×1' : 'Envío calculado en el checkout según tu ciudad'}
+            </p>
             <Link href="/checkout" onClick={close} className="btn-primary w-full">
               Finalizar compra →
             </Link>

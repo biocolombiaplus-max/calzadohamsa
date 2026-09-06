@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import { createOrder } from '@/lib/orders';
 import { getDepartamentos, getMunicipios } from '@/lib/colombia';
 import { getShippingRate } from '@/lib/shipping';
+import { computeBundlePricing } from '@/lib/bundle';
 import { useSiteSettings } from '@/lib/settings-context';
 import { formatPrice } from '@/lib/utils';
 import { generatePaymentReference, redirectToWompiCheckout } from '@/lib/wompi';
@@ -39,9 +40,15 @@ export default function QuickBuyModal({
 
   const municipios = useMemo(() => getMunicipios(form.department), [form.department]);
 
-  const itemsTotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const subtotal = totalOverride ?? itemsTotal;
-  const shippingCost = freeShipping
+  const bundle = useMemo(() => computeBundlePricing(items, settings.bundle2x1.price), [items, settings.bundle2x1.price]);
+  const bundleApplies = totalOverride === undefined && bundle.pairsCount > 0;
+  const subtotal = totalOverride ?? (bundleApplies ? bundle.discountedSubtotal : bundle.subtotal);
+  const effectiveFreeShipping = freeShipping || bundleApplies;
+  const autoDiscountLabel = bundleApplies
+    ? `🎉 2×1 aplicado — ahorras ${formatPrice(bundle.savings)}`
+    : undefined;
+  const shownDiscountLabel = discountLabel ?? autoDiscountLabel;
+  const shippingCost = effectiveFreeShipping
     ? 0
     : form.department
       ? getShippingRate(settings.shipping, form.department, form.city)
@@ -128,15 +135,15 @@ export default function QuickBuyModal({
               <span className="font-semibold text-ink">{formatPrice(item.price * item.quantity)}</span>
             </div>
           ))}
-          {discountLabel && (
+          {shownDiscountLabel && (
             <div className="flex items-center justify-between border-t border-border pt-2 text-xs font-bold text-primary">
-              <span>{discountLabel}</span>
+              <span>{shownDiscountLabel}</span>
             </div>
           )}
           <div className="flex items-center justify-between border-t border-border pt-2 text-sm text-muted">
             <span>Envío</span>
-            <span className={freeShipping ? 'font-bold text-primary' : 'font-semibold text-ink'}>
-              {freeShipping ? 'GRATIS' : form.department ? formatPrice(shippingCost) : 'Elige tu ubicación'}
+            <span className={effectiveFreeShipping ? 'font-bold text-primary' : 'font-semibold text-ink'}>
+              {effectiveFreeShipping ? 'GRATIS' : form.department ? formatPrice(shippingCost) : 'Elige tu ubicación'}
             </span>
           </div>
           <div className="flex items-center justify-between border-t border-border pt-2 font-bold text-ink">
@@ -197,7 +204,7 @@ export default function QuickBuyModal({
               ))}
             </select>
           </div>
-          {!freeShipping && form.department && (
+          {!effectiveFreeShipping && form.department && (
             <p className="-mt-1 text-xs text-muted">
               🚚 Envío a {form.city || form.department}: <span className="font-semibold text-ink">{formatPrice(shippingCost)}</span>
             </p>

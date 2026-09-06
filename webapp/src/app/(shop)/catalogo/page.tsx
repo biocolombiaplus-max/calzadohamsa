@@ -9,8 +9,13 @@ import ProductGrid from '@/components/ProductGrid';
 function CatalogoContent() {
   const searchParams = useSearchParams();
   const isOffer = searchParams.get('oferta') === '2x1';
+  const collectionParam = searchParams.get('collection');
   const [products, setProducts] = useState<Product[] | null>(null);
-  const [activeCollection, setActiveCollection] = useState<string>('todas');
+  const [activeCollection, setActiveCollection] = useState<string>(collectionParam ?? 'todas');
+
+  useEffect(() => {
+    if (collectionParam) setActiveCollection(collectionParam);
+  }, [collectionParam]);
 
   useEffect(() => {
     let cancelled = false;

@@ -138,6 +138,33 @@ abre WhatsApp con todo el resumen del pedido ya escrito, para que la clienta
 lo confirme y ustedes lo alisten de inmediato. Todos los pedidos también
 quedan visibles y gestionables desde `/admin/pedidos`.
 
+## 2×1 automático en el carrito normal
+
+No hace falta pasar por `/oferta-2x1` para obtener el 2×1: si el carrito
+(`/carrito`, el panel lateral, o "Comprar ya" con cantidad 2) llega a 2
+unidades — de cualquier modelo, talla o color combinados — el sistema
+empareja automáticamente las 2 unidades más caras al precio del combo
+(`settings.bundle2x1.price`) y activa el envío gratis. Con 4 unidades arma
+2 combos, con una cantidad impar la unidad sobrante se cobra a precio
+normal. La lógica vive en `src/lib/bundle.ts` (`computeBundlePricing`) y la
+usan el carrito, el checkout y el modal de compra rápida.
+
+## Encabezado: logo y menú de colecciones
+
+El logo queda siempre perfectamente centrado y el carrito pegado a la
+esquina (en cualquier tamaño de pantalla), gracias a un layout de 3
+columnas donde las columnas laterales tienen el mismo ancho. En móvil hay
+un botón de menú (☰) con los mismos enlaces que en desktop.
+
+- **Tamaño del logo**: ajustable en `/admin/configuracion` → "General" →
+  "Tamaño del logo en el encabezado".
+- **Menú de colecciones**: en `/admin/configuracion` → "Menú de
+  colecciones" agregas pares de "Nombre en el menú" + "Valor de colección"
+  (debe coincidir exactamente con el campo "Colección" de cada producto).
+  Aparecen como un submenú "Colecciones" en el header (desktop y móvil) que
+  enlaza a `/catalogo?collection=<valor>`. Si no agregas ninguna, el menú
+  no se muestra.
+
 ## Envíos por departamento y municipio
 
 Las compras de **un solo par** cobran envío según la ciudad de la clienta;

@@ -7,8 +7,10 @@ const DOC_PATH = { collection: 'settings', id: 'site' } as const;
 export const DEFAULT_SETTINGS: SiteSettings = {
   storeName: process.env.NEXT_PUBLIC_STORE_NAME || 'Hamsa Shoes',
   logoUrl: '',
+  logoHeight: 72,
   whatsappCountryCode: process.env.NEXT_PUBLIC_WHATSAPP_COUNTRY_CODE || '57',
   whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '',
+  collectionsMenu: [],
   colors: {
     primary: '#A9673A',
     primaryHover: '#8C5429',
@@ -123,6 +125,8 @@ function mergeWithDefaults(data: Partial<SiteSettings> | undefined): SiteSetting
       exceptions: data.shipping?.exceptions ?? DEFAULT_SETTINGS.shipping.exceptions,
     },
     bundle2x1: { ...DEFAULT_SETTINGS.bundle2x1, ...data.bundle2x1 },
+    logoHeight: data.logoHeight ?? DEFAULT_SETTINGS.logoHeight,
+    collectionsMenu: data.collectionsMenu ?? DEFAULT_SETTINGS.collectionsMenu,
     announcementMessages: data.announcementMessages?.length ? data.announcementMessages : DEFAULT_SETTINGS.announcementMessages,
     trustItems: data.trustItems?.length ? data.trustItems : DEFAULT_SETTINGS.trustItems,
     benefits: data.benefits?.length ? data.benefits : DEFAULT_SETTINGS.benefits,

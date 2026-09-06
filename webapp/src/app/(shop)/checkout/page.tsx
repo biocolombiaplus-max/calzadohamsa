@@ -8,6 +8,7 @@ import { createOrder } from '@/lib/orders';
 import { formatPrice } from '@/lib/utils';
 import { getDepartamentos, getMunicipios } from '@/lib/colombia';
 import { getShippingRate } from '@/lib/shipping';
+import { computeBundlePricing } from '@/lib/bundle';
 import { useSiteSettings } from '@/lib/settings-context';
 import type { PaymentMethod } from '@/lib/types';
 import LocationCapture from '@/components/product/LocationCapture';
@@ -18,16 +19,21 @@ export default function CheckoutPage() {
   const router = useRouter();
   const settings = useSiteSettings();
   const [mounted, setMounted] = useState(false);
-  const { items, subtotal, clear } = useCartStore();
+  const { items, clear } = useCartStore();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('contra_entrega');
   const [form, setForm] = useState({ name: '', phone: '', address: '', city: '', department: '', note: '' });
   const [locationUrl, setLocationUrl] = useState('');
 
+  const bundle = useMemo(() => computeBundlePricing(items, settings.bundle2x1.price), [items, settings.bundle2x1.price]);
   const municipios = useMemo(() => getMunicipios(form.department), [form.department]);
-  const shippingCost = form.department ? getShippingRate(settings.shipping, form.department, form.city) : 0;
-  const total = subtotal() + shippingCost;
+  const shippingCost = bundle.hasFreeShipping
+    ? 0
+    : form.department
+      ? getShippingRate(settings.shipping, form.department, form.city)
+      : 0;
+  const total = bundle.discountedSubtotal + shippingCost;
 
   useEffect(() => setMounted(true), []);
 
@@ -52,12 +58,11 @@ export default function CheckoutPage() {
 
     setSubmitting(true);
     try {
-      const itemsSubtotal = subtotal();
       const { id } = await createOrder({
         items,
-        subtotal: itemsSubtotal,
+        subtotal: bundle.discountedSubtotal,
         shipping: shippingCost,
-        total: itemsSubtotal + shippingCost,
+        total: bundle.discountedSubtotal + shippingCost,
         customer: locationUrl ? { ...form, locationUrl } : form,
         paymentMethod,
         status: 'pendiente',
@@ -147,11 +152,15 @@ export default function CheckoutPage() {
               </select>
             </div>
           </div>
-          {form.department && (
-            <p className="-mt-2 text-xs text-muted">
-              🚚 Envío a {form.city || form.department}:{' '}
-              <span className="font-semibold text-ink">{formatPrice(shippingCost)}</span>
-            </p>
+          {bundle.hasFreeShipping ? (
+            <p className="-mt-2 text-xs font-semibold text-primary">🚚 Envío GRATIS por tu 2×1</p>
+          ) : (
+            form.department && (
+              <p className="-mt-2 text-xs text-muted">
+                🚚 Envío a {form.city || form.department}:{' '}
+                <span className="font-semibold text-ink">{formatPrice(shippingCost)}</span>
+              </p>
+            )
           )}
 
           <div>
@@ -207,6 +216,11 @@ export default function CheckoutPage() {
 
         <div className="h-fit rounded-card bg-white p-6 shadow-soft">
           <h2 className="mb-4 font-heading text-lg font-bold text-ink">Tu pedido</h2>
+          {bundle.pairsCount > 0 && (
+            <div className="mb-4 rounded-lg bg-primary-light/15 px-3 py-2 text-xs font-bold text-primary">
+              🎉 2×1 aplicado — ahorras {formatPrice(bundle.savings)}
+            </div>
+          )}
           <ul className="space-y-3">
             {items.map((item) => (
               <li key={`${item.productId}-${item.size}-${item.color}`} className="flex justify-between text-sm">
@@ -222,12 +236,18 @@ export default function CheckoutPage() {
           </ul>
           <div className="mt-4 flex justify-between border-t border-border pt-3 text-sm text-muted">
             <span>Subtotal</span>
-            <span>{formatPrice(subtotal())}</span>
+            <span className={bundle.savings > 0 ? 'line-through' : ''}>{formatPrice(bundle.subtotal)}</span>
           </div>
+          {bundle.savings > 0 && (
+            <div className="flex justify-between text-sm text-muted">
+              <span>Con 2×1</span>
+              <span className="font-semibold text-primary">{formatPrice(bundle.discountedSubtotal)}</span>
+            </div>
+          )}
           <div className="flex justify-between text-sm text-muted">
             <span>Envío</span>
             <span className="font-semibold text-ink">
-              {form.department ? formatPrice(shippingCost) : 'Elige tu ubicación'}
+              {bundle.hasFreeShipping ? 'GRATIS' : form.department ? formatPrice(shippingCost) : 'Elige tu ubicación'}
             </span>
           </div>
           <div className="mt-2 flex justify-between border-t border-border pt-3 text-base font-bold text-ink">

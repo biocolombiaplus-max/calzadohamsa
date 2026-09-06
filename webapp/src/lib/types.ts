@@ -125,11 +125,18 @@ export interface SiteColors {
   border: string;
 }
 
+export interface CollectionMenuItem {
+  label: string;
+  value: string;
+}
+
 export interface SiteSettings {
   storeName: string;
   logoUrl: string;
+  logoHeight: number;
   whatsappCountryCode: string;
   whatsappNumber: string;
+  collectionsMenu: CollectionMenuItem[];
   colors: SiteColors;
   announcementMessages: string[];
   hero: {
