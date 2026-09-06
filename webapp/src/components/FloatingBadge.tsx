@@ -9,34 +9,25 @@ export default function FloatingBadge({ href = '/catalogo?oferta=2x1' }: { href?
 
   return (
     <div className="fixed bottom-5 right-5 z-30 animate-popIn">
-      <div className="relative flex h-20 w-20 animate-float items-center justify-center">
-        {/* Halo tipo destello girando detrás, efecto "sticker" */}
-        <span
-          className="absolute -inset-3 animate-spin-slow rounded-full opacity-70"
-          style={{
-            background:
-              'repeating-conic-gradient(#F4C542 0deg 15deg, transparent 15deg 30deg)',
-          }}
-        />
-        <span className="absolute inset-0 animate-ping rounded-full bg-urgent/50" />
-        <span className="absolute inset-0 rounded-full bg-urgent/25 blur-md" />
-
+      <div className="relative animate-float">
         <Link
           href={href}
-          className="relative flex h-full w-full animate-attention flex-col items-center justify-center gap-0.5 overflow-hidden rounded-full bg-gradient-to-br from-urgent via-urgent to-primary text-center font-extrabold text-white shadow-lift ring-[3px] ring-[#F4C542] transition-transform hover:scale-110"
+          className="relative flex w-[4.75rem] animate-glow-urgent flex-col items-center justify-center gap-1 overflow-hidden rounded-2xl bg-gradient-to-br from-[#FF7A4D] via-urgent to-[#9C2B2B] py-3.5 shadow-lift ring-1 ring-white/40 transition-transform hover:scale-105"
         >
-          <span className="pointer-events-none absolute inset-0 animate-shimmer bg-[length:200%_100%] bg-gradient-to-r from-transparent via-white/50 to-transparent" />
-          <span className="relative text-[8px] uppercase tracking-wider opacity-90">Oferta</span>
-          <span className="relative text-xl leading-none drop-shadow-sm">2×1</span>
-          <span className="relative text-[7px] font-bold uppercase tracking-wide text-[#F4C542]">
-            Hoy
+          <span className="pointer-events-none absolute inset-0 animate-shimmer bg-[length:200%_100%] bg-gradient-to-r from-transparent via-white/35 to-transparent" />
+          <span className="relative rounded-full bg-white/20 px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-white">
+            Oferta
           </span>
+          <span className="relative text-2xl font-extrabold leading-none text-white drop-shadow-sm">2×1</span>
         </Link>
 
+        <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#F4C542] text-[10px] shadow-soft">
+          🔥
+        </span>
         <button
           onClick={() => setDismissed(true)}
           aria-label="Cerrar"
-          className="absolute -right-1 -top-1 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-ink text-[10px] text-white shadow-soft"
+          className="absolute -left-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-ink text-[10px] text-white shadow-soft"
         >
           ✕
         </button>

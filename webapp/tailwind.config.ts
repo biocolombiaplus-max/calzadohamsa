@@ -48,6 +48,10 @@ const config: Config = {
           '0%, 100%': { boxShadow: '0 0 0 0 rgb(var(--color-primary) / 0.35)' },
           '50%': { boxShadow: '0 0 0 8px rgb(var(--color-primary) / 0)' },
         },
+        glowUrgent: {
+          '0%, 100%': { boxShadow: '0 0 0 0 rgba(226,71,45,0.45)' },
+          '50%': { boxShadow: '0 0 0 9px rgba(226,71,45,0)' },
+        },
         float: {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-6px)' },
@@ -82,6 +86,7 @@ const config: Config = {
         pulseSoft: 'pulseSoft 1.8s ease-in-out infinite',
         shimmer: 'shimmer 2.8s linear infinite',
         glow: 'glow 2.4s ease-in-out infinite',
+        'glow-urgent': 'glowUrgent 2.4s ease-in-out infinite',
         float: 'float 3s ease-in-out infinite',
         popIn: 'popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both',
         'spin-slow': 'spinSlow 7s linear infinite',
