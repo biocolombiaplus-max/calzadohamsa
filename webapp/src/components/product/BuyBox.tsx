@@ -155,7 +155,7 @@ export default function BuyBox({ product }: { product: Product }) {
         </p>
       </div>
 
-      {showQuickBuy && <QuickBuyModal item={buildItem()} onClose={() => setShowQuickBuy(false)} />}
+      {showQuickBuy && <QuickBuyModal items={[buildItem()]} onClose={() => setShowQuickBuy(false)} />}
     </div>
   );
 }

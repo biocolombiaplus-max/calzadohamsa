@@ -36,7 +36,7 @@ export interface CartItem {
   quantity: number;
 }
 
-export type PaymentMethod = 'contra_entrega' | 'transferencia';
+export type PaymentMethod = 'contra_entrega' | 'transferencia' | 'wompi';
 
 export type OrderStatus = 'pendiente' | 'confirmado' | 'enviado' | 'entregado' | 'cancelado';
 
@@ -73,6 +73,7 @@ export interface Order {
   status: OrderStatus;
   carrier?: Carrier;
   trackingNumber?: string;
+  paymentReference?: string;
   createdAt: number;
 }
 

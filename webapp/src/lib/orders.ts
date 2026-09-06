@@ -18,6 +18,7 @@ function toOrder(id: string, data: any): Order {
     status: data.status ?? 'pendiente',
     carrier: data.carrier || undefined,
     trackingNumber: data.trackingNumber || undefined,
+    paymentReference: data.paymentReference || undefined,
     createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toMillis() : Date.now(),
   };
 }

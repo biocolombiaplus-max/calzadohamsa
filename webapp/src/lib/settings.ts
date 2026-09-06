@@ -39,7 +39,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     button1Text: '🛍️ Ver colección',
     button1Url: '/catalogo',
     button2Text: '🔥 Oferta 2×1',
-    button2Url: '/catalogo?oferta=2x1',
+    button2Url: '/oferta-2x1',
   },
   trustItems: [
     { icon: '🚚', title: 'Envío GRATIS', sub: 'A toda Colombia' },

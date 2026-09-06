@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
-export default function FloatingBadge({ href = '/catalogo?oferta=2x1' }: { href?: string }) {
+export default function FloatingBadge({ href = '/oferta-2x1' }: { href?: string }) {
   const [dismissed, setDismissed] = useState(false);
   if (dismissed) return null;
 

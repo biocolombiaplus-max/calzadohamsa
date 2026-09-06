@@ -120,7 +120,8 @@ aquí apuntando Vercel a esta subcarpeta (paso siguiente).
 3. En **Environment Variables**, agrega las mismas variables de tu
    `.env.local` (las `NEXT_PUBLIC_FIREBASE_*`, `NEXT_PUBLIC_CLOUDINARY_*`,
    `NEXT_PUBLIC_STORE_NAME`, `NEXT_PUBLIC_WHATSAPP_COUNTRY_CODE`,
-   `NEXT_PUBLIC_WHATSAPP_NUMBER`).
+   `NEXT_PUBLIC_WHATSAPP_NUMBER` y, si vas a usar pago en línea,
+   `NEXT_PUBLIC_WOMPI_PUBLIC_KEY` + `WOMPI_INTEGRITY_SECRET`).
 4. Click **Deploy**. En unos minutos tendrás tu tienda en una URL
    `tu-proyecto.vercel.app` — puedes conectar tu dominio propio desde
    **Project Settings → Domains**.
@@ -136,6 +137,50 @@ en la tienda de Shopify. El checkout guarda el pedido en Firestore
 abre WhatsApp con todo el resumen del pedido ya escrito, para que la clienta
 lo confirme y ustedes lo alisten de inmediato. Todos los pedidos también
 quedan visibles y gestionables desde `/admin/pedidos`.
+
+## Oferta 2x1 (`/oferta-2x1`)
+
+Página dedicada donde la clienta elige 2 pares (modelo, talla y color de
+cada uno) y ve el descuento aplicado automáticamente: paga solo el par más
+caro, el más económico es gratis, y hay temporizador de urgencia + "envío
+gratis solo por hoy". Al completar la selección aparecen dos botones:
+
+- **⚡ Pagar ahora y ahorra 5% más** → pasarela **Wompi** (tarjeta, PSE,
+  Nequi), con 5% de descuento adicional sobre el total del 2x1.
+- **💵 Pago contra entrega** → abre el formulario rápido de siempre y al
+  confirmar redirige a la página de confirmación (con botón a WhatsApp).
+
+Los botones "2x1" del resto del sitio (menú, badge flotante, hero) ya
+apuntan a esta página.
+
+### Activar el pago en línea con Wompi
+
+Sin `NEXT_PUBLIC_WOMPI_PUBLIC_KEY` y `WOMPI_INTEGRITY_SECRET` configuradas,
+el botón "Pagar ahora" simplemente cae de vuelta al flujo de pago contra
+entrega (no se rompe nada). Para activarlo:
+
+1. En tu [panel de Wompi](https://comercios.wompi.co) ve a
+   **Desarrolladores > Llaves de la API**.
+2. Copia la **llave pública** (`pub_prod_...` o `pub_test_...` en modo
+   pruebas) en `NEXT_PUBLIC_WOMPI_PUBLIC_KEY`.
+3. Copia la **llave secreta de integridad** (`prod_integrity_...` /
+   `test_integrity_...`) en `WOMPI_INTEGRITY_SECRET`. Esta nunca debe
+   llevar el prefijo `NEXT_PUBLIC_` porque solo se usa en el servidor
+   (`/api/wompi-signature`) para firmar el pago sin exponerla al navegador.
+4. Agrega ambas variables en **Vercel > Project Settings > Environment
+   Variables** y vuelve a desplegar.
+
+**Importante — confirmación de pagos:** el pedido se crea en Firestore con
+estado `pendiente` antes de enviar a la clienta a Wompi. Wompi confirma el
+pago en su propio checkout y redirige de vuelta a la página de
+confirmación, pero por ahora la actualización del estado del pedido a
+"pagado/confirmado" es **manual**: revisa el pago en tu
+[panel de Wompi](https://comercios.wompi.co) (o el correo de notificación
+que te llega por cada transacción) y marca el pedido como confirmado desde
+`/admin/pedidos`, igual que ya haces con la transportadora y el número de
+guía. Automatizar esa confirmación requeriría un webhook con credenciales
+de servidor adicionales (Firebase Admin SDK) — si más adelante quieres ese
+nivel de automatización, es un paso aparte que podemos construir.
 
 Si más adelante quieres aceptar pagos con tarjeta en línea, se puede integrar
 una pasarela como **Wompi** o **PayU** (ambas soportan Colombia) sin cambiar

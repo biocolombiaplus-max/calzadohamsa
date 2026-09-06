@@ -24,7 +24,7 @@ export default function Header() {
           <Link href="/catalogo" className="transition-colors hover:text-primary">
             Catálogo
           </Link>
-          <Link href="/catalogo?oferta=2x1" className="text-primary transition-colors hover:text-primary-hover">
+          <Link href="/oferta-2x1" className="text-primary transition-colors hover:text-primary-hover">
             🔥 Oferta 2×1
           </Link>
         </nav>
