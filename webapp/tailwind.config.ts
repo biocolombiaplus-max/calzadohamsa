@@ -57,6 +57,25 @@ const config: Config = {
           '70%': { transform: 'scale(1.08)', opacity: '1' },
           '100%': { transform: 'scale(1)', opacity: '1' },
         },
+        spinSlow: {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        },
+        attention: {
+          '0%, 82%, 100%': { transform: 'scale(1) rotate(0deg)' },
+          '86%': { transform: 'scale(1.12) rotate(-6deg)' },
+          '90%': { transform: 'scale(1.12) rotate(5deg)' },
+          '94%': { transform: 'scale(1.08) rotate(-3deg)' },
+        },
+        twinkle: {
+          '0%, 100%': { opacity: '0.25', transform: 'scale(0.85)' },
+          '50%': { opacity: '1', transform: 'scale(1.15)' },
+        },
+        sparkle: {
+          '0%': { transform: 'translateY(0) scale(0.6)', opacity: '0' },
+          '30%': { opacity: '1' },
+          '100%': { transform: 'translateY(-40px) scale(1.1)', opacity: '0' },
+        },
       },
       animation: {
         marquee: 'marquee 28s linear infinite',
@@ -65,6 +84,10 @@ const config: Config = {
         glow: 'glow 2.4s ease-in-out infinite',
         float: 'float 3s ease-in-out infinite',
         popIn: 'popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both',
+        'spin-slow': 'spinSlow 7s linear infinite',
+        attention: 'attention 5s ease-in-out infinite',
+        twinkle: 'twinkle 1.4s ease-in-out infinite',
+        sparkle: 'sparkle 1.2s ease-out infinite',
       },
     },
   },

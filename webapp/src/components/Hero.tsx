@@ -32,12 +32,20 @@ export default function Hero() {
             ))}
           </div>
 
-          <div className="mt-7 flex flex-wrap gap-4">
-            <Link href={hero.button1Url} className="btn-primary">
-              {hero.button1Text}
+          <div className="mt-7 flex flex-wrap justify-center gap-4 lg:justify-start">
+            <Link
+              href={hero.button1Url}
+              className="btn-primary relative animate-glow overflow-hidden"
+            >
+              <span className="pointer-events-none absolute inset-0 animate-shimmer bg-[length:200%_100%] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+              <span className="relative">{hero.button1Text}</span>
             </Link>
-            <Link href={hero.button2Url} className="btn-secondary">
-              {hero.button2Text}
+            <Link
+              href={hero.button2Url}
+              className="relative inline-flex animate-pulseSoft items-center justify-center gap-2 overflow-hidden rounded-card bg-gradient-to-br from-urgent to-primary px-6 py-3.5 font-semibold text-white shadow-lift ring-2 ring-urgent/30 transition-transform hover:scale-105 active:scale-[0.98]"
+            >
+              <span className="pointer-events-none absolute inset-0 animate-shimmer bg-[length:200%_100%] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+              <span className="relative">{hero.button2Text}</span>
             </Link>
           </div>
 
