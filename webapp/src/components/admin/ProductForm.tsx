@@ -7,6 +7,7 @@ import type { Product, ProductColor, ProductInput } from '@/lib/types';
 import { slugify } from '@/lib/utils';
 import { createProduct, updateProduct, deleteProduct } from '@/lib/products';
 import { uploadProductImage, deleteProductImage } from '@/lib/storage';
+import ImageCropModal from './ImageCropModal';
 
 const COMMON_SIZES = ['34', '35', '36', '37', '38', '39', '40', '41', '42'];
 const QUICK_COLORS: ProductColor[] = [
@@ -38,6 +39,8 @@ export default function ProductForm({ product }: { product?: Product }) {
   const [images, setImages] = useState<string[]>(product?.images ?? []);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
+  const [cropQueue, setCropQueue] = useState<File[]>([]);
+  const [cropCurrent, setCropCurrent] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -82,35 +85,42 @@ export default function ProductForm({ product }: { product?: Product }) {
     setColors((c) => c.filter((x) => x.name !== name));
   }
 
-  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     if (!slug) {
       setUploadError('Escribe primero el título del producto (lo necesitamos para organizar las fotos).');
+      e.target.value = '';
       return;
     }
-    setUploading(true);
     setUploadError('');
-    const uploaded: string[] = [];
-    let failedCount = 0;
-    let lastErrorMessage = '';
-    for (const file of Array.from(files)) {
-      try {
-        const url = await uploadProductImage(file, slug);
-        uploaded.push(url);
-      } catch (err) {
-        failedCount += 1;
-        lastErrorMessage = err instanceof Error ? err.message : 'Error desconocido';
-      }
-    }
-    if (uploaded.length > 0) setImages((prev) => [...prev, ...uploaded]);
-    if (failedCount > 0) {
-      setUploadError(
-        `No se pudo subir ${failedCount === files.length ? '' : `${failedCount} de ${files.length} `}foto(s). ${lastErrorMessage}`,
-      );
-    }
-    setUploading(false);
+    const queued = Array.from(files);
+    setCropCurrent(queued[0]);
+    setCropQueue(queued.slice(1));
     e.target.value = '';
+  }
+
+  function advanceCropQueue() {
+    setCropCurrent(cropQueue[0] ?? null);
+    setCropQueue((q) => q.slice(1));
+  }
+
+  async function handleCropConfirm(blob: Blob) {
+    setUploading(true);
+    try {
+      const croppedFile = new File([blob], `${slug || 'foto'}.jpg`, { type: 'image/jpeg' });
+      const url = await uploadProductImage(croppedFile, slug);
+      setImages((prev) => [...prev, url]);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'No se pudo subir la foto. Intenta de nuevo.');
+    } finally {
+      setUploading(false);
+      advanceCropQueue();
+    }
+  }
+
+  function handleCropCancel() {
+    advanceCropQueue();
   }
 
   async function handleRemoveImage(url: string) {
@@ -220,15 +230,23 @@ export default function ProductForm({ product }: { product?: Product }) {
             ))}
             <label className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-border text-xs text-muted hover:border-primary">
               {uploading ? 'Subiendo...' : '+ Agregar'}
-              <input type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" disabled={uploading} />
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageUpload}
+                className="hidden"
+                disabled={uploading || !!cropCurrent}
+              />
             </label>
           </div>
           {uploadError && (
             <p className="mb-2 rounded-lg bg-urgent/10 p-3 text-sm text-urgent">{uploadError}</p>
           )}
           <p className="text-xs text-muted">
-            Sube varias fotos a la vez. La primera será la foto principal. Cada foto se optimiza y redimensiona
-            automáticamente para que la tienda cargue rápido, sin que tengas que editarla antes.
+            Sube varias fotos a la vez. Antes de subirla, podrás ajustar el encuadre de cada una — funciona con
+            cualquier tamaño o proporción de imagen. La primera foto será la principal, y cada una se optimiza
+            automáticamente para que la tienda cargue rápido.
           </p>
         </div>
 
@@ -407,6 +425,10 @@ export default function ProductForm({ product }: { product?: Product }) {
           </button>
         )}
       </div>
+
+      {cropCurrent && (
+        <ImageCropModal file={cropCurrent} onCancel={handleCropCancel} onConfirm={handleCropConfirm} />
+      )}
     </form>
   );
 }
