@@ -22,7 +22,6 @@ export default function ImageCropModal({
   const [processing, setProcessing] = useState(false);
   const [bgRemoved, setBgRemoved] = useState(false);
   const [removingBg, setRemovingBg] = useState(false);
-  const [bgProgress, setBgProgress] = useState(0);
   const [bgError, setBgError] = useState('');
 
   useEffect(() => {
@@ -59,9 +58,8 @@ export default function ImageCropModal({
   async function handleRemoveBackground() {
     setBgError('');
     setRemovingBg(true);
-    setBgProgress(0);
     try {
-      const resultBlob = await removeImageBackground(imageSrc, setBgProgress);
+      const resultBlob = await removeImageBackground(imageSrc);
       const newUrl = URL.createObjectURL(resultBlob);
       setImageSrc((prev) => {
         if (prev) URL.revokeObjectURL(prev);
@@ -70,8 +68,8 @@ export default function ImageCropModal({
       setBgRemoved(true);
       setCrop({ x: 0, y: 0 });
       setZoom(1);
-    } catch {
-      setBgError('No se pudo quitar el fondo (puede ser tu conexión). Puedes seguir sin quitarlo.');
+    } catch (err) {
+      setBgError(err instanceof Error ? err.message : 'No se pudo quitar el fondo. Puedes seguir sin quitarlo.');
     } finally {
       setRemovingBg(false);
     }
@@ -93,19 +91,13 @@ export default function ImageCropModal({
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-urgent to-primary px-4 py-2.5 text-sm font-bold text-white shadow-soft transition-transform hover:scale-[1.01] disabled:opacity-60 disabled:hover:scale-100"
           >
             {removingBg ? (
-              <>⏳ Quitando fondo{bgProgress > 0 ? ` (${bgProgress}%)` : '...'}</>
+              <>⏳ Quitando fondo...</>
             ) : bgRemoved ? (
               <>✓ Fondo eliminado</>
             ) : (
               <>✨ Quitar fondo con IA</>
             )}
           </button>
-          {removingBg && (
-            <p className="mt-2 text-center text-[11px] text-muted">
-              La primera vez puede tardar hasta un minuto (descarga el modelo de IA). Las siguientes fotos son
-              más rápidas.
-            </p>
-          )}
           {bgError && <p className="mt-2 text-center text-[11px] text-urgent">{bgError}</p>}
         </div>
 

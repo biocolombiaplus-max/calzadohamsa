@@ -121,7 +121,8 @@ aquí apuntando Vercel a esta subcarpeta (paso siguiente).
    `.env.local` (las `NEXT_PUBLIC_FIREBASE_*`, `NEXT_PUBLIC_CLOUDINARY_*`,
    `NEXT_PUBLIC_STORE_NAME`, `NEXT_PUBLIC_WHATSAPP_COUNTRY_CODE`,
    `NEXT_PUBLIC_WHATSAPP_NUMBER`, `NEXT_PUBLIC_SITE_URL` y, si vas a usar
-   pago en línea, `NEXT_PUBLIC_WOMPI_PUBLIC_KEY` + `WOMPI_INTEGRITY_SECRET`).
+   pago en línea, `NEXT_PUBLIC_WOMPI_PUBLIC_KEY` + `WOMPI_INTEGRITY_SECRET`;
+   si vas a usar quitar fondo con IA, también `REMOVE_BG_API_KEY`).
 4. Click **Deploy**. En unos minutos tendrás tu tienda en una URL
    `tu-proyecto.vercel.app` — puedes conectar tu dominio propio desde
    **Project Settings → Domains**.
@@ -275,21 +276,27 @@ proporción de foto:
   "encoger" para mostrar más de lo que ya existe en la foto. Esta opción
   en cambio reduce la foto entera sin deformarla y rellena lo que sobra
   con fondo blanco, para que se vea el producto completo sí o sí.
-- **✨ Quitar fondo con IA**: quita el fondo de la foto (deja el producto
-  sobre fondo blanco) usando un modelo de IA que corre en el propio
-  navegador — sin subir la foto a ningún servicio externo ni necesitar una
-  cuenta o llave de pago. La primera vez que se usa en un navegador puede
-  tardar hasta un minuto (descarga el modelo, ~40-80MB, una sola vez; las
-  siguientes fotos son mucho más rápidas). Requiere buena conexión a
-  internet la primera vez.
+- **✨ Quitar fondo con IA**: quita el fondo de la foto y deja el producto
+  sobre fondo blanco. Sin configurar nada, el botón muestra un aviso claro
+  de que falta activarlo — el resto del recortador (recortar / usar foto
+  completa) sigue funcionando normal.
 
-  **Nota técnica**: esta función se carga bajo demanda desde
-  [esm.sh](https://esm.sh) en el navegador (`src/lib/backgroundRemoval.ts`)
-  en vez de instalarse como dependencia del proyecto — la librería
-  (`@imgly/background-removal`) solo es compatible empaquetada localmente
-  con Next.js 15, y este proyecto usa Next.js 14. Si en algún momento
-  actualizas a Next.js 15, puedes instalarla como dependencia normal
-  siguiendo su documentación para que cargue más rápido.
+  **Cómo activarlo**: crea una cuenta gratis en
+  [remove.bg/api](https://www.remove.bg/api), copia tu **API Key**
+  (Settings → API Key) y agrégala como `REMOVE_BG_API_KEY` en tu
+  `.env.local` (o en Vercel → Environment Variables). Revisa en tu panel
+  de remove.bg cuántas fotos incluye gratis el plan actual antes de usarlo
+  con muchos productos — si necesitas más, ahí mismo puedes comprar
+  créditos adicionales.
+
+  **Nota técnica**: se probó primero una versión que quitaba el fondo
+  100% en el navegador (sin servidor ni cuenta de por medio, con un
+  modelo de IA descargado bajo demanda), pero resultó poco confiable en
+  la práctica — depende de que el navegador permita módulos externos y
+  workers entre distintos orígenes, y Safari en modo privado (muy común
+  al probar desde el celular) bloquea buena parte de eso. Por eso ahora
+  la llamada la hace el servidor (`/api/remove-background`), igual que ya
+  se hace con la firma de Wompi: la llave nunca se expone al navegador.
 
 ## Estructura del proyecto
 
