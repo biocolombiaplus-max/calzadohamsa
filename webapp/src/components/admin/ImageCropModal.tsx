@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import Cropper, { type Area } from 'react-easy-crop';
 import 'react-easy-crop/react-easy-crop.css';
-import { getCroppedImageBlob } from '@/lib/imageCrop';
+import { getCroppedImageBlob, getContainedImageBlob } from '@/lib/imageCrop';
 
 export default function ImageCropModal({
   file,
@@ -30,11 +30,21 @@ export default function ImageCropModal({
     setCroppedAreaPixels(areaPixels);
   }, []);
 
-  async function handleConfirm() {
+  async function handleConfirmCrop() {
     if (!croppedAreaPixels) return;
     setProcessing(true);
     try {
       const blob = await getCroppedImageBlob(imageSrc, croppedAreaPixels);
+      onConfirm(blob);
+    } catch {
+      setProcessing(false);
+    }
+  }
+
+  async function handleUseWholePhoto() {
+    setProcessing(true);
+    try {
+      const blob = await getContainedImageBlob(imageSrc);
       onConfirm(blob);
     } catch {
       setProcessing(false);
@@ -46,8 +56,7 @@ export default function ImageCropModal({
       <div className="w-full max-w-lg rounded-card bg-white p-5 shadow-lift">
         <h3 className="mb-1 font-heading text-lg font-bold text-ink">Ajusta el encuadre de la foto</h3>
         <p className="mb-4 text-xs text-muted">
-          Arrastra para mover y usa la barra para acercar o alejar. Así se verá en la tienda, sin importar el
-          tamaño original de tu foto.
+          Arrastra para mover y usa la barra para acercar. Funciona con cualquier tamaño o proporción de foto.
         </p>
 
         <div className="relative h-80 w-full overflow-hidden rounded-lg bg-ink/5">
@@ -56,6 +65,8 @@ export default function ImageCropModal({
               image={imageSrc}
               crop={crop}
               zoom={zoom}
+              minZoom={1}
+              maxZoom={3}
               aspect={1}
               onCropChange={setCrop}
               onZoomChange={setZoom}
@@ -64,7 +75,7 @@ export default function ImageCropModal({
           )}
         </div>
 
-        <div className="mt-4 flex items-center gap-3">
+        <div className="mt-3 flex items-center gap-3">
           <span className="text-xs text-muted">🔍</span>
           <input
             type="range"
@@ -78,21 +89,31 @@ export default function ImageCropModal({
         </div>
 
         <div className="mt-5 flex gap-3">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="btn-secondary flex-1"
-            disabled={processing}
-          >
+          <button type="button" onClick={onCancel} className="btn-secondary flex-1" disabled={processing}>
             Cancelar
           </button>
           <button
             type="button"
-            onClick={handleConfirm}
+            onClick={handleConfirmCrop}
             className="btn-primary flex-1 disabled:opacity-60"
             disabled={processing || !croppedAreaPixels}
           >
-            {processing ? 'Procesando...' : 'Usar esta foto'}
+            {processing ? 'Procesando...' : 'Usar este recorte'}
+          </button>
+        </div>
+
+        <div className="mt-4 border-t border-border pt-4 text-center">
+          <p className="mb-2 text-xs text-muted">
+            ¿El producto no cabe completo en el recorte? Usa la foto entera sin recortar nada — se ajusta con
+            fondo blanco a los lados si hace falta.
+          </p>
+          <button
+            type="button"
+            onClick={handleUseWholePhoto}
+            disabled={processing}
+            className="text-sm font-semibold text-primary hover:underline disabled:opacity-60"
+          >
+            📐 Usar la foto completa, sin recortar
           </button>
         </div>
       </div>
