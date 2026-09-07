@@ -19,6 +19,7 @@ function toOrder(id: string, data: any): Order {
     carrier: data.carrier || undefined,
     trackingNumber: data.trackingNumber || undefined,
     paymentReference: data.paymentReference || undefined,
+    couponCode: data.couponCode || undefined,
     createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toMillis() : Date.now(),
   };
 }

@@ -74,6 +74,7 @@ export interface Order {
   carrier?: Carrier;
   trackingNumber?: string;
   paymentReference?: string;
+  couponCode?: string;
   createdAt: number;
 }
 

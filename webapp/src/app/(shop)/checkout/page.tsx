@@ -9,6 +9,7 @@ import { formatPrice } from '@/lib/utils';
 import { getDepartamentos, getMunicipios } from '@/lib/colombia';
 import { getShippingRate } from '@/lib/shipping';
 import { computeBundlePricing } from '@/lib/bundle';
+import { getActiveCoupon, clearCoupon } from '@/lib/coupon';
 import { useSiteSettings } from '@/lib/settings-context';
 import type { PaymentMethod } from '@/lib/types';
 import LocationCapture from '@/components/product/LocationCapture';
@@ -25,15 +26,18 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('contra_entrega');
   const [form, setForm] = useState({ name: '', phone: '', address: '', city: '', department: '', note: '' });
   const [locationUrl, setLocationUrl] = useState('');
+  const [coupon] = useState(() => getActiveCoupon());
 
   const bundle = useMemo(() => computeBundlePricing(items, settings.bundle2x1.price), [items, settings.bundle2x1.price]);
   const municipios = useMemo(() => getMunicipios(form.department), [form.department]);
+  const couponDiscount = coupon ? Math.round(bundle.discountedSubtotal * (coupon.percent / 100)) : 0;
+  const finalSubtotal = bundle.discountedSubtotal - couponDiscount;
   const shippingCost = bundle.hasFreeShipping
     ? 0
     : form.department
       ? getShippingRate(settings.shipping, form.department, form.city)
       : 0;
-  const total = bundle.discountedSubtotal + shippingCost;
+  const total = finalSubtotal + shippingCost;
 
   useEffect(() => setMounted(true), []);
 
@@ -60,13 +64,15 @@ export default function CheckoutPage() {
     try {
       const { id } = await createOrder({
         items,
-        subtotal: bundle.discountedSubtotal,
+        subtotal: finalSubtotal,
         shipping: shippingCost,
-        total: bundle.discountedSubtotal + shippingCost,
+        total,
         customer: locationUrl ? { ...form, locationUrl } : form,
         paymentMethod,
         status: 'pendiente',
+        couponCode: coupon ? coupon.code : undefined,
       });
+      if (coupon) clearCoupon();
       clear();
       router.push(`/pedido-confirmado/${id}`);
     } catch (err) {
@@ -242,6 +248,12 @@ export default function CheckoutPage() {
             <div className="flex justify-between text-sm text-muted">
               <span>Con 2×1</span>
               <span className="font-semibold text-primary">{formatPrice(bundle.discountedSubtotal)}</span>
+            </div>
+          )}
+          {coupon && (
+            <div className="flex justify-between text-sm font-semibold text-primary">
+              <span>🎟️ Cupón {coupon.code} (-{coupon.percent}%)</span>
+              <span>-{formatPrice(couponDiscount)}</span>
             </div>
           )}
           <div className="flex justify-between text-sm text-muted">

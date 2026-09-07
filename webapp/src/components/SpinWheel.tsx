@@ -1,14 +1,22 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { saveWonCoupon } from '@/lib/coupon';
 
-const PRIZES = [
-  { label: '5% OFF', code: 'HAMSA5', color: '#C98A0C' },
-  { label: 'Sigue intentando', code: null, color: '#C4302B' },
-  { label: '10% OFF', code: 'HAMSA10', color: '#A9673A' },
-  { label: 'Envío gratis', code: 'ENVIOGRATIS', color: '#9C2B57' },
-  { label: 'Sigue intentando', code: null, color: '#B5451B' },
-  { label: '15% OFF', code: 'HAMSA15', color: '#7A4A22' },
+type Prize =
+  | { type: 'discount'; percent: number; code: string; weight: number; color: string }
+  | { type: 'retry'; weight: number; color: string };
+
+// El orden alterna premio / "sigue intentando" para que el disco se vea
+// balanceado. El "weight" controla qué tan seguido cae cada casilla (no es
+// un sorteo parejo): el 5% está pensado para salir la mayoría de las veces,
+// el 10% es el premio "raro" y las dos de "sigue intentando" reparten el
+// resto para que el juego no se sienta como una victoria garantizada.
+const PRIZES: Prize[] = [
+  { type: 'discount', percent: 5, code: 'HAMSA5', weight: 65, color: '#FFB800' },
+  { type: 'retry', weight: 15, color: '#7C3AED' },
+  { type: 'discount', percent: 10, code: 'HAMSA10', weight: 5, color: '#FF3D71' },
+  { type: 'retry', weight: 15, color: '#06B6D4' },
 ];
 
 const GOLD = '#F4C542';
@@ -16,10 +24,20 @@ const SLICE = 360 / PRIZES.length;
 const LIGHTS = 12;
 const SESSION_KEY = 'hamsa-spin-shown';
 
+function pickWeightedIndex(): number {
+  const total = PRIZES.reduce((sum, p) => sum + p.weight, 0);
+  let r = Math.random() * total;
+  for (let i = 0; i < PRIZES.length; i++) {
+    if (r < PRIZES[i].weight) return i;
+    r -= PRIZES[i].weight;
+  }
+  return PRIZES.length - 1;
+}
+
 export default function SpinWheel() {
   const [visible, setVisible] = useState(false);
   const [spinning, setSpinning] = useState(false);
-  const [result, setResult] = useState<{ label: string; code: string | null } | null>(null);
+  const [result, setResult] = useState<Prize | null>(null);
   const [rotation, setRotation] = useState(0);
   const shownRef = useRef(false);
 
@@ -53,19 +71,23 @@ export default function SpinWheel() {
   function spin() {
     if (spinning || result) return;
     setSpinning(true);
-    const prizeIndex = Math.floor(Math.random() * PRIZES.length);
+    const prizeIndex = pickWeightedIndex();
     const extraSpins = 5;
     const targetRotation = 360 * extraSpins + (360 - prizeIndex * SLICE - SLICE / 2);
     setRotation(targetRotation);
     setTimeout(() => {
       setSpinning(false);
-      setResult(PRIZES[prizeIndex]);
+      const prize = PRIZES[prizeIndex];
+      setResult(prize);
+      if (prize.type === 'discount') {
+        saveWonCoupon(prize.code, prize.percent);
+      }
     }, 4000);
   }
 
   if (!visible) return null;
 
-  const won = result?.code;
+  const won = result?.type === 'discount' ? result : null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/70 p-4">
@@ -120,7 +142,7 @@ export default function SpinWheel() {
           >
             <div className="h-full w-full rounded-full bg-white p-[4px]">
               <div
-                className="relative h-full w-full rounded-full transition-transform duration-[4000ms] ease-out"
+                className="relative h-full w-full overflow-hidden rounded-full transition-transform duration-[4000ms] ease-out"
                 style={{
                   transform: `rotate(${rotation}deg)`,
                   background: `conic-gradient(${PRIZES.map(
@@ -128,18 +150,37 @@ export default function SpinWheel() {
                   ).join(', ')})`,
                 }}
               >
-                {PRIZES.map((p, i) => (
-                  <span
+                {/* Divisores blancos entre casillas */}
+                {PRIZES.map((_, i) => (
+                  <div
                     key={i}
-                    className="absolute left-1/2 top-1/2 w-24 origin-left text-[11px] font-extrabold uppercase tracking-tight text-white sm:text-xs"
-                    style={{
-                      transform: `rotate(${i * SLICE + SLICE / 2}deg) translateX(22px)`,
-                      textShadow: '0 1px 3px rgba(0,0,0,0.55)',
-                    }}
-                  >
-                    {p.label}
-                  </span>
+                    className="absolute left-1/2 top-1/2 h-1/2 w-[3px] -translate-x-1/2 bg-white/85"
+                    style={{ transformOrigin: 'top center', transform: `rotate(${i * SLICE}deg)` }}
+                  />
                 ))}
+
+                {/* Etiquetas */}
+                {PRIZES.map((p, i) => {
+                  const mid = i * SLICE + SLICE / 2;
+                  return (
+                    <div key={i} className="absolute inset-0" style={{ transform: `rotate(${mid}deg)` }}>
+                      <div className="absolute left-1/2 top-[38px] w-[72px] -translate-x-1/2 text-center leading-tight text-white">
+                        {p.type === 'discount' ? (
+                          <>
+                            <div className="text-xl font-extrabold drop-shadow-sm">{p.percent}%</div>
+                            <div className="text-[10px] font-bold tracking-wide drop-shadow-sm">OFF</div>
+                          </>
+                        ) : (
+                          <div className="text-[10px] font-extrabold uppercase tracking-wide drop-shadow-sm">
+                            Sigue
+                            <br />
+                            intentando
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -173,13 +214,15 @@ export default function SpinWheel() {
             >
               🎉
             </span>
-            <p className="mb-2 text-sm font-semibold text-ink">¡Felicidades! Ganaste: {result.label}</p>
+            <p className="mb-2 text-sm font-semibold text-ink">¡Felicidades! Ganaste {won.percent}% de descuento</p>
             <div className="rounded-card border-2 border-dashed p-[2px]" style={{ borderColor: GOLD }}>
               <div className="rounded-[10px] bg-white px-4 py-3 font-mono text-lg font-bold text-primary">
-                {result.code}
+                {won.code}
               </div>
             </div>
-            <p className="mt-2 text-xs text-muted">Usa este código al finalizar tu compra</p>
+            <p className="mt-2 text-xs text-muted">
+              Se aplica automáticamente al pagar — tienes 24 horas para usarlo.
+            </p>
             <button onClick={() => setVisible(false)} className="btn-secondary mt-4 w-full">
               Ir de compras
             </button>

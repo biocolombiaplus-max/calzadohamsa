@@ -6,6 +6,7 @@ import { createOrder } from '@/lib/orders';
 import { getDepartamentos, getMunicipios } from '@/lib/colombia';
 import { getShippingRate } from '@/lib/shipping';
 import { computeBundlePricing } from '@/lib/bundle';
+import { getActiveCoupon, clearCoupon } from '@/lib/coupon';
 import { useSiteSettings } from '@/lib/settings-context';
 import { formatPrice } from '@/lib/utils';
 import { generatePaymentReference, redirectToWompiCheckout } from '@/lib/wompi';
@@ -37,12 +38,16 @@ export default function QuickBuyModal({
   const [locationUrl, setLocationUrl] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [coupon] = useState(() => getActiveCoupon());
 
   const municipios = useMemo(() => getMunicipios(form.department), [form.department]);
 
   const bundle = useMemo(() => computeBundlePricing(items, settings.bundle2x1.price), [items, settings.bundle2x1.price]);
   const bundleApplies = totalOverride === undefined && bundle.pairsCount > 0;
-  const subtotal = totalOverride ?? (bundleApplies ? bundle.discountedSubtotal : bundle.subtotal);
+  const preCouponSubtotal = totalOverride ?? (bundleApplies ? bundle.discountedSubtotal : bundle.subtotal);
+  const couponApplies = totalOverride === undefined && !!coupon;
+  const couponDiscount = couponApplies ? Math.round(preCouponSubtotal * (coupon!.percent / 100)) : 0;
+  const subtotal = preCouponSubtotal - couponDiscount;
   const effectiveFreeShipping = freeShipping || bundleApplies;
   const autoDiscountLabel = bundleApplies
     ? `🎉 2×1 aplicado — ahorras ${formatPrice(bundle.savings)}`
@@ -81,7 +86,9 @@ export default function QuickBuyModal({
           paymentMethod: 'wompi',
           status: 'pendiente',
           paymentReference: reference,
+          couponCode: couponApplies ? coupon!.code : undefined,
         });
+        if (couponApplies) clearCoupon();
         await redirectToWompiCheckout({
           amountInCents: Math.round(total * 100),
           reference,
@@ -100,7 +107,9 @@ export default function QuickBuyModal({
         customer: locationUrl ? { ...form, locationUrl } : form,
         paymentMethod: 'contra_entrega',
         status: 'pendiente',
+        couponCode: couponApplies ? coupon!.code : undefined,
       });
+      if (couponApplies) clearCoupon();
       router.push(`/pedido-confirmado/${id}`);
     } catch (err) {
       console.error(err);
@@ -138,6 +147,12 @@ export default function QuickBuyModal({
           {shownDiscountLabel && (
             <div className="flex items-center justify-between border-t border-border pt-2 text-xs font-bold text-primary">
               <span>{shownDiscountLabel}</span>
+            </div>
+          )}
+          {couponApplies && (
+            <div className="flex items-center justify-between border-t border-border pt-2 text-xs font-bold text-primary">
+              <span>🎟️ Cupón {coupon!.code} (-{coupon!.percent}%)</span>
+              <span>-{formatPrice(couponDiscount)}</span>
             </div>
           )}
           <div className="flex items-center justify-between border-t border-border pt-2 text-sm text-muted">

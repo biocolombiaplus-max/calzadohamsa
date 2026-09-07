@@ -233,6 +233,9 @@ function OrderCard({
           {order.paymentReference && (
             <span className="ml-3 text-xs text-muted">Ref: {order.paymentReference}</span>
           )}
+          {order.couponCode && (
+            <span className="ml-3 text-xs font-semibold text-primary">🎟️ Cupón: {order.couponCode}</span>
+          )}
         </div>
         <a
           href={whatsappLinkTo(order.customer.phone, buildStatusMessage(order, storeName))}
