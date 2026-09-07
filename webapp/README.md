@@ -261,6 +261,36 @@ una pasarela como **Wompi** o **PayU** (ambas soportan Colombia) sin cambiar
 la arquitectura — es un paso independiente que se puede agregar cuando lo
 necesites.
 
+## Fotos de producto: recorte y quitar fondo
+
+Al subir fotos en `/admin/productos`, antes de que se suban a Cloudinary
+aparece una ventana para ajustarlas — funciona con cualquier tamaño o
+proporción de foto:
+
+- **Recortar**: arrastra para mover y usa la barra para acercar, luego
+  "Usar este recorte". Útil para elegir qué parte de la foto se ve.
+- **Usar la foto completa, sin recortar**: para fotos muy altas o muy
+  anchas (ej. un collage con dos tomas apiladas) donde el producto no cabe
+  completo en un recorte cuadrado — un recorte, por definición, no puede
+  "encoger" para mostrar más de lo que ya existe en la foto. Esta opción
+  en cambio reduce la foto entera sin deformarla y rellena lo que sobra
+  con fondo blanco, para que se vea el producto completo sí o sí.
+- **✨ Quitar fondo con IA**: quita el fondo de la foto (deja el producto
+  sobre fondo blanco) usando un modelo de IA que corre en el propio
+  navegador — sin subir la foto a ningún servicio externo ni necesitar una
+  cuenta o llave de pago. La primera vez que se usa en un navegador puede
+  tardar hasta un minuto (descarga el modelo, ~40-80MB, una sola vez; las
+  siguientes fotos son mucho más rápidas). Requiere buena conexión a
+  internet la primera vez.
+
+  **Nota técnica**: esta función se carga bajo demanda desde
+  [esm.sh](https://esm.sh) en el navegador (`src/lib/backgroundRemoval.ts`)
+  en vez de instalarse como dependencia del proyecto — la librería
+  (`@imgly/background-removal`) solo es compatible empaquetada localmente
+  con Next.js 15, y este proyecto usa Next.js 14. Si en algún momento
+  actualizas a Next.js 15, puedes instalarla como dependencia normal
+  siguiendo su documentación para que cargue más rápido.
+
 ## Estructura del proyecto
 
 ```
