@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { DEFAULT_SETTINGS, getSiteSettings, updateSiteSettings } from '@/lib/settings';
 import { uploadProductImage } from '@/lib/storage';
 import { getDepartamentos, getMunicipios } from '@/lib/colombia';
+import { FONT_GROUPS, ALL_CURATED_FONTS, googleFontsHref, fontFamilyValue } from '@/lib/fonts';
 import type {
   SiteSettings,
   TrustItem,
@@ -51,6 +52,88 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
         />
         <input value={value} onChange={(e) => onChange(e.target.value)} className={inputClass} />
       </div>
+    </div>
+  );
+}
+
+function FontPicker({
+  label,
+  value,
+  onChange,
+  previewFallback,
+}: {
+  label: string;
+  value: string;
+  onChange: (font: string) => void;
+  previewFallback: 'serif' | 'sans-serif';
+}) {
+  const [customMode, setCustomMode] = useState(() => !!value && !ALL_CURATED_FONTS.includes(value));
+
+  // Carga la fuente elegida solo para poder mostrarla en la vista previa de
+  // aquí abajo — el cambio real en todo el sitio ocurre al Guardar cambios.
+  useEffect(() => {
+    if (!value) return;
+    const id = `font-preview-${value.replace(/\s+/g, '-')}`;
+    if (document.getElementById(id)) return;
+    const link = document.createElement('link');
+    link.id = id;
+    link.rel = 'stylesheet';
+    link.href = googleFontsHref([value]);
+    document.head.appendChild(link);
+  }, [value]);
+
+  return (
+    <div>
+      <label className="mb-1 block text-sm font-semibold text-ink">{label}</label>
+      {!customMode ? (
+        <select
+          value={value}
+          onChange={(e) => (e.target.value === '__custom__' ? setCustomMode(true) : onChange(e.target.value))}
+          className={`${inputClass} bg-white`}
+        >
+          {FONT_GROUPS.map((group) => (
+            <optgroup key={group.label} label={group.label}>
+              {group.fonts.map((f) => (
+                <option key={f} value={f}>
+                  {f}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+          <option value="__custom__">✏️ Otra (escribir el nombre)...</option>
+        </select>
+      ) : (
+        <div className="flex gap-2">
+          <input
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="Nombre exacto en Google Fonts (ej: Josefin Sans)"
+            className={inputClass}
+          />
+          <button
+            type="button"
+            onClick={() => setCustomMode(false)}
+            className="shrink-0 text-xs font-semibold text-primary hover:underline"
+          >
+            Ver lista
+          </button>
+        </div>
+      )}
+      {customMode && (
+        <p className="mt-1 text-xs text-muted">
+          Escribe el nombre tal cual aparece en{' '}
+          <a href="https://fonts.google.com" target="_blank" rel="noopener noreferrer" className="underline">
+            fonts.google.com
+          </a>
+          .
+        </p>
+      )}
+      <p
+        className="mt-2 truncate rounded-lg border border-border bg-cream-alt/40 px-3 py-3 text-xl"
+        style={{ fontFamily: fontFamilyValue(value, previewFallback) }}
+      >
+        {value || 'Elige una fuente'} — Aa Bb Cc 123
+      </p>
     </div>
   );
 }
@@ -124,7 +207,7 @@ export default function ConfiguracionPage() {
     setSettings((s) => (s ? { ...s, [key]: value } : s));
   }
 
-  function updateNested<K extends 'colors' | 'hero' | 'cta' | 'footer', F extends keyof SiteSettings[K]>(
+  function updateNested<K extends 'colors' | 'fonts' | 'hero' | 'cta' | 'footer', F extends keyof SiteSettings[K]>(
     key: K,
     field: F,
     value: SiteSettings[K][F],
@@ -386,6 +469,33 @@ export default function ConfiguracionPage() {
         </div>
       </Section>
 
+      <Section
+        title="Tipografía"
+        description="La letra de títulos y de textos en todo el sitio (títulos, subtítulos, descripciones, botones...). Elige de la lista o escribe cualquier fuente de Google Fonts manualmente."
+      >
+        <div className="grid gap-6 sm:grid-cols-2">
+          <FontPicker
+            label="Fuente de títulos"
+            value={settings.fonts.headingFont}
+            onChange={(v) => updateNested('fonts', 'headingFont', v)}
+            previewFallback="serif"
+          />
+          <FontPicker
+            label="Fuente de textos (párrafos, botones)"
+            value={settings.fonts.bodyFont}
+            onChange={(v) => updateNested('fonts', 'bodyFont', v)}
+            previewFallback="sans-serif"
+          />
+        </div>
+        <p className="text-xs text-muted">
+          💡 Para un look moderno y juvenil (tipo Canva o CapCut) prueba combinaciones como{' '}
+          <strong className="text-ink">Bebas Neue</strong> o <strong className="text-ink">Fredoka</strong> en
+          títulos con <strong className="text-ink">Poppins</strong> o <strong className="text-ink">Nunito</strong>{' '}
+          en textos. Para algo elegante, <strong className="text-ink">Playfair Display</strong> +{' '}
+          <strong className="text-ink">Inter</strong> (la combinación por defecto).
+        </p>
+      </Section>
+
       <Section title="Barra de anuncios" description="Los mensajes que rotan arriba de todo, uno por línea">
         <textarea
           value={settings.announcementMessages.join('\n')}
@@ -410,6 +520,33 @@ export default function ConfiguracionPage() {
             className={inputClass}
           />
         </Field>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Tamaño del título">
+            <select
+              value={settings.hero.titleSize}
+              onChange={(e) => updateNested('hero', 'titleSize', e.target.value as typeof settings.hero.titleSize)}
+              className={`${inputClass} bg-white`}
+            >
+              <option value="sm">Pequeño</option>
+              <option value="md">Normal</option>
+              <option value="lg">Grande</option>
+              <option value="xl">Extra grande</option>
+            </select>
+          </Field>
+          <Field label="Tamaño del subtítulo">
+            <select
+              value={settings.hero.subtextSize}
+              onChange={(e) =>
+                updateNested('hero', 'subtextSize', e.target.value as typeof settings.hero.subtextSize)
+              }
+              className={`${inputClass} bg-white`}
+            >
+              <option value="sm">Pequeño</option>
+              <option value="md">Normal</option>
+              <option value="lg">Grande</option>
+            </select>
+          </Field>
+        </div>
         <Field label="Subtítulo">
           <textarea
             value={settings.hero.subtext}

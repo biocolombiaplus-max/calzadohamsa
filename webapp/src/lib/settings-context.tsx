@@ -3,7 +3,10 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { DEFAULT_SETTINGS, getSiteSettings } from './settings';
 import { hexToRgbChannels } from './utils';
+import { googleFontsHref, fontFamilyValue } from './fonts';
 import type { SiteSettings } from './types';
+
+const FONT_LINK_ID = 'site-google-fonts';
 
 const SettingsContext = createContext<SiteSettings>(DEFAULT_SETTINGS);
 
@@ -31,6 +34,23 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     root.style.setProperty('--color-muted', hexToRgbChannels(settings.colors.muted));
     root.style.setProperty('--color-border', hexToRgbChannels(settings.colors.border));
   }, [settings.colors]);
+
+  useEffect(() => {
+    const { headingFont, bodyFont } = settings.fonts;
+
+    let link = document.getElementById(FONT_LINK_ID) as HTMLLinkElement | null;
+    if (!link) {
+      link = document.createElement('link');
+      link.id = FONT_LINK_ID;
+      link.rel = 'stylesheet';
+      document.head.appendChild(link);
+    }
+    link.href = googleFontsHref([headingFont, bodyFont]);
+
+    const root = document.documentElement;
+    root.style.setProperty('--font-heading', fontFamilyValue(headingFont, 'serif'));
+    root.style.setProperty('--font-body', fontFamilyValue(bodyFont, 'sans-serif'));
+  }, [settings.fonts]);
 
   return <SettingsContext.Provider value={settings}>{children}</SettingsContext.Provider>;
 }

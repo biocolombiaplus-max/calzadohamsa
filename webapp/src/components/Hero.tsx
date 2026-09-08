@@ -3,7 +3,20 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSiteSettings } from '@/lib/settings-context';
-import { whatsappLinkTo } from '@/lib/utils';
+import { classNames, whatsappLinkTo } from '@/lib/utils';
+
+const TITLE_SIZE_CLASSES: Record<string, string> = {
+  sm: 'text-3xl sm:text-4xl lg:text-5xl',
+  md: 'text-4xl sm:text-5xl lg:text-6xl',
+  lg: 'text-5xl sm:text-6xl lg:text-7xl',
+  xl: 'text-6xl sm:text-7xl lg:text-8xl',
+};
+
+const SUBTEXT_SIZE_CLASSES: Record<string, string> = {
+  sm: 'text-sm sm:text-base',
+  md: 'text-base sm:text-lg',
+  lg: 'text-lg sm:text-xl',
+};
 
 export default function Hero() {
   const { hero, storeName, whatsappCountryCode, whatsappNumber } = useSiteSettings();
@@ -15,11 +28,23 @@ export default function Hero() {
           <span className="mb-4 inline-block rounded-full bg-primary-light/30 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-primary-hover">
             {hero.eyebrow}
           </span>
-          <h1 className="font-heading text-4xl font-bold leading-tight tracking-tight text-ink sm:text-5xl lg:text-6xl">
+          <h1
+            className={classNames(
+              'font-heading font-bold leading-tight tracking-tight text-ink',
+              TITLE_SIZE_CLASSES[hero.titleSize] ?? TITLE_SIZE_CLASSES.md,
+            )}
+          >
             {hero.heading}
           </h1>
           <span className="mx-auto mt-4 block h-px w-16 bg-gradient-to-r from-transparent via-primary to-transparent lg:mx-0" />
-          <p className="mx-auto mt-4 max-w-md text-base text-muted sm:text-lg lg:mx-0">{hero.subtext}</p>
+          <p
+            className={classNames(
+              'mx-auto mt-4 max-w-md text-muted lg:mx-0',
+              SUBTEXT_SIZE_CLASSES[hero.subtextSize] ?? SUBTEXT_SIZE_CLASSES.md,
+            )}
+          >
+            {hero.subtext}
+          </p>
 
           <div className="mt-5 grid grid-cols-3 gap-2 sm:gap-3">
             {[hero.badge1, hero.badge2, hero.badge3].map((badge, i) => (

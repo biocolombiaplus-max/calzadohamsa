@@ -21,6 +21,10 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     muted: '#8A7660',
     border: '#E6D5BC',
   },
+  fonts: {
+    headingFont: 'Playfair Display',
+    bodyFont: 'Inter',
+  },
   announcementMessages: [
     '🔥 2×1 en sandalias — $159.900 + ENVÍO GRATIS',
     '💵 PAGO CONTRA ENTREGA — paga al recibir',
@@ -42,6 +46,8 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     button1Url: '/catalogo',
     button2Text: '🔥 Oferta 2×1',
     button2Url: '/oferta-2x1',
+    titleSize: 'md',
+    subtextSize: 'md',
   },
   shipping: {
     defaultRate: 15000,
@@ -115,6 +121,7 @@ function mergeWithDefaults(data: Partial<SiteSettings> | undefined): SiteSetting
     ...DEFAULT_SETTINGS,
     ...data,
     colors: { ...DEFAULT_SETTINGS.colors, ...data.colors },
+    fonts: { ...DEFAULT_SETTINGS.fonts, ...data.fonts },
     hero: { ...DEFAULT_SETTINGS.hero, ...data.hero },
     cta: { ...DEFAULT_SETTINGS.cta, ...data.cta },
     footer: { ...DEFAULT_SETTINGS.footer, ...data.footer },

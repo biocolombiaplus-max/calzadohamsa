@@ -139,6 +139,10 @@ export interface SiteSettings {
   whatsappNumber: string;
   collectionsMenu: CollectionMenuItem[];
   colors: SiteColors;
+  fonts: {
+    headingFont: string;
+    bodyFont: string;
+  };
   announcementMessages: string[];
   hero: {
     eyebrow: string;
@@ -152,6 +156,8 @@ export interface SiteSettings {
     button1Url: string;
     button2Text: string;
     button2Url: string;
+    titleSize: 'sm' | 'md' | 'lg' | 'xl';
+    subtextSize: 'sm' | 'md' | 'lg';
   };
   shipping: ShippingSettings;
   bundle2x1: {
