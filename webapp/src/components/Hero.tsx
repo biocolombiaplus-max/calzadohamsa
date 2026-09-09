@@ -87,7 +87,7 @@ export default function Hero() {
 
         <div className="relative aspect-[4/5] overflow-hidden rounded-card bg-cream-alt shadow-soft">
           <Image src={hero.image || '/hero-placeholder.svg'} alt={storeName} fill priority className="object-cover" />
-          <div className="absolute bottom-4 left-4 rounded-card bg-white/95 px-4 py-2.5 shadow-soft">
+          <div className="absolute right-4 top-4 rounded-card bg-white/95 px-4 py-2.5 shadow-soft">
             <p className="text-xs font-bold text-ink">🆕 Nuevo ingreso</p>
             <p className="text-[11px] text-muted">+2.400 clientas nos recomiendan</p>
           </div>

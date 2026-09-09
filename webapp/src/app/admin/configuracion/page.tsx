@@ -18,11 +18,26 @@ import type {
 
 const DEPARTAMENTOS = getDepartamentos();
 
-function Section({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
+function Section({
+  title,
+  description,
+  action,
+  children,
+}: {
+  title: string;
+  description?: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <section className="rounded-card bg-white p-6 shadow-soft">
-      <h2 className="font-heading text-lg font-bold text-ink">{title}</h2>
-      {description && <p className="mt-1 text-xs text-muted">{description}</p>}
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="font-heading text-lg font-bold text-ink">{title}</h2>
+          {description && <p className="mt-1 text-xs text-muted">{description}</p>}
+        </div>
+        {action}
+      </div>
       <div className="mt-4 space-y-4">{children}</div>
     </section>
   );
@@ -217,6 +232,16 @@ export default function ConfiguracionPage() {
 
   function updateShipping<F extends keyof SiteSettings['shipping']>(field: F, value: SiteSettings['shipping'][F]) {
     setSettings((s) => (s ? { ...s, shipping: { ...s.shipping, [field]: value } } : s));
+  }
+
+  function resetColors() {
+    if (!confirm('¿Restablecer los colores a los valores originales de la tienda? Se aplica al Guardar cambios.')) return;
+    setSettings((s) => (s ? { ...s, colors: DEFAULT_SETTINGS.colors } : s));
+  }
+
+  function resetFonts() {
+    if (!confirm('¿Restablecer la tipografía a las fuentes originales de la tienda? Se aplica al Guardar cambios.')) return;
+    setSettings((s) => (s ? { ...s, fonts: DEFAULT_SETTINGS.fonts } : s));
   }
 
   async function handleSave() {
@@ -424,7 +449,19 @@ export default function ConfiguracionPage() {
         )}
       </Section>
 
-      <Section title="Colores de la marca" description="Se aplican en todo el sitio al instante">
+      <Section
+        title="Colores de la marca"
+        description="Se aplican en todo el sitio al instante"
+        action={
+          <button
+            type="button"
+            onClick={resetColors}
+            className="shrink-0 whitespace-nowrap text-xs font-semibold text-muted hover:text-urgent"
+          >
+            ↺ Restablecer
+          </button>
+        }
+      >
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <ColorField
             label="Primario (botones, CTA)"
@@ -472,6 +509,15 @@ export default function ConfiguracionPage() {
       <Section
         title="Tipografía"
         description="La letra de títulos y de textos en todo el sitio (títulos, subtítulos, descripciones, botones...). Elige de la lista o escribe cualquier fuente de Google Fonts manualmente."
+        action={
+          <button
+            type="button"
+            onClick={resetFonts}
+            className="shrink-0 whitespace-nowrap text-xs font-semibold text-muted hover:text-urgent"
+          >
+            ↺ Restablecer
+          </button>
+        }
       >
         <div className="grid gap-6 sm:grid-cols-2">
           <FontPicker
