@@ -244,6 +244,33 @@ export default function ConfiguracionPage() {
     setSettings((s) => (s ? { ...s, fonts: DEFAULT_SETTINGS.fonts } : s));
   }
 
+  async function resetDesignToDefaults() {
+    if (!settings) return;
+    if (
+      !confirm(
+        '¿Restablecer el diseño (colores, tipografía y tamaño del logo) a los valores originales de la tienda? Esto se guarda de inmediato, sin afectar tus textos, testimonios ni demás contenido.',
+      )
+    )
+      return;
+    const restored: SiteSettings = {
+      ...settings,
+      colors: DEFAULT_SETTINGS.colors,
+      fonts: DEFAULT_SETTINGS.fonts,
+      logoHeight: DEFAULT_SETTINGS.logoHeight,
+    };
+    setSettings(restored);
+    setSaving(true);
+    try {
+      await updateSiteSettings(restored);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch {
+      alert('No se pudo guardar. Intenta de nuevo.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function handleSave() {
     if (!settings) return;
     setSaving(true);
@@ -263,6 +290,24 @@ export default function ConfiguracionPage() {
       <div>
         <h1 className="font-heading text-2xl font-bold text-ink">Configuración del sitio</h1>
         <p className="text-sm text-muted">Edita textos, imágenes, colores y contacto sin tocar código</p>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-card border-2 border-dashed border-urgent/40 bg-urgent/5 p-4">
+        <div>
+          <p className="text-sm font-bold text-ink">¿Algo se desordenó? (colores, logo, letras)</p>
+          <p className="text-xs text-muted">
+            Este botón vuelve de inmediato a los colores, tipografía y tamaño del logo originales de la tienda —
+            sin borrar tus textos, testimonios ni ninguna otra configuración.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={resetDesignToDefaults}
+          disabled={saving}
+          className="shrink-0 whitespace-nowrap rounded-lg bg-urgent px-4 py-2.5 text-sm font-bold text-white shadow-soft transition-transform hover:scale-105 disabled:opacity-60"
+        >
+          ↺ Volver a ajustes originales
+        </button>
       </div>
 
       <Section title="General" description="Nombre de la tienda, logo y WhatsApp">
