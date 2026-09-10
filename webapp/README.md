@@ -261,20 +261,15 @@ una pasarela como **Wompi** o **PayU** (ambas soportan Colombia) sin cambiar
 la arquitectura — es un paso independiente que se puede agregar cuando lo
 necesites.
 
-## Fotos de producto: recorte y quitar fondo
+## Fotos de producto: ajuste de tamaño
 
 Al subir fotos en `/admin/productos`, antes de que se suban a Cloudinary
-aparece una ventana para ajustarlas — funciona con cualquier tamaño o
-proporción de foto:
-
-- **Recortar**: arrastra para mover y usa la barra para acercar, luego
-  "Usar este recorte". Útil para elegir qué parte de la foto se ve.
-- **Usar la foto completa, sin recortar**: para fotos muy altas o muy
-  anchas (ej. un collage con dos tomas apiladas) donde el producto no cabe
-  completo en un recorte cuadrado — un recorte, por definición, no puede
-  "encoger" para mostrar más de lo que ya existe en la foto. Esta opción
-  en cambio reduce la foto entera sin deformarla y rellena lo que sobra
-  con fondo blanco, para que se vea el producto completo sí o sí.
+aparece una ventana para ajustarlas a un formato cuadrado — funciona con
+cualquier tamaño o proporción de foto. Por defecto siempre se ve el
+producto completo, sin recortar nada (si la foto no es cuadrada, se
+rellena con fondo blanco a los lados). La barra de zoom permite acercar
+desde ahí para un encuadre más ajustado si se prefiere — el acercamiento
+siempre recorta por igual desde el centro, nunca deforma la foto.
 
 ## Estructura del proyecto
 

@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import Cropper, { type Area } from 'react-easy-crop';
-import 'react-easy-crop/react-easy-crop.css';
-import { getCroppedImageBlob, getContainedImageBlob } from '@/lib/imageCrop';
+import { useEffect, useState } from 'react';
+import { getZoomedContainBlob } from '@/lib/imageCrop';
+
+const MAX_ZOOM = 3;
 
 export default function ImageCropModal({
   file,
@@ -15,9 +15,7 @@ export default function ImageCropModal({
   onConfirm: (blob: Blob) => void;
 }) {
   const [imageSrc, setImageSrc] = useState('');
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
@@ -26,25 +24,10 @@ export default function ImageCropModal({
     return () => URL.revokeObjectURL(url);
   }, [file]);
 
-  const handleCropComplete = useCallback((_area: Area, areaPixels: Area) => {
-    setCroppedAreaPixels(areaPixels);
-  }, []);
-
-  async function handleConfirmCrop() {
-    if (!croppedAreaPixels) return;
+  async function handleConfirm() {
     setProcessing(true);
     try {
-      const blob = await getCroppedImageBlob(imageSrc, croppedAreaPixels);
-      onConfirm(blob);
-    } catch {
-      setProcessing(false);
-    }
-  }
-
-  async function handleUseWholePhoto() {
-    setProcessing(true);
-    try {
-      const blob = await getContainedImageBlob(imageSrc);
+      const blob = await getZoomedContainBlob(imageSrc, zoom);
       onConfirm(blob);
     } catch {
       setProcessing(false);
@@ -54,23 +37,20 @@ export default function ImageCropModal({
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-ink/80 p-4">
       <div className="w-full max-w-lg rounded-card bg-white p-5 shadow-lift">
-        <h3 className="mb-1 font-heading text-lg font-bold text-ink">Ajusta el encuadre de la foto</h3>
+        <h3 className="mb-1 font-heading text-lg font-bold text-ink">Ajusta el tamaño de la foto</h3>
         <p className="mb-4 text-xs text-muted">
-          Arrastra para mover y usa la barra para acercar. Funciona con cualquier tamaño o proporción de foto.
+          Empieza mostrando el producto completo, sin recortar nada. Usa la barra para acercar si quieres un
+          encuadre más ajustado. Funciona con cualquier tamaño o proporción de foto.
         </p>
 
-        <div className="relative h-80 w-full overflow-hidden rounded-lg bg-ink/5">
+        <div className="relative flex h-80 w-full items-center justify-center overflow-hidden rounded-lg bg-white ring-1 ring-border">
           {imageSrc && (
-            <Cropper
-              image={imageSrc}
-              crop={crop}
-              zoom={zoom}
-              minZoom={1}
-              maxZoom={3}
-              aspect={1}
-              onCropChange={setCrop}
-              onZoomChange={setZoom}
-              onCropComplete={handleCropComplete}
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={imageSrc}
+              alt="Vista previa de la foto"
+              className="h-full w-full object-contain"
+              style={{ transform: `scale(${zoom})` }}
             />
           )}
         </div>
@@ -80,7 +60,7 @@ export default function ImageCropModal({
           <input
             type="range"
             min={1}
-            max={3}
+            max={MAX_ZOOM}
             step={0.01}
             value={zoom}
             onChange={(e) => setZoom(Number(e.target.value))}
@@ -94,26 +74,11 @@ export default function ImageCropModal({
           </button>
           <button
             type="button"
-            onClick={handleConfirmCrop}
+            onClick={handleConfirm}
             className="btn-primary flex-1 disabled:opacity-60"
-            disabled={processing || !croppedAreaPixels}
-          >
-            {processing ? 'Procesando...' : 'Usar este recorte'}
-          </button>
-        </div>
-
-        <div className="mt-4 border-t border-border pt-4 text-center">
-          <p className="mb-2 text-xs text-muted">
-            ¿El producto no cabe completo en el recorte? Usa la foto entera sin recortar nada — se ajusta con
-            fondo blanco a los lados si hace falta.
-          </p>
-          <button
-            type="button"
-            onClick={handleUseWholePhoto}
             disabled={processing}
-            className="text-sm font-semibold text-primary hover:underline disabled:opacity-60"
           >
-            📐 Usar la foto completa, sin recortar
+            {processing ? 'Procesando...' : 'Usar esta foto'}
           </button>
         </div>
       </div>
