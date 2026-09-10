@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback } from 'react';
 import Cropper, { type Area } from 'react-easy-crop';
 import 'react-easy-crop/react-easy-crop.css';
 import { getCroppedImageBlob, getContainedImageBlob } from '@/lib/imageCrop';
-import { removeImageBackground } from '@/lib/backgroundRemoval';
 
 export default function ImageCropModal({
   file,
@@ -20,9 +19,6 @@ export default function ImageCropModal({
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [processing, setProcessing] = useState(false);
-  const [bgRemoved, setBgRemoved] = useState(false);
-  const [removingBg, setRemovingBg] = useState(false);
-  const [bgError, setBgError] = useState('');
 
   useEffect(() => {
     const url = URL.createObjectURL(file);
@@ -55,26 +51,6 @@ export default function ImageCropModal({
     }
   }
 
-  async function handleRemoveBackground() {
-    setBgError('');
-    setRemovingBg(true);
-    try {
-      const resultBlob = await removeImageBackground(imageSrc);
-      const newUrl = URL.createObjectURL(resultBlob);
-      setImageSrc((prev) => {
-        if (prev) URL.revokeObjectURL(prev);
-        return newUrl;
-      });
-      setBgRemoved(true);
-      setCrop({ x: 0, y: 0 });
-      setZoom(1);
-    } catch (err) {
-      setBgError(err instanceof Error ? err.message : 'No se pudo quitar el fondo. Puedes seguir sin quitarlo.');
-    } finally {
-      setRemovingBg(false);
-    }
-  }
-
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-ink/80 p-4">
       <div className="w-full max-w-lg rounded-card bg-white p-5 shadow-lift">
@@ -82,24 +58,6 @@ export default function ImageCropModal({
         <p className="mb-4 text-xs text-muted">
           Arrastra para mover y usa la barra para acercar. Funciona con cualquier tamaño o proporción de foto.
         </p>
-
-        <div className="mb-3 rounded-lg border border-border bg-cream-alt/50 p-3">
-          <button
-            type="button"
-            onClick={handleRemoveBackground}
-            disabled={removingBg || processing || bgRemoved}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-urgent to-primary px-4 py-2.5 text-sm font-bold text-white shadow-soft transition-transform hover:scale-[1.01] disabled:opacity-60 disabled:hover:scale-100"
-          >
-            {removingBg ? (
-              <>⏳ Quitando fondo...</>
-            ) : bgRemoved ? (
-              <>✓ Fondo eliminado</>
-            ) : (
-              <>✨ Quitar fondo con IA</>
-            )}
-          </button>
-          {bgError && <p className="mt-2 text-center text-[11px] text-urgent">{bgError}</p>}
-        </div>
 
         <div className="relative h-80 w-full overflow-hidden rounded-lg bg-ink/5">
           {imageSrc && (
@@ -138,7 +96,7 @@ export default function ImageCropModal({
             type="button"
             onClick={handleConfirmCrop}
             className="btn-primary flex-1 disabled:opacity-60"
-            disabled={processing || removingBg || !croppedAreaPixels}
+            disabled={processing || !croppedAreaPixels}
           >
             {processing ? 'Procesando...' : 'Usar este recorte'}
           </button>
@@ -152,7 +110,7 @@ export default function ImageCropModal({
           <button
             type="button"
             onClick={handleUseWholePhoto}
-            disabled={processing || removingBg}
+            disabled={processing}
             className="text-sm font-semibold text-primary hover:underline disabled:opacity-60"
           >
             📐 Usar la foto completa, sin recortar
