@@ -427,7 +427,12 @@ export default function ProductForm({ product }: { product?: Product }) {
       </div>
 
       {cropCurrent && (
-        <ImageCropModal file={cropCurrent} onCancel={handleCropCancel} onConfirm={handleCropConfirm} />
+        <ImageCropModal
+          key={`${cropCurrent.name}-${cropCurrent.lastModified}-${cropCurrent.size}`}
+          file={cropCurrent}
+          onCancel={handleCropCancel}
+          onConfirm={handleCropConfirm}
+        />
       )}
     </form>
   );
