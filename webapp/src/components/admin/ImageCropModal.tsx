@@ -45,9 +45,9 @@ export default function ImageCropModal({
       <div className="w-full max-w-lg rounded-card bg-white p-5 shadow-lift">
         <h3 className="mb-1 font-heading text-lg font-bold text-ink">Ajusta el tamaño de la foto</h3>
         <p className="mb-4 text-xs text-muted">
-          Por defecto la foto llena el cuadro, sin franjas blancas a los lados. Si prefieres ver el producto
-          100% completo (con fondo blanco si hace falta), lleva la barra al mínimo. Funciona con cualquier
-          tamaño o proporción de foto.
+          Por defecto la foto llena el cuadro, sin franjas blancas a los lados. Si el producto no ocupa toda
+          la foto, acerca un poco más con la barra para que se vea aún más protagonista. Si prefieres verla
+          100% completa, lleva la barra al mínimo.
         </p>
 
         <div className="relative flex h-80 w-full items-center justify-center overflow-hidden rounded-lg bg-white ring-1 ring-border">
