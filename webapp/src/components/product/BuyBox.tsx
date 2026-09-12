@@ -9,11 +9,22 @@ import { useSiteSettings } from '@/lib/settings-context';
 import UrgencyTimer from './UrgencyTimer';
 import QuickBuyModal from './QuickBuyModal';
 
-export default function BuyBox({ product }: { product: Product }) {
+export default function BuyBox({
+  product,
+  onColorChange,
+}: {
+  product: Product;
+  onColorChange?: (colorName: string) => void;
+}) {
   const { whatsappCountryCode, whatsappNumber, trustItems, bundle2x1 } = useSiteSettings();
   const addItem = useCartStore((s) => s.addItem);
   const [size, setSize] = useState(product.sizes[0] ?? '');
   const [color, setColor] = useState(product.colors[0]?.name ?? '');
+
+  function handleColorChange(colorName: string) {
+    setColor(colorName);
+    onColorChange?.(colorName);
+  }
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const [showQuickBuy, setShowQuickBuy] = useState(false);
@@ -25,12 +36,13 @@ export default function BuyBox({ product }: { product: Product }) {
   const stockPct = useMemo(() => Math.min(100, Math.max(6, product.stock)), [product.stock]);
 
   function buildItem() {
+    const colorImage = product.colors.find((c) => c.name === color)?.image;
     return {
       productId: product.id,
       slug: product.slug,
       title: product.title,
       price: product.price,
-      image: product.images[0] ?? '',
+      image: colorImage || product.images[0] || '',
       size,
       color,
       quantity,
@@ -125,7 +137,7 @@ export default function BuyBox({ product }: { product: Product }) {
             {product.colors.map((c) => (
               <button
                 key={c.name}
-                onClick={() => setColor(c.name)}
+                onClick={() => handleColorChange(c.name)}
                 aria-label={c.name}
                 className={classNames(
                   'h-10 w-10 rounded-full border-2 transition-transform',

@@ -83,6 +83,19 @@ export default function ProductForm({ product }: { product?: Product }) {
     setColors((c) => c.filter((x) => x.name !== name));
   }
 
+  function updateColorImage(name: string, image: string) {
+    setColors((c) =>
+      c.map((x) => {
+        if (x.name !== name) return x;
+        if (!image) {
+          const { image: _unused, ...rest } = x;
+          return rest;
+        }
+        return { ...x, image };
+      }),
+    );
+  }
+
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -339,6 +352,37 @@ export default function ProductForm({ product }: { product?: Product }) {
               + Agregar
             </button>
           </div>
+
+          {colors.length > 0 && images.length > 0 && (
+            <div className="mt-4 space-y-2 border-t border-border pt-4">
+              <p className="text-sm font-semibold text-ink">Foto de cada color (opcional)</p>
+              <p className="text-xs text-muted">
+                Si le asignas una foto a cada color, al elegirlo en la página del producto la foto principal
+                cambia sola — igual que en las tiendas grandes.
+              </p>
+              {colors.map((c) => (
+                <div key={c.name} className="flex items-center gap-3">
+                  <span
+                    className="h-6 w-6 shrink-0 rounded-full border border-border"
+                    style={{ backgroundColor: c.hex }}
+                  />
+                  <span className="w-24 shrink-0 truncate text-sm text-ink">{c.name}</span>
+                  <select
+                    value={c.image ?? ''}
+                    onChange={(e) => updateColorImage(c.name, e.target.value)}
+                    className="flex-1 rounded-lg border border-border bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                  >
+                    <option value="">Sin foto asignada</option>
+                    {images.map((url, i) => (
+                      <option key={url} value={url}>
+                        Foto {i + 1}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

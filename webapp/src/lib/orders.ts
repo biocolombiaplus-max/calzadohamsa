@@ -1,7 +1,7 @@
 import { collection, doc, getDoc, getDocs, addDoc, updateDoc, orderBy, query, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Carrier, Order, OrderInput, OrderStatus } from './types';
-import { generateOrderNumber } from './utils';
+import { generateOrderNumber, stripUndefined } from './utils';
 
 const COLLECTION = 'orders';
 
@@ -27,7 +27,7 @@ function toOrder(id: string, data: any): Order {
 export async function createOrder(input: OrderInput): Promise<{ id: string; orderNumber: string }> {
   const orderNumber = generateOrderNumber();
   const ref = await addDoc(collection(db, COLLECTION), {
-    ...input,
+    ...stripUndefined(input),
     orderNumber,
     createdAt: serverTimestamp(),
   });

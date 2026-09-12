@@ -45,6 +45,26 @@ export function classNames(...values: Array<string | false | null | undefined>):
   return values.filter(Boolean).join(' ');
 }
 
+// Firestore rechaza addDoc()/updateDoc() si algún campo (a cualquier
+// profundidad, incluso dentro de arreglos como `colors`) queda en
+// `undefined` — hay que quitar esas llaves del todo antes de guardar.
+// Aplícalo solo sobre datos planos (no sobre el objeto ya armado con
+// serverTimestamp(), que es un valor especial de Firestore y no debe
+// reconstruirse como objeto plano).
+export function stripUndefined<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((item) => stripUndefined(item)) as unknown as T;
+  }
+  if (value && typeof value === 'object') {
+    const result: Record<string, unknown> = {};
+    for (const [key, val] of Object.entries(value as Record<string, unknown>)) {
+      if (val !== undefined) result[key] = stripUndefined(val);
+    }
+    return result as T;
+  }
+  return value;
+}
+
 export function hexToRgbChannels(hex: string): string {
   const clean = hex.replace('#', '').trim();
   const normalized = clean.length === 3 ? clean.split('').map((c) => c + c).join('') : clean;

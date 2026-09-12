@@ -1,20 +1,31 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { classNames } from '@/lib/utils';
 
 export default function ProductGallery({
   images,
   title,
   discountPercent = 0,
+  colorImage,
 }: {
   images: string[];
   title: string;
   discountPercent?: number;
+  colorImage?: string;
 }) {
-  const gallery = images.length > 0 ? images : ['/hero-placeholder.svg'];
-  const [active, setActive] = useState(0);
+  const gallery = useMemo(() => (images.length > 0 ? images : ['/hero-placeholder.svg']), [images]);
+  const [active, setActive] = useState(() => (colorImage ? Math.max(0, gallery.indexOf(colorImage)) : 0));
+
+  // Cuando el color elegido en BuyBox tiene una foto asignada, la galería
+  // salta a esa foto — igual que en las tiendas grandes — sin impedir que
+  // la clienta siga navegando manualmente por las demás fotos después.
+  useEffect(() => {
+    if (!colorImage) return;
+    const index = gallery.indexOf(colorImage);
+    if (index >= 0) setActive(index);
+  }, [colorImage, gallery]);
 
   return (
     <div>

@@ -15,6 +15,7 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Product, ProductInput } from './types';
+import { stripUndefined } from './utils';
 
 const COLLECTION = 'products';
 
@@ -77,7 +78,7 @@ export async function getRelatedProducts(currentId: string, collectionName: stri
 
 export async function createProduct(input: ProductInput): Promise<string> {
   const ref = await addDoc(collection(db, COLLECTION), {
-    ...input,
+    ...stripUndefined(input),
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -86,7 +87,7 @@ export async function createProduct(input: ProductInput): Promise<string> {
 
 export async function updateProduct(id: string, input: Partial<ProductInput>): Promise<void> {
   const ref = doc(db, COLLECTION, id);
-  await updateDoc(ref, { ...input, updatedAt: serverTimestamp() });
+  await updateDoc(ref, { ...stripUndefined(input), updatedAt: serverTimestamp() });
 }
 
 export async function deleteProduct(id: string): Promise<void> {

@@ -17,11 +17,16 @@ import HowItWorks from '@/components/HowItWorks';
 export default function ProductPage() {
   const params = useParams<{ slug: string }>();
   const [product, setProduct] = useState<Product | null | undefined>(undefined);
+  const [colorImage, setColorImage] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     let cancelled = false;
     getProductBySlug(params.slug)
-      .then((p) => !cancelled && setProduct(p))
+      .then((p) => {
+        if (cancelled) return;
+        setProduct(p);
+        setColorImage(p?.colors[0]?.image);
+      })
       .catch(() => !cancelled && setProduct(null));
     return () => {
       cancelled = true;
@@ -59,7 +64,12 @@ export default function ProductPage() {
 
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
           <div>
-            <ProductGallery images={product.images} title={product.title} discountPercent={discountPercent} />
+            <ProductGallery
+              images={product.images}
+              title={product.title}
+              discountPercent={discountPercent}
+              colorImage={colorImage}
+            />
           </div>
 
           <div>
@@ -73,7 +83,10 @@ export default function ProductPage() {
               <SocialProofTicker productTitle={product.title} />
             </div>
             <div id="buybox" className="mt-5 scroll-mt-24">
-              <BuyBox product={product} />
+              <BuyBox
+                product={product}
+                onColorChange={(name) => setColorImage(product.colors.find((c) => c.name === name)?.image)}
+              />
             </div>
           </div>
         </div>
