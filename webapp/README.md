@@ -265,11 +265,17 @@ necesites.
 
 Al subir fotos en `/admin/productos`, antes de que se suban a Cloudinary
 aparece una ventana para ajustarlas a un formato cuadrado — funciona con
-cualquier tamaño o proporción de foto. Por defecto siempre se ve el
-producto completo, sin recortar nada (si la foto no es cuadrada, se
-rellena con fondo blanco a los lados). La barra de zoom permite acercar
-desde ahí para un encuadre más ajustado si se prefiere — el acercamiento
-siempre recorta por igual desde el centro, nunca deforma la foto.
+cualquier tamaño o proporción de foto. Por defecto la foto llena el
+cuadro por completo, sin franjas blancas a los lados (recortando parejo
+desde el centro si hace falta, nunca deforma la foto). Si prefieres ver
+el producto 100% completo aunque queden franjas blancas a los lados,
+lleva la barra de zoom al mínimo.
+
+Las fotos que ya estaban subidas antes de este cambio y que se ven con
+franjas blancas a los lados hay que volver a subirlas (editar el
+producto → reemplazar la foto) para que tomen el nuevo encuadre —
+la franja blanca queda "quemada" dentro de la foto ya guardada, así que
+no hay forma de quitarla sin volver a procesar la imagen original.
 
 ## Estructura del proyecto
 

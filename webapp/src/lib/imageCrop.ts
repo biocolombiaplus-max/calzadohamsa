@@ -8,13 +8,12 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
-// Dibuja la foto centrada en un lienzo cuadrado de tamaño fijo (para que
-// toda foto de producto termine con el mismo formato prolijo), partiendo
-// siempre de mostrar el producto COMPLETO sin recortar nada (zoom=1, la
-// foto entera cabe adentro, con fondo blanco a los lados si hace falta) y
-// permitiendo acercar desde ahí (zoom > 1) para un encuadre más ajustado —
-// el acercamiento siempre recorta por igual desde el centro hacia afuera,
-// nunca deforma la foto ni la sale de proporción.
+// zoom=1 siempre corresponde a "mostrar la foto completa sin recortar nada"
+// (con fondo blanco a los lados si la foto no es cuadrada). Un zoom más
+// alto acerca desde ahí, recortando por igual desde el centro — nunca
+// deforma la foto ni la sale de proporción. getCoverZoom() (abajo) calcula
+// el zoom exacto al que la foto llena el cuadrado sin ninguna franja
+// blanca, para usarlo como punto de partida recomendado.
 export async function getZoomedContainBlob(imageSrc: string, zoom = 1, outputSize = 1200): Promise<Blob> {
   const image = await loadImage(imageSrc);
   const canvas = document.createElement('canvas');
@@ -35,6 +34,13 @@ export async function getZoomedContainBlob(imageSrc: string, zoom = 1, outputSiz
   ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
 
   return canvasToJpegBlob(canvas);
+}
+
+// El zoom (relativo al "contain" de arriba) al que la foto llena el
+// cuadrado por completo, sin ninguna franja blanca — equivale al recorte
+// clásico tipo "cover". Siempre es >= 1.
+export function getCoverZoom(naturalWidth: number, naturalHeight: number): number {
+  return Math.max(naturalWidth, naturalHeight) / Math.min(naturalWidth, naturalHeight);
 }
 
 function canvasToJpegBlob(canvas: HTMLCanvasElement): Promise<Blob> {
