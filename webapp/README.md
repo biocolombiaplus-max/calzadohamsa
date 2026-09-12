@@ -261,21 +261,24 @@ una pasarela como **Wompi** o **PayU** (ambas soportan Colombia) sin cambiar
 la arquitectura — es un paso independiente que se puede agregar cuando lo
 necesites.
 
-## Fotos de producto: ajuste de tamaño
+## Fotos de producto: encuadre automático a cuadrado
 
-Al subir fotos en `/admin/productos`, antes de que se suban a Cloudinary
-aparece una ventana para ajustarlas a un formato cuadrado — funciona con
-cualquier tamaño o proporción de foto. Por defecto la foto llena el
-cuadro por completo, sin franjas blancas a los lados (recortando parejo
-desde el centro si hace falta, nunca deforma la foto). Si prefieres ver
-el producto 100% completo aunque queden franjas blancas a los lados,
-lleva la barra de zoom al mínimo.
+Al subir fotos en `/admin/productos` no hace falta recortarlas ni ajustar
+nada manualmente: se suben tal cual (cualquier tamaño o proporción), y
+Cloudinary las encuadra a cuadrado automáticamente usando su función de
+"gravedad automática" (`g_auto`), que detecta con IA en qué parte de la
+foto está el producto y recorta ahí — sin dejar franjas de fondo ni
+cortar el producto, sin importar si quedó centrado o no en la foto
+original. Esto pasa en la propia URL de Cloudinary (parámetro
+`AUTO_OPTIMIZE` en `src/lib/storage.ts`), no en el navegador, así que
+funciona igual de bien para cualquier foto que subas.
 
 Las fotos que ya estaban subidas antes de este cambio y que se ven con
-franjas blancas a los lados hay que volver a subirlas (editar el
-producto → reemplazar la foto) para que tomen el nuevo encuadre —
-la franja blanca queda "quemada" dentro de la foto ya guardada, así que
-no hay forma de quitarla sin volver a procesar la imagen original.
+franjas de fondo a los lados hay que volver a subirlas (editar el
+producto → reemplazar la foto) para que tomen el nuevo encuadre — esas
+fotos anteriores ya se guardaron recortadas a cuadrado con la franja
+"quemada" en los píxeles, así que no hay forma de arreglarlas sin volver
+a procesar la imagen original.
 
 ## Estructura del proyecto
 

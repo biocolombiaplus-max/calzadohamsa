@@ -7,7 +7,7 @@ import type { Product, ProductColor, ProductInput } from '@/lib/types';
 import { slugify } from '@/lib/utils';
 import { createProduct, updateProduct, deleteProduct } from '@/lib/products';
 import { uploadProductImage, deleteProductImage } from '@/lib/storage';
-import ImageCropModal from './ImageCropModal';
+import { resizeForUpload } from '@/lib/imageCrop';
 
 const COMMON_SIZES = ['34', '35', '36', '37', '38', '39', '40', '41', '42'];
 const QUICK_COLORS: ProductColor[] = [
@@ -39,8 +39,6 @@ export default function ProductForm({ product }: { product?: Product }) {
   const [images, setImages] = useState<string[]>(product?.images ?? []);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
-  const [cropQueue, setCropQueue] = useState<File[]>([]);
-  const [cropCurrent, setCropCurrent] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -85,7 +83,7 @@ export default function ProductForm({ product }: { product?: Product }) {
     setColors((c) => c.filter((x) => x.name !== name));
   }
 
-  function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     if (!slug) {
@@ -95,32 +93,23 @@ export default function ProductForm({ product }: { product?: Product }) {
     }
     setUploadError('');
     const queued = Array.from(files);
-    setCropCurrent(queued[0]);
-    setCropQueue(queued.slice(1));
     e.target.value = '';
-  }
 
-  function advanceCropQueue() {
-    setCropCurrent(cropQueue[0] ?? null);
-    setCropQueue((q) => q.slice(1));
-  }
-
-  async function handleCropConfirm(blob: Blob) {
     setUploading(true);
     try {
-      const croppedFile = new File([blob], `${slug || 'foto'}.jpg`, { type: 'image/jpeg' });
-      const url = await uploadProductImage(croppedFile, slug);
-      setImages((prev) => [...prev, url]);
-    } catch (err) {
-      setUploadError(err instanceof Error ? err.message : 'No se pudo subir la foto. Intenta de nuevo.');
+      for (const original of queued) {
+        try {
+          const resized = await resizeForUpload(original);
+          const uploadFile = new File([resized], original.name || `${slug}.jpg`, { type: 'image/jpeg' });
+          const url = await uploadProductImage(uploadFile, slug);
+          setImages((prev) => [...prev, url]);
+        } catch (err) {
+          setUploadError(err instanceof Error ? err.message : 'No se pudo subir la foto. Intenta de nuevo.');
+        }
+      }
     } finally {
       setUploading(false);
-      advanceCropQueue();
     }
-  }
-
-  function handleCropCancel() {
-    advanceCropQueue();
   }
 
   async function handleRemoveImage(url: string) {
@@ -236,7 +225,7 @@ export default function ProductForm({ product }: { product?: Product }) {
                 multiple
                 onChange={handleImageUpload}
                 className="hidden"
-                disabled={uploading || !!cropCurrent}
+                disabled={uploading}
               />
             </label>
           </div>
@@ -244,9 +233,9 @@ export default function ProductForm({ product }: { product?: Product }) {
             <p className="mb-2 rounded-lg bg-urgent/10 p-3 text-sm text-urgent">{uploadError}</p>
           )}
           <p className="text-xs text-muted">
-            Sube varias fotos a la vez. Antes de subirla, podrás ajustar el encuadre de cada una — funciona con
-            cualquier tamaño o proporción de imagen. La primera foto será la principal, y cada una se optimiza
-            automáticamente para que la tienda cargue rápido.
+            Sube varias fotos a la vez, de cualquier tamaño o proporción — el encuadre a cuadrado (sin franjas
+            de fondo) se ajusta solo, detectando dónde está el producto en la foto. La primera foto será la
+            principal, y cada una se optimiza automáticamente para que la tienda cargue rápido.
           </p>
         </div>
 
@@ -425,15 +414,6 @@ export default function ProductForm({ product }: { product?: Product }) {
           </button>
         )}
       </div>
-
-      {cropCurrent && (
-        <ImageCropModal
-          key={`${cropCurrent.name}-${cropCurrent.lastModified}-${cropCurrent.size}`}
-          file={cropCurrent}
-          onCancel={handleCropCancel}
-          onConfirm={handleCropConfirm}
-        />
-      )}
     </form>
   );
 }

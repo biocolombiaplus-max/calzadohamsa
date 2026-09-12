@@ -8,47 +8,34 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
-// zoom=1 siempre corresponde a "mostrar la foto completa sin recortar nada"
-// (con fondo blanco a los lados si la foto no es cuadrada). Un zoom más
-// alto acerca desde ahí, recortando por igual desde el centro — nunca
-// deforma la foto ni la sale de proporción. getCoverZoom() (abajo) calcula
-// el zoom exacto al que la foto llena el cuadrado sin ninguna franja
-// blanca, para usarlo como punto de partida recomendado.
-export async function getZoomedContainBlob(imageSrc: string, zoom = 1, outputSize = 1200): Promise<Blob> {
-  const image = await loadImage(imageSrc);
-  const canvas = document.createElement('canvas');
-  canvas.width = outputSize;
-  canvas.height = outputSize;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('No se pudo procesar la imagen en este navegador.');
-
-  const containScale = Math.min(outputSize / image.width, outputSize / image.height);
-  const scale = containScale * Math.max(zoom, 1);
-  const drawWidth = image.width * scale;
-  const drawHeight = image.height * scale;
-  const offsetX = (outputSize - drawWidth) / 2;
-  const offsetY = (outputSize - drawHeight) / 2;
-
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, outputSize, outputSize);
-  ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
-
-  return canvasToJpegBlob(canvas);
-}
-
-// El zoom (relativo al "contain" de arriba) al que la foto llena el
-// cuadrado por completo, sin ninguna franja blanca — equivale al recorte
-// clásico tipo "cover". Siempre es >= 1.
-export function getCoverZoom(naturalWidth: number, naturalHeight: number): number {
-  return Math.max(naturalWidth, naturalHeight) / Math.min(naturalWidth, naturalHeight);
-}
-
-function canvasToJpegBlob(canvas: HTMLCanvasElement): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => (blob ? resolve(blob) : reject(new Error('No se pudo generar la imagen.'))),
-      'image/jpeg',
-      0.92,
-    );
-  });
+// Reduce el archivo si la foto es muy pesada (celulares modernos suben
+// fotos de 12+ MP), sin recortar ni deformar nada — se mantiene la
+// proporción original completa. El encuadre final a cuadrado, sin franjas
+// de fondo y sin importar el tamaño o proporción de la foto, lo hace
+// Cloudinary automáticamente al mostrarla (ver AUTO_OPTIMIZE en storage.ts),
+// detectando con IA en qué parte de la foto está el producto.
+export async function resizeForUpload(file: File, maxDimension = 2000): Promise<Blob> {
+  const url = URL.createObjectURL(file);
+  try {
+    const image = await loadImage(url);
+    if (image.width <= maxDimension && image.height <= maxDimension) {
+      return file;
+    }
+    const scale = maxDimension / Math.max(image.width, image.height);
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(image.width * scale);
+    canvas.height = Math.round(image.height * scale);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return file;
+    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    return await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob(
+        (blob) => (blob ? resolve(blob) : reject(new Error('No se pudo procesar la imagen.'))),
+        'image/jpeg',
+        0.9,
+      );
+    });
+  } finally {
+    URL.revokeObjectURL(url);
+  }
 }

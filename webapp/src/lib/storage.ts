@@ -6,11 +6,13 @@
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
-// Redimensiona (sin recortar ni deformar), comprime y sirve en el formato
-// más liviano posible (WebP/AVIF) automáticamente, vía transformación de
-// Cloudinary en la propia URL — no cuesta nada extra y no requiere ningún
-// paso manual del lado del admin.
-const AUTO_OPTIMIZE = 'c_limit,w_1600,h_1600,q_auto,f_auto';
+// Recorta a cuadrado usando la IA de Cloudinary (g_auto detecta en qué
+// parte de la foto está el producto y encuadra ahí, sin importar el
+// tamaño o proporción de la foto original ni dejar franjas de fondo),
+// comprime y sirve en el formato más liviano posible (WebP/AVIF)
+// automáticamente — todo vía transformación en la propia URL, sin costo
+// extra y sin ningún paso manual del lado del admin.
+const AUTO_OPTIMIZE = 'c_fill,g_auto,w_1200,h_1200,q_auto,f_auto';
 
 function withAutoOptimization(url: string): string {
   return url.replace('/image/upload/', `/image/upload/${AUTO_OPTIMIZE}/`);
