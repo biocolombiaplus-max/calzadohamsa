@@ -4,6 +4,14 @@ export interface ProductColor {
   image?: string;
 }
 
+export interface ProductReview {
+  name: string;
+  city?: string;
+  rating: number;
+  text: string;
+  date?: string;
+}
+
 export interface Product {
   id: string;
   slug: string;
@@ -20,6 +28,7 @@ export interface Product {
   active: boolean;
   soldCount?: number;
   reviewsCount?: number;
+  reviews?: ProductReview[];
   createdAt?: number;
   updatedAt?: number;
 }

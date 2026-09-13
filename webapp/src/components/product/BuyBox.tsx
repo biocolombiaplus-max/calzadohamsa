@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type RefObject } from 'react';
 import type { Product } from '@/lib/types';
-import { classNames, formatPrice, whatsappLinkTo } from '@/lib/utils';
+import { classNames, formatPrice, resolveColorImage, whatsappLinkTo } from '@/lib/utils';
 import { useCartStore } from '@/lib/cart-store';
 import { useSiteSettings } from '@/lib/settings-context';
 import UrgencyTimer from './UrgencyTimer';
@@ -12,9 +12,11 @@ import QuickBuyModal from './QuickBuyModal';
 export default function BuyBox({
   product,
   onColorChange,
+  ctaRef,
 }: {
   product: Product;
   onColorChange?: (colorName: string) => void;
+  ctaRef?: RefObject<HTMLDivElement>;
 }) {
   const { whatsappCountryCode, whatsappNumber, trustItems, bundle2x1 } = useSiteSettings();
   const addItem = useCartStore((s) => s.addItem);
@@ -36,13 +38,12 @@ export default function BuyBox({
   const stockPct = useMemo(() => Math.min(100, Math.max(6, product.stock)), [product.stock]);
 
   function buildItem() {
-    const colorImage = product.colors.find((c) => c.name === color)?.image;
     return {
       productId: product.id,
       slug: product.slug,
       title: product.title,
       price: product.price,
-      image: colorImage || product.images[0] || '',
+      image: resolveColorImage(product, color) || product.images[0] || '',
       size,
       color,
       quantity,
@@ -167,7 +168,7 @@ export default function BuyBox({
         </div>
       </div>
 
-      <div className="space-y-3">
+      <div ref={ctaRef} className="space-y-3">
         <button onClick={handleBuyNow} className="btn-primary w-full text-base shadow-lift">
           💵 Comprar ya — Pago contra entrega
         </button>

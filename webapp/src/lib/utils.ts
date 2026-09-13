@@ -1,3 +1,18 @@
+// Determina qué foto mostrar para el color elegido: si el admin le asignó
+// una foto específica a ese color, se usa esa. Si no, se asume que las
+// fotos se subieron en el mismo orden que los colores (lo más común al
+// fotografiar cada variante una vez) y se usa la foto en esa misma
+// posición — así el cambio de color "hace algo" en la galería incluso en
+// productos donde nadie configuró la asignación manualmente.
+export function resolveColorImage(
+  product: { colors: { name: string; image?: string }[]; images: string[] },
+  colorName: string,
+): string | undefined {
+  const index = product.colors.findIndex((c) => c.name === colorName);
+  if (index === -1) return undefined;
+  return product.colors[index].image || product.images[index];
+}
+
 export function formatPrice(value: number): string {
   return new Intl.NumberFormat('es-CO', {
     style: 'currency',

@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { notFound, useParams } from 'next/navigation';
 import { getProductBySlug } from '@/lib/products';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, resolveColorImage } from '@/lib/utils';
 import type { Product } from '@/lib/types';
 import ProductGallery from '@/components/product/ProductGallery';
 import BuyBox from '@/components/product/BuyBox';
@@ -18,6 +18,21 @@ export default function ProductPage() {
   const params = useParams<{ slug: string }>();
   const [product, setProduct] = useState<Product | null | undefined>(undefined);
   const [colorImage, setColorImage] = useState<string | undefined>(undefined);
+  const [ctaVisible, setCtaVisible] = useState(false);
+  const ctaRef = useRef<HTMLDivElement>(null);
+
+  // La barra fija de compra en móvil solo tiene sentido cuando el botón de
+  // compra "real" del BuyBox no se ve — si aparecen las dos a la vez se ven
+  // redundantes y hasta se tapan entre sí.
+  useEffect(() => {
+    const el = ctaRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => setCtaVisible(entry.isIntersecting), {
+      rootMargin: '0px 0px -10% 0px',
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [product]);
 
   useEffect(() => {
     let cancelled = false;
@@ -25,7 +40,7 @@ export default function ProductPage() {
       .then((p) => {
         if (cancelled) return;
         setProduct(p);
-        setColorImage(p?.colors[0]?.image);
+        setColorImage(p?.colors[0] ? resolveColorImage(p, p.colors[0].name) : undefined);
       })
       .catch(() => !cancelled && setProduct(null));
     return () => {
@@ -85,7 +100,8 @@ export default function ProductPage() {
             <div id="buybox" className="mt-5 scroll-mt-24">
               <BuyBox
                 product={product}
-                onColorChange={(name) => setColorImage(product.colors.find((c) => c.name === name)?.image)}
+                onColorChange={(name) => setColorImage(resolveColorImage(product, name))}
+                ctaRef={ctaRef}
               />
             </div>
           </div>
@@ -117,16 +133,19 @@ export default function ProductPage() {
       <HowItWorks />
       <RelatedProducts productId={product.id} collection={product.collection} />
 
-      {/* Barra fija de compra en móvil */}
-      <div className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-between gap-3 border-t border-border bg-white p-3 shadow-lift lg:hidden">
-        <div>
-          <p className="text-xs text-muted">Precio</p>
-          <p className="font-bold text-primary">{formatPrice(product.price)}</p>
+      {/* Barra fija de compra en móvil — solo aparece cuando el botón real
+          de compra del BuyBox no está a la vista, para no duplicar el CTA */}
+      {!ctaVisible && (
+        <div className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-between gap-3 border-t border-border bg-white p-3 shadow-lift lg:hidden">
+          <div>
+            <p className="text-xs text-muted">Precio</p>
+            <p className="font-bold text-primary">{formatPrice(product.price)}</p>
+          </div>
+          <a href="#buybox" className="btn-primary flex-1 text-center text-sm">
+            Comprar ahora
+          </a>
         </div>
-        <a href="#buybox" className="btn-primary flex-1 text-center text-sm">
-          Comprar ahora
-        </a>
-      </div>
+      )}
     </div>
   );
 }

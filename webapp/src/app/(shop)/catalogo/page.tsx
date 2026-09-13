@@ -6,12 +6,39 @@ import { getActiveProducts } from '@/lib/products';
 import type { Product } from '@/lib/types';
 import ProductGrid from '@/components/ProductGrid';
 
+type SortOption = 'relevancia' | 'precio_asc' | 'precio_desc' | 'vendidos' | 'nuevo';
+
+const SORT_LABELS: Record<SortOption, string> = {
+  relevancia: 'Relevancia',
+  nuevo: 'Más recientes',
+  precio_asc: 'Precio: menor a mayor',
+  precio_desc: 'Precio: mayor a menor',
+  vendidos: 'Más vendidos',
+};
+
+function sortProducts(products: Product[], sort: SortOption): Product[] {
+  const sorted = [...products];
+  switch (sort) {
+    case 'precio_asc':
+      return sorted.sort((a, b) => a.price - b.price);
+    case 'precio_desc':
+      return sorted.sort((a, b) => b.price - a.price);
+    case 'vendidos':
+      return sorted.sort((a, b) => (b.soldCount ?? 0) - (a.soldCount ?? 0));
+    case 'nuevo':
+      return sorted.sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
+    default:
+      return sorted.sort((a, b) => Number(b.featured) - Number(a.featured));
+  }
+}
+
 function CatalogoContent() {
   const searchParams = useSearchParams();
   const isOffer = searchParams.get('oferta') === '2x1';
   const collectionParam = searchParams.get('collection');
   const [products, setProducts] = useState<Product[] | null>(null);
   const [activeCollection, setActiveCollection] = useState<string>(collectionParam ?? 'todas');
+  const [sort, setSort] = useState<SortOption>('relevancia');
 
   useEffect(() => {
     if (collectionParam) setActiveCollection(collectionParam);
@@ -34,9 +61,9 @@ function CatalogoContent() {
 
   const filtered = useMemo(() => {
     if (!products) return [];
-    if (activeCollection === 'todas') return products;
-    return products.filter((p) => p.collection === activeCollection);
-  }, [products, activeCollection]);
+    const base = activeCollection === 'todas' ? products : products.filter((p) => p.collection === activeCollection);
+    return sortProducts(base, sort);
+  }, [products, activeCollection, sort]);
 
   return (
     <div className="container-page py-10">
@@ -70,6 +97,28 @@ function CatalogoContent() {
               {c}
             </button>
           ))}
+        </div>
+      )}
+
+      {products !== null && (
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
+          <p className="text-sm text-muted">
+            {filtered.length} {filtered.length === 1 ? 'producto' : 'productos'}
+          </p>
+          <label className="flex items-center gap-2 text-sm text-muted">
+            Ordenar por
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as SortOption)}
+              className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-semibold text-ink focus:border-primary focus:outline-none"
+            >
+              {Object.entries(SORT_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
       )}
 
