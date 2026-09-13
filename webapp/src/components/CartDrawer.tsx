@@ -13,6 +13,8 @@ export default function CartDrawer() {
   const { items, isOpen, close, removeItem, updateQuantity } = useCartStore();
   const settings = useSiteSettings();
   const bundle = computeBundlePricing(items, settings.bundle2x1.price);
+  const totalUnits = items.reduce((sum, item) => sum + item.quantity, 0);
+  const oneAwayFromBundle = totalUnits > 0 && totalUnits % 2 === 1;
 
   useEffect(() => setMounted(true), []);
   useEffect(() => {
@@ -97,6 +99,15 @@ export default function CartDrawer() {
               <div className="mb-3 rounded-lg bg-primary-light/15 px-3 py-2 text-xs font-bold text-primary">
                 🎉 2×1 aplicado — ahorras {formatPrice(bundle.savings)} + envío gratis
               </div>
+            )}
+            {oneAwayFromBundle && (
+              <Link
+                href="/catalogo"
+                onClick={close}
+                className="mb-3 block rounded-lg bg-urgent/10 px-3 py-2 text-xs font-bold text-urgent hover:bg-urgent/15"
+              >
+                🔥 ¡Agrega 1 par más y activa el 2×1 con envío gratis!
+              </Link>
             )}
             {bundle.savings > 0 && (
               <div className="mb-1 flex items-center justify-between text-sm text-muted line-through">

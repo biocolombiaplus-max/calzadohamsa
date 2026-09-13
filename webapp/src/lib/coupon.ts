@@ -7,6 +7,25 @@ export interface WonCoupon {
   expiresAt: number;
 }
 
+// Códigos válidos — los mismos que reparte la ruleta de descuentos
+// (SpinWheel), pero también se pueden escribir a mano en el checkout (por
+// ejemplo si la clienta lo recibió por WhatsApp o redes sociales).
+export const COUPON_CODES: Record<string, number> = {
+  HAMSA5: 5,
+  HAMSA10: 10,
+};
+
+// Valida un código escrito a mano y, si es válido, lo guarda como el cupón
+// activo (igual que si se hubiera ganado en la ruleta). Devuelve el cupón
+// guardado, o null si el código no existe.
+export function redeemCouponCode(rawCode: string): WonCoupon | null {
+  const code = rawCode.trim().toUpperCase();
+  const percent = COUPON_CODES[code];
+  if (!percent) return null;
+  saveWonCoupon(code, percent);
+  return getActiveCoupon();
+}
+
 export function saveWonCoupon(code: string, percent: number): void {
   if (typeof window === 'undefined') return;
   const coupon: WonCoupon = { code, percent, expiresAt: Date.now() + VALID_HOURS * 60 * 60 * 1000 };

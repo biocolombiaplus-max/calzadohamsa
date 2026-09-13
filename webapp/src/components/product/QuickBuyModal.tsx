@@ -1,14 +1,14 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { createOrder } from '@/lib/orders';
 import { getDepartamentos, getMunicipios } from '@/lib/colombia';
 import { getShippingRate } from '@/lib/shipping';
 import { computeBundlePricing } from '@/lib/bundle';
-import { getActiveCoupon, clearCoupon } from '@/lib/coupon';
+import { getActiveCoupon, clearCoupon, redeemCouponCode } from '@/lib/coupon';
 import { useSiteSettings } from '@/lib/settings-context';
-import { formatPrice } from '@/lib/utils';
+import { classNames, formatPrice } from '@/lib/utils';
 import { generatePaymentReference, redirectToWompiCheckout } from '@/lib/wompi';
 import type { CartItem } from '@/lib/types';
 import LocationCapture from './LocationCapture';
@@ -38,9 +38,53 @@ export default function QuickBuyModal({
   const [locationUrl, setLocationUrl] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [coupon] = useState(() => getActiveCoupon());
+  const [attemptedSubmit, setAttemptedSubmit] = useState(false);
+  const [coupon, setCoupon] = useState(() => getActiveCoupon());
+  const [couponInput, setCouponInput] = useState('');
+  const [couponError, setCouponError] = useState('');
 
   const municipios = useMemo(() => getMunicipios(form.department), [form.department]);
+
+  const fieldErrors = useMemo(
+    () => ({
+      name: !form.name.trim(),
+      phone: !form.phone.trim(),
+      address: !form.address.trim(),
+      department: !form.department,
+      city: !form.city,
+    }),
+    [form],
+  );
+  const hasErrors = Object.values(fieldErrors).some(Boolean);
+
+  useEffect(() => {
+    if (!attemptedSubmit || !hasErrors) return;
+    document.querySelector('.border-urgent')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [attemptedSubmit, hasErrors]);
+
+  function fieldClass(field: keyof typeof fieldErrors, extra = '') {
+    return classNames(
+      'w-full rounded-lg border px-4 py-3 text-sm focus:outline-none',
+      attemptedSubmit && fieldErrors[field] ? 'border-urgent focus:border-urgent' : 'border-border focus:border-primary',
+      extra,
+    );
+  }
+
+  function handleApplyCoupon() {
+    setCouponError('');
+    const result = redeemCouponCode(couponInput);
+    if (!result) {
+      setCouponError('Ese cupón no es válido o ya venció.');
+      return;
+    }
+    setCoupon(result);
+    setCouponInput('');
+  }
+
+  function handleRemoveCoupon() {
+    clearCoupon();
+    setCoupon(null);
+  }
 
   const bundle = useMemo(() => computeBundlePricing(items, settings.bundle2x1.price), [items, settings.bundle2x1.price]);
   const bundleApplies = totalOverride === undefined && bundle.pairsCount > 0;
@@ -67,9 +111,10 @@ export default function QuickBuyModal({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
+    setAttemptedSubmit(true);
 
-    if (!form.name || !form.phone || !form.address || !form.city || !form.department) {
-      setError('Por favor completa todos los campos obligatorios.');
+    if (hasErrors) {
+      setError('Por favor completa los campos marcados en rojo.');
       return;
     }
 
@@ -152,7 +197,39 @@ export default function QuickBuyModal({
           {couponApplies && (
             <div className="flex items-center justify-between border-t border-border pt-2 text-xs font-bold text-primary">
               <span>🎟️ Cupón {coupon!.code} (-{coupon!.percent}%)</span>
-              <span>-{formatPrice(couponDiscount)}</span>
+              <span className="flex items-center gap-2">
+                -{formatPrice(couponDiscount)}
+                <button type="button" onClick={handleRemoveCoupon} className="font-normal text-muted underline">
+                  Quitar
+                </button>
+              </span>
+            </div>
+          )}
+          {totalOverride === undefined && !coupon && (
+            <div className="border-t border-border pt-2">
+              <div className="flex gap-2">
+                <input
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleApplyCoupon();
+                    }
+                  }}
+                  placeholder="¿Tienes un cupón?"
+                  className="flex-1 rounded-lg border border-border px-3 py-1.5 text-xs focus:border-primary focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={handleApplyCoupon}
+                  disabled={!couponInput.trim()}
+                  className="btn-secondary px-3 py-1.5 text-xs disabled:opacity-50"
+                >
+                  Aplicar
+                </button>
+              </div>
+              {couponError && <p className="mt-1 text-xs text-urgent">{couponError}</p>}
             </div>
           )}
           <div className="flex items-center justify-between border-t border-border pt-2 text-sm text-muted">
@@ -167,35 +244,46 @@ export default function QuickBuyModal({
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <input
-            required
-            placeholder="Nombre completo *"
-            value={form.name}
-            onChange={(e) => updateField('name', e.target.value)}
-            className="w-full rounded-lg border border-border px-4 py-3 text-sm focus:border-primary focus:outline-none"
-          />
-          <input
-            required
-            type="tel"
-            placeholder="Teléfono / WhatsApp *"
-            value={form.phone}
-            onChange={(e) => updateField('phone', e.target.value)}
-            className="w-full rounded-lg border border-border px-4 py-3 text-sm focus:border-primary focus:outline-none"
-          />
-          <input
-            required
-            placeholder="Dirección de envío *"
-            value={form.address}
-            onChange={(e) => updateField('address', e.target.value)}
-            className="w-full rounded-lg border border-border px-4 py-3 text-sm focus:border-primary focus:outline-none"
-          />
+        <form onSubmit={handleSubmit} noValidate className="space-y-3">
+          <div>
+            <input
+              required
+              placeholder="Nombre completo *"
+              value={form.name}
+              onChange={(e) => updateField('name', e.target.value)}
+              className={fieldClass('name')}
+            />
+            {attemptedSubmit && fieldErrors.name && <p className="mt-1 text-xs text-urgent">Escribe tu nombre.</p>}
+          </div>
+          <div>
+            <input
+              required
+              type="tel"
+              placeholder="Teléfono / WhatsApp *"
+              value={form.phone}
+              onChange={(e) => updateField('phone', e.target.value)}
+              className={fieldClass('phone')}
+            />
+            {attemptedSubmit && fieldErrors.phone && <p className="mt-1 text-xs text-urgent">Escribe tu teléfono.</p>}
+          </div>
+          <div>
+            <input
+              required
+              placeholder="Dirección de envío *"
+              value={form.address}
+              onChange={(e) => updateField('address', e.target.value)}
+              className={fieldClass('address')}
+            />
+            {attemptedSubmit && fieldErrors.address && (
+              <p className="mt-1 text-xs text-urgent">Escribe tu dirección.</p>
+            )}
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <select
               required
               value={form.department}
               onChange={(e) => updateField('department', e.target.value)}
-              className="w-full rounded-lg border border-border bg-white px-3 py-3 text-sm focus:border-primary focus:outline-none"
+              className={fieldClass('department', 'bg-white')}
             >
               <option value="">Departamento *</option>
               {DEPARTAMENTOS.map((d) => (
@@ -209,7 +297,7 @@ export default function QuickBuyModal({
               disabled={!form.department}
               value={form.city}
               onChange={(e) => updateField('city', e.target.value)}
-              className="w-full rounded-lg border border-border bg-white px-3 py-3 text-sm focus:border-primary focus:outline-none disabled:opacity-50"
+              className={fieldClass('city', 'bg-white disabled:opacity-50')}
             >
               <option value="">{form.department ? 'Municipio *' : 'Elige depto. primero'}</option>
               {municipios.map((m) => (
@@ -219,6 +307,9 @@ export default function QuickBuyModal({
               ))}
             </select>
           </div>
+          {attemptedSubmit && (fieldErrors.department || fieldErrors.city) && (
+            <p className="-mt-2 text-xs text-urgent">Elige tu departamento y municipio.</p>
+          )}
           {!effectiveFreeShipping && form.department && (
             <p className="-mt-1 text-xs text-muted">
               🚚 Envío a {form.city || form.department}: <span className="font-semibold text-ink">{formatPrice(shippingCost)}</span>

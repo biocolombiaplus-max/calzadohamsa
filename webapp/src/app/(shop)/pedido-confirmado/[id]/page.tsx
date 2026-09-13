@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation';
 import { getOrderById } from '@/lib/orders';
 import { formatPrice, whatsappLinkTo } from '@/lib/utils';
 import { useSiteSettings } from '@/lib/settings-context';
+import PostPurchaseUpsell from '@/components/product/PostPurchaseUpsell';
 import type { Order } from '@/lib/types';
 
 export default function OrderConfirmationPage() {
@@ -111,6 +112,10 @@ export default function OrderConfirmationPage() {
         <Link href="/catalogo" className="mt-6 inline-block text-sm font-semibold text-primary hover:underline">
           ← Seguir comprando
         </Link>
+      </div>
+
+      <div className="mx-auto mt-4 max-w-4xl">
+        <PostPurchaseUpsell excludeProductIds={order.items.map((i) => i.productId)} />
       </div>
     </div>
   );

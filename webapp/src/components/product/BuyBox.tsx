@@ -79,13 +79,17 @@ export default function BuyBox({
             </>
           )}
         </div>
-        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
-          <span className="flex items-center gap-1 text-primary">
-            ★★★★★ <span className="text-ink">{product.reviewsCount ?? 87} reseñas</span>
-          </span>
-          <span className="hidden sm:inline">·</span>
-          <span>{product.soldCount ?? 342} vendidos</span>
-        </div>
+        {(!!product.reviewsCount || !!product.soldCount) && (
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
+            {!!product.reviewsCount && (
+              <span className="flex items-center gap-1 text-primary">
+                ★★★★★ <span className="text-ink">{product.reviewsCount} reseñas</span>
+              </span>
+            )}
+            {!!product.reviewsCount && !!product.soldCount && <span className="hidden sm:inline">·</span>}
+            {!!product.soldCount && <span>{product.soldCount} vendidos</span>}
+          </div>
+        )}
       </div>
 
       {product.stock > 0 && product.stock <= 15 && (
