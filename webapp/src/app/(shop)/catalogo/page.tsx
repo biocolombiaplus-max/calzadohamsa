@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { getActiveProducts } from '@/lib/products';
 import type { Product } from '@/lib/types';
@@ -39,6 +40,8 @@ function CatalogoContent() {
   const [products, setProducts] = useState<Product[] | null>(null);
   const [activeCollection, setActiveCollection] = useState<string>(collectionParam ?? 'todas');
   const [sort, setSort] = useState<SortOption>('relevancia');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
 
   useEffect(() => {
     if (collectionParam) setActiveCollection(collectionParam);
@@ -61,9 +64,15 @@ function CatalogoContent() {
 
   const filtered = useMemo(() => {
     if (!products) return [];
-    const base = activeCollection === 'todas' ? products : products.filter((p) => p.collection === activeCollection);
+    let base = activeCollection === 'todas' ? products : products.filter((p) => p.collection === activeCollection);
+    const min = minPrice ? Number(minPrice) : null;
+    const max = maxPrice ? Number(maxPrice) : null;
+    if (min !== null && !Number.isNaN(min)) base = base.filter((p) => p.price >= min);
+    if (max !== null && !Number.isNaN(max)) base = base.filter((p) => p.price <= max);
     return sortProducts(base, sort);
-  }, [products, activeCollection, sort]);
+  }, [products, activeCollection, sort, minPrice, maxPrice]);
+
+  const hasPriceFilter = minPrice !== '' || maxPrice !== '';
 
   return (
     <div className="container-page py-10">
@@ -72,6 +81,20 @@ function CatalogoContent() {
           🔥 Oferta 2×1 activa — Agrega 2 pares al carrito y aplica tu descuento en el checkout
         </div>
       )}
+
+      <nav className="mb-3 text-xs text-muted">
+        <Link href="/" className="hover:text-primary">Inicio</Link> /{' '}
+        {activeCollection === 'todas' ? (
+          <span className="text-ink">Catálogo</span>
+        ) : (
+          <>
+            <Link href="/catalogo" onClick={() => setActiveCollection('todas')} className="hover:text-primary">
+              Catálogo
+            </Link>{' '}
+            / <span className="capitalize text-ink">{activeCollection}</span>
+          </>
+        )}
+      </nav>
 
       <h1 className="font-heading text-3xl font-bold text-ink">Catálogo</h1>
       <p className="mt-1 text-sm text-muted">Encuentra tu sandalia perfecta entre toda la colección</p>
@@ -105,20 +128,55 @@ function CatalogoContent() {
           <p className="text-sm text-muted">
             {filtered.length} {filtered.length === 1 ? 'producto' : 'productos'}
           </p>
-          <label className="flex items-center gap-2 text-sm text-muted">
-            Ordenar por
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value as SortOption)}
-              className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-semibold text-ink focus:border-primary focus:outline-none"
-            >
-              {Object.entries(SORT_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-1.5 text-sm text-muted">
+              <span className="hidden sm:inline">Precio</span>
+              <input
+                type="number"
+                min="0"
+                inputMode="numeric"
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
+                placeholder="Desde"
+                className="w-20 rounded-lg border border-border bg-white px-2 py-2 text-sm focus:border-primary focus:outline-none sm:w-24"
+              />
+              <span>—</span>
+              <input
+                type="number"
+                min="0"
+                inputMode="numeric"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+                placeholder="Hasta"
+                className="w-20 rounded-lg border border-border bg-white px-2 py-2 text-sm focus:border-primary focus:outline-none sm:w-24"
+              />
+              {hasPriceFilter && (
+                <button
+                  onClick={() => {
+                    setMinPrice('');
+                    setMaxPrice('');
+                  }}
+                  className="text-xs font-semibold text-primary hover:underline"
+                >
+                  Limpiar
+                </button>
+              )}
+            </div>
+            <label className="flex items-center gap-2 text-sm text-muted">
+              Ordenar por
+              <select
+                value={sort}
+                onChange={(e) => setSort(e.target.value as SortOption)}
+                className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-semibold text-ink focus:border-primary focus:outline-none"
+              >
+                {Object.entries(SORT_LABELS).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
         </div>
       )}
 

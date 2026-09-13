@@ -15,6 +15,7 @@ import { classNames } from '@/lib/utils';
 import { generatePaymentReference, isWompiConfigured, redirectToWompiCheckout } from '@/lib/wompi';
 import type { PaymentMethod } from '@/lib/types';
 import LocationCapture from '@/components/product/LocationCapture';
+import PaymentBadges from '@/components/PaymentBadges';
 
 const DEPARTAMENTOS = getDepartamentos();
 
@@ -324,6 +325,11 @@ export default function CheckoutPage() {
           </div>
 
           {error && <p className="rounded-lg bg-urgent/10 p-3 text-sm text-urgent">{error}</p>}
+
+          <div>
+            <p className="mb-1.5 text-xs font-semibold text-muted">Aceptamos</p>
+            <PaymentBadges />
+          </div>
 
           <button
             type="submit"

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useSiteSettings } from '@/lib/settings-context';
 import { whatsappLinkTo } from '@/lib/utils';
+import PaymentBadges from '@/components/PaymentBadges';
 
 const SOCIALS: { key: 'instagram' | 'facebook' | 'tiktok'; label: string; icon: string }[] = [
   { key: 'instagram', label: 'Instagram', icon: '📷' },
@@ -40,6 +41,10 @@ export default function Footer() {
               ))}
             </div>
           )}
+          <div className="mt-5">
+            <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-cream/50">Pagos seguros</p>
+            <PaymentBadges />
+          </div>
         </div>
 
         <div>
