@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useState } from 'react';
-import type { Product, ProductColor, ProductInput } from '@/lib/types';
+import type { Product, ProductColor, ProductInput, ProductReview } from '@/lib/types';
 import { slugify } from '@/lib/utils';
 import { createProduct, updateProduct, deleteProduct } from '@/lib/products';
 import { uploadProductImage, deleteProductImage } from '@/lib/storage';
@@ -37,6 +37,8 @@ export default function ProductForm({ product }: { product?: Product }) {
   const [sizes, setSizes] = useState<string[]>(product?.sizes ?? []);
   const [colors, setColors] = useState<ProductColor[]>(product?.colors ?? []);
   const [images, setImages] = useState<string[]>(product?.images ?? []);
+  const [soldCount, setSoldCount] = useState(product?.soldCount?.toString() ?? '');
+  const [reviews, setReviews] = useState<ProductReview[]>(product?.reviews ?? []);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -45,6 +47,7 @@ export default function ProductForm({ product }: { product?: Product }) {
   const [customSize, setCustomSize] = useState('');
   const [customColorName, setCustomColorName] = useState('');
   const [customColorHex, setCustomColorHex] = useState('#A9673A');
+  const [newReview, setNewReview] = useState<ProductReview>({ name: '', city: '', rating: 5, text: '' });
 
   function handleTitleChange(value: string) {
     setTitle(value);
@@ -94,6 +97,16 @@ export default function ProductForm({ product }: { product?: Product }) {
         return { ...x, image };
       }),
     );
+  }
+
+  function addReview() {
+    if (!newReview.name.trim() || !newReview.text.trim()) return;
+    setReviews((r) => [...r, { ...newReview, name: newReview.name.trim(), text: newReview.text.trim() }]);
+    setNewReview({ name: '', city: '', rating: 5, text: '' });
+  }
+
+  function removeReview(index: number) {
+    setReviews((r) => r.filter((_, i) => i !== index));
   }
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -153,8 +166,9 @@ export default function ProductForm({ product }: { product?: Product }) {
       stock: Number(stock) || 0,
       featured,
       active,
-      soldCount: product?.soldCount ?? 0,
-      reviewsCount: product?.reviewsCount ?? 0,
+      soldCount: Number(soldCount) || 0,
+      reviewsCount: reviews.length,
+      reviews,
     };
 
     try {
@@ -386,6 +400,81 @@ export default function ProductForm({ product }: { product?: Product }) {
         </div>
       </div>
 
+      <div className="rounded-card bg-white p-6 shadow-soft lg:col-span-2">
+        <h2 className="mb-1 font-heading text-lg font-bold text-ink">Reseñas de clientas</h2>
+        <p className="mb-4 text-xs text-muted">
+          Reseñas reales que le escribiste o te enviaron por WhatsApp/Instagram — se muestran en la ficha del
+          producto. Solo agrega reseñas verdaderas de clientas reales.
+        </p>
+
+        {reviews.length > 0 && (
+          <ul className="mb-4 space-y-2">
+            {reviews.map((r, i) => (
+              <li key={i} className="flex items-start justify-between gap-3 rounded-lg border border-border p-3">
+                <div>
+                  <p className="text-sm font-semibold text-ink">
+                    {'★'.repeat(r.rating)}
+                    {'☆'.repeat(5 - r.rating)} {r.name}
+                    {r.city && <span className="font-normal text-muted"> · {r.city}</span>}
+                  </p>
+                  <p className="mt-0.5 text-sm text-muted">{r.text}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeReview(i)}
+                  className="shrink-0 text-xs font-semibold text-urgent"
+                >
+                  Eliminar
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <div className="grid gap-3 rounded-lg bg-cream-alt/50 p-4 sm:grid-cols-2">
+          <input
+            value={newReview.name}
+            onChange={(e) => setNewReview((r) => ({ ...r, name: e.target.value }))}
+            placeholder="Nombre de la clienta *"
+            className="rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
+          />
+          <input
+            value={newReview.city ?? ''}
+            onChange={(e) => setNewReview((r) => ({ ...r, city: e.target.value }))}
+            placeholder="Ciudad (opcional)"
+            className="rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
+          />
+          <select
+            value={newReview.rating}
+            onChange={(e) => setNewReview((r) => ({ ...r, rating: Number(e.target.value) }))}
+            className="rounded-lg border border-border bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none"
+          >
+            {[5, 4, 3, 2, 1].map((n) => (
+              <option key={n} value={n}>
+                {'★'.repeat(n)} ({n})
+              </option>
+            ))}
+          </select>
+          <div className="sm:col-span-2">
+            <textarea
+              value={newReview.text}
+              onChange={(e) => setNewReview((r) => ({ ...r, text: e.target.value }))}
+              placeholder="Qué dijo la clienta *"
+              rows={2}
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={addReview}
+            disabled={!newReview.name.trim() || !newReview.text.trim()}
+            className="btn-secondary px-4 py-2 text-sm disabled:opacity-50 sm:col-span-2"
+          >
+            + Agregar reseña
+          </button>
+        </div>
+      </div>
+
       <div className="space-y-5">
         <div className="rounded-card bg-white p-6 shadow-soft">
           <h2 className="mb-4 font-heading text-lg font-bold text-ink">Precio e inventario</h2>
@@ -417,7 +506,19 @@ export default function ProductForm({ product }: { product?: Product }) {
             min="0"
             value={stock}
             onChange={(e) => setStock(e.target.value)}
+            className="mb-4 w-full rounded-lg border border-border px-4 py-2.5 focus:border-primary focus:outline-none"
+          />
+
+          <label className="mb-1 block text-sm font-semibold text-ink">
+            Unidades vendidas (opcional — dato real, se muestra como prueba social)
+          </label>
+          <input
+            type="number"
+            min="0"
+            value={soldCount}
+            onChange={(e) => setSoldCount(e.target.value)}
             className="w-full rounded-lg border border-border px-4 py-2.5 focus:border-primary focus:outline-none"
+            placeholder="Ej: 34 (déjalo vacío si no lo sabes con certeza)"
           />
         </div>
 

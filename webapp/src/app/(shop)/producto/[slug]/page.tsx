@@ -11,6 +11,7 @@ import BuyBox from '@/components/product/BuyBox';
 import SocialProofTicker from '@/components/product/SocialProofTicker';
 import SizeGuide from '@/components/product/SizeGuide';
 import Accordion, { AccordionItem } from '@/components/product/Accordion';
+import ProductReviews from '@/components/product/ProductReviews';
 import RelatedProducts from '@/components/product/RelatedProducts';
 import HowItWorks from '@/components/HowItWorks';
 
@@ -128,6 +129,8 @@ export default function ProductPage() {
             </AccordionItem>
           </Accordion>
         </div>
+
+        <ProductReviews reviews={product.reviews ?? []} />
       </div>
 
       <HowItWorks />
