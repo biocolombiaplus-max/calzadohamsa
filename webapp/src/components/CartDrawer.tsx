@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { useCartStore } from '@/lib/cart-store';
 import { useSiteSettings } from '@/lib/settings-context';
 import { computeBundlePricing } from '@/lib/bundle';
-import { formatPrice } from '@/lib/utils';
+import { buildCartWhatsAppMessage, formatPrice, whatsappLinkTo } from '@/lib/utils';
 
 export default function CartDrawer() {
   const [mounted, setMounted] = useState(false);
@@ -127,6 +127,14 @@ export default function CartDrawer() {
             <Link href="/checkout" onClick={close} className="btn-primary w-full">
               Finalizar compra →
             </Link>
+            <a
+              href={whatsappLinkTo(settings.whatsappNumber, buildCartWhatsAppMessage(items), settings.whatsappCountryCode)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 block text-center text-xs font-semibold text-whatsapp hover:underline"
+            >
+              💬 O termina tu compra por WhatsApp
+            </a>
           </div>
         )}
       </div>

@@ -47,6 +47,14 @@ export function whatsappLinkTo(phone: string, message: string, countryCode?: str
   return `https://wa.me/${fullNumber}?text=${encodeURIComponent(message)}`;
 }
 
+// Mensaje de WhatsApp con el detalle del carrito — pensado para clientas que
+// prefieren terminar la compra hablando con alguien en vez de llenar el
+// formulario del checkout, en lugar de simplemente perderlas.
+export function buildCartWhatsAppMessage(items: { title: string; size: string; color: string; quantity: number }[]): string {
+  const lines = items.map((i) => `- ${i.title} (talla ${i.size}, ${i.color}) x${i.quantity}`).join('\n');
+  return `Hola! Quiero terminar mi compra:\n\n${lines}\n\n¿Me ayudan a confirmar el pedido?`;
+}
+
 export function generateOrderNumber(): string {
   const date = new Date();
   const stamp = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(
