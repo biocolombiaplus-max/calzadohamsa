@@ -368,31 +368,55 @@ export default function ProductForm({ product }: { product?: Product }) {
           </div>
 
           {colors.length > 0 && images.length > 0 && (
-            <div className="mt-4 space-y-2 border-t border-border pt-4">
-              <p className="text-sm font-semibold text-ink">Foto de cada color (opcional)</p>
-              <p className="text-xs text-muted">
-                Si le asignas una foto a cada color, al elegirlo en la página del producto la foto principal
-                cambia sola — igual que en las tiendas grandes.
-              </p>
+            <div className="mt-4 space-y-4 border-t border-border pt-4">
+              <div>
+                <p className="text-sm font-semibold text-ink">Foto de cada color</p>
+                <p className="text-xs text-muted">
+                  Toca la foto que corresponde a cada color. Si dejas un color en &ldquo;Principal&rdquo;, se
+                  mostrará siempre la primera foto al elegirlo — así nunca se muestra el color equivocado.
+                </p>
+              </div>
+
+              {colors.some((c) => !c.image) && colors.length > 1 && (
+                <p className="rounded-lg bg-urgent/10 p-2.5 text-xs font-semibold text-urgent">
+                  ⚠️ Hay colores sin foto asignada — al elegirlos en la tienda se verá la foto principal en vez
+                  de la foto real de ese color. Asígnales una abajo para que el cambio de color se vea bien.
+                </p>
+              )}
+
               {colors.map((c) => (
-                <div key={c.name} className="flex items-center gap-3">
-                  <span
-                    className="h-6 w-6 shrink-0 rounded-full border border-border"
-                    style={{ backgroundColor: c.hex }}
-                  />
-                  <span className="w-24 shrink-0 truncate text-sm text-ink">{c.name}</span>
-                  <select
-                    value={c.image ?? ''}
-                    onChange={(e) => updateColorImage(c.name, e.target.value)}
-                    className="flex-1 rounded-lg border border-border bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none"
-                  >
-                    <option value="">Sin foto asignada</option>
+                <div key={c.name}>
+                  <div className="mb-1.5 flex items-center gap-2">
+                    <span
+                      className="h-5 w-5 shrink-0 rounded-full border border-border"
+                      style={{ backgroundColor: c.hex }}
+                    />
+                    <span className="text-sm font-semibold text-ink">{c.name}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => updateColorImage(c.name, '')}
+                      className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border-2 px-1 text-center text-[10px] font-semibold leading-tight text-muted ${
+                        !c.image ? 'border-primary bg-primary-light/10 text-primary' : 'border-border'
+                      }`}
+                    >
+                      Principal
+                    </button>
                     {images.map((url, i) => (
-                      <option key={url} value={url}>
-                        Foto {i + 1}
-                      </option>
+                      <button
+                        key={url}
+                        type="button"
+                        onClick={() => updateColorImage(c.name, url)}
+                        aria-label={`Foto ${i + 1} para ${c.name}`}
+                        className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 ${
+                          c.image === url ? 'border-primary' : 'border-border'
+                        }`}
+                      >
+                        <Image src={url} alt={`Foto ${i + 1}`} fill className="object-cover" />
+                      </button>
                     ))}
-                  </select>
+                  </div>
                 </div>
               ))}
             </div>
