@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, addDoc, updateDoc, orderBy, query, limit, onSnapshot, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, orderBy, query, limit, onSnapshot, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Carrier, CartItem, Order, OrderCustomer, OrderInput, OrderStatus, PaymentMethod } from './types';
 import { generateOrderNumber, stripUndefined } from './utils';
@@ -48,6 +48,10 @@ export async function getAllOrders(): Promise<Order[]> {
 
 export async function updateOrderStatus(id: string, status: OrderStatus): Promise<void> {
   await updateDoc(doc(db, COLLECTION, id), { status });
+}
+
+export async function deleteOrder(id: string): Promise<void> {
+  await deleteDoc(doc(db, COLLECTION, id));
 }
 
 // Escucha en vivo los pedidos nuevos que van llegando mientras el admin

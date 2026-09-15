@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getAllOrders, updateOrderStatus, updateOrderShipping } from '@/lib/orders';
+import { getAllOrders, updateOrderStatus, updateOrderShipping, deleteOrder } from '@/lib/orders';
 import { getSiteSettings } from '@/lib/settings';
 import { CARRIERS, type Order, type OrderStatus, type Carrier } from '@/lib/types';
 import { formatPrice, whatsappLinkTo } from '@/lib/utils';
@@ -82,6 +82,12 @@ export default function AdminOrdersPage() {
     }
   }
 
+  async function handleDeleteOrder(order: Order) {
+    if (!confirm(`¿Eliminar el pedido ${order.orderNumber}? Esta acción no se puede deshacer.`)) return;
+    await deleteOrder(order.id);
+    setOrders((prev) => (prev ? prev.filter((o) => o.id !== order.id) : prev));
+  }
+
   return (
     <div>
       <h1 className="mb-1 font-heading text-2xl font-bold text-ink">Pedidos</h1>
@@ -101,6 +107,7 @@ export default function AdminOrdersPage() {
               saving={savingShipping === order.id}
               onStatusChange={(status) => handleStatusChange(order.id, status)}
               onShippingSave={(carrier, trackingNumber) => handleShippingSave(order, carrier, trackingNumber)}
+              onDelete={() => handleDeleteOrder(order)}
             />
           ))
         )}
@@ -115,12 +122,14 @@ function OrderCard({
   saving,
   onStatusChange,
   onShippingSave,
+  onDelete,
 }: {
   order: Order;
   storeName: string;
   saving: boolean;
   onStatusChange: (status: OrderStatus) => void;
   onShippingSave: (carrier: Carrier | '', trackingNumber: string) => void;
+  onDelete: () => void;
 }) {
   const [carrier, setCarrier] = useState<Carrier | ''>(order.carrier ?? '');
   const [trackingNumber, setTrackingNumber] = useState(order.trackingNumber ?? '');
@@ -133,17 +142,26 @@ function OrderCard({
           <p className="font-bold text-ink">{order.orderNumber}</p>
           <p className="text-xs text-muted">{new Date(order.createdAt).toLocaleString('es-CO')}</p>
         </div>
-        <select
-          value={order.status}
-          onChange={(e) => onStatusChange(e.target.value as OrderStatus)}
-          className={`rounded-full border-0 px-3 py-1.5 text-xs font-bold ${STATUS_COLORS[order.status]}`}
-        >
-          {STATUSES.map((s) => (
-            <option key={s.value} value={s.value}>
-              {s.label}
-            </option>
-          ))}
-        </select>
+        <div className="flex flex-col items-end gap-1.5">
+          <select
+            value={order.status}
+            onChange={(e) => onStatusChange(e.target.value as OrderStatus)}
+            className={`rounded-full border-0 px-3 py-1.5 text-xs font-bold ${STATUS_COLORS[order.status]}`}
+          >
+            {STATUSES.map((s) => (
+              <option key={s.value} value={s.value}>
+                {s.label}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={onDelete}
+            className="text-xs font-semibold text-muted hover:text-urgent"
+          >
+            🗑️ Eliminar pedido
+          </button>
+        </div>
       </div>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
