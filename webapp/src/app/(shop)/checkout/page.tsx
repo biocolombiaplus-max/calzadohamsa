@@ -4,14 +4,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useCartStore } from '@/lib/cart-store';
-import { createOrder } from '@/lib/orders';
-import { formatPrice } from '@/lib/utils';
+import { createOrder, notifyOrderByEmail } from '@/lib/orders';
+import { buildOrderWhatsAppMessage, classNames, formatPrice, whatsappLinkTo } from '@/lib/utils';
 import { getDepartamentos, getMunicipios } from '@/lib/colombia';
 import { getShippingRate } from '@/lib/shipping';
 import { computeBundlePricing } from '@/lib/bundle';
 import { getActiveCoupon, clearCoupon, redeemCouponCode } from '@/lib/coupon';
 import { useSiteSettings } from '@/lib/settings-context';
-import { classNames } from '@/lib/utils';
 import { generatePaymentReference, isWompiConfigured, redirectToWompiCheckout } from '@/lib/wompi';
 import type { PaymentMethod } from '@/lib/types';
 import LocationCapture from '@/components/product/LocationCapture';
@@ -105,19 +104,37 @@ export default function CheckoutPage() {
 
   async function submitOrder(method: PaymentMethod) {
     setSubmitting(true);
+    // Se abre la pestaña de WhatsApp ANTES de esperar la creación del pedido
+    // (todavía dentro del clic de la clienta) para que los navegadores no la
+    // bloqueen como pop-up; se le pone la URL real una vez el pedido exista.
+    const waWindow = method === 'contra_entrega' ? window.open('', '_blank') : null;
     try {
+      const customer = locationUrl ? { ...form, locationUrl } : form;
+
       if (method === 'wompi') {
         const reference = generatePaymentReference();
-        const { id } = await createOrder({
+        const { id, orderNumber } = await createOrder({
           items,
           subtotal: wompiSubtotal,
           shipping: shippingCost,
           total: wompiTotal,
-          customer: locationUrl ? { ...form, locationUrl } : form,
+          customer,
           paymentMethod: 'wompi',
           status: 'pendiente',
           paymentReference: reference,
           couponCode: coupon ? coupon.code : undefined,
+        });
+        notifyOrderByEmail({
+          to: settings.notificationEmail,
+          storeName: settings.storeName,
+          accentColor: settings.colors.primary,
+          orderNumber,
+          items,
+          subtotal: wompiSubtotal,
+          shipping: shippingCost,
+          total: wompiTotal,
+          paymentMethod: 'wompi',
+          customer,
         });
         if (coupon) clearCoupon();
         await redirectToWompiCheckout({
@@ -130,21 +147,45 @@ export default function CheckoutPage() {
         return;
       }
 
-      const { id } = await createOrder({
+      const { id, orderNumber } = await createOrder({
         items,
         subtotal: finalSubtotal,
         shipping: shippingCost,
         total,
-        customer: locationUrl ? { ...form, locationUrl } : form,
+        customer,
         paymentMethod: method,
         status: 'pendiente',
         couponCode: coupon ? coupon.code : undefined,
       });
+      notifyOrderByEmail({
+        to: settings.notificationEmail,
+        storeName: settings.storeName,
+        accentColor: settings.colors.primary,
+        orderNumber,
+        items,
+        subtotal: finalSubtotal,
+        shipping: shippingCost,
+        total,
+        paymentMethod: method,
+        customer,
+      });
+
+      if (method === 'contra_entrega') {
+        const waUrl = whatsappLinkTo(
+          settings.whatsappNumber,
+          buildOrderWhatsAppMessage({ orderNumber, items, subtotal: finalSubtotal, shipping: shippingCost, total, paymentMethod: method, customer }),
+          settings.whatsappCountryCode,
+        );
+        if (waWindow) waWindow.location.href = waUrl;
+        else window.open(waUrl, '_blank');
+      }
+
       if (coupon) clearCoupon();
       clear();
       router.push(`/pedido-confirmado/${id}`);
     } catch (err) {
       console.error(err);
+      waWindow?.close();
       setError('No pudimos registrar tu pedido. Por favor intenta de nuevo o escríbenos por WhatsApp.');
       setSubmitting(false);
     }

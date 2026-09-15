@@ -261,6 +261,43 @@ una pasarela como **Wompi** o **PayU** (ambas soportan Colombia) sin cambiar
 la arquitectura — es un paso independiente que se puede agregar cuando lo
 necesites.
 
+## Notificación por correo de cada pedido nuevo
+
+Igual que la notificación automática de Shopify, puedes recibir un correo
+con diseño profesional cada vez que alguien complete un pedido (sin importar
+el método de pago). Usa [Resend](https://resend.com) — tiene plan gratis
+(3.000 correos/mes) y no requiere tarjeta para empezar.
+
+1. Crea una cuenta gratis en [resend.com](https://resend.com) y genera una
+   **API Key** en **API Keys > Create API Key**.
+2. Agrega esa llave como `RESEND_API_KEY` en **Vercel > Project Settings >
+   Environment Variables** (nunca lleva el prefijo `NEXT_PUBLIC_`, porque el
+   correo se envía desde el servidor en `/api/notify-order`, no desde el
+   navegador).
+3. En `/admin/configuracion`, sección **General**, escribe el correo donde
+   quieres recibir los pedidos en **"Correo para recibir notificación de
+   cada pedido nuevo"**.
+4. (Opcional pero recomendado) Por defecto los correos se envían desde
+   `onboarding@resend.dev`, una dirección de pruebas de Resend que solo
+   entrega de forma confiable al correo con el que creaste la cuenta. Para
+   recibir en cualquier correo (el de tu negocio, tu contador, etc.) sin
+   restricciones, verifica tu propio dominio en **Resend > Domains** y
+   agrega `RESEND_FROM_EMAIL` con un remitente de ese dominio, por ejemplo:
+   `Hamsa Shoes <pedidos@tudominio.com>`.
+
+Si no configuras `RESEND_API_KEY`, el checkout sigue funcionando normal —
+simplemente no se envía el correo.
+
+## Pago contra entrega: pedido automático a WhatsApp
+
+Cuando la clienta elige **pago contra entrega** en el checkout, apenas se
+confirma el pedido se abre automáticamente una pestaña de WhatsApp hacia el
+número configurado en `/admin/configuracion`, con un mensaje profesional ya
+redactado (número de pedido, productos, talla/color, subtotal, envío, total
+y los datos de entrega) listo para enviar con un toque. Si el navegador
+bloquea la pestaña emergente, la página de confirmación del pedido muestra
+el mismo mensaje en un botón "Confirmar pedido por WhatsApp" como respaldo.
+
 ## Fotos de producto: encuadre automático a cuadrado
 
 Al subir fotos en `/admin/productos` no hace falta recortarlas ni ajustar

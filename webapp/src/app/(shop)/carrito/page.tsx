@@ -9,6 +9,7 @@ import { computeBundlePricing } from '@/lib/bundle';
 import { buildCartWhatsAppMessage, formatPrice, whatsappLinkTo } from '@/lib/utils';
 import { getDepartamentos, getMunicipios } from '@/lib/colombia';
 import { getShippingRate } from '@/lib/shipping';
+import BundleUpsellBanner from '@/components/BundleUpsellBanner';
 
 const DEPARTAMENTOS = getDepartamentos();
 
@@ -103,12 +104,7 @@ export default function CarritoPage() {
             </div>
           )}
           {oneAwayFromBundle && (
-            <Link
-              href="/catalogo"
-              className="mb-3 block rounded-lg bg-urgent/10 px-3 py-2 text-xs font-bold text-urgent hover:bg-urgent/15"
-            >
-              🔥 ¡Agrega 1 par más y activa el 2×1 con envío gratis!
-            </Link>
+            <BundleUpsellBanner totalUnits={totalUnits} bundlePrice={settings.bundle2x1.price} />
           )}
           <div className="flex justify-between text-sm text-muted">
             <span>Subtotal</span>

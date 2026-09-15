@@ -352,6 +352,19 @@ export default function ConfiguracionPage() {
             />
           </Field>
         </div>
+        <Field label="Correo para recibir notificación de cada pedido nuevo">
+          <input
+            type="email"
+            value={settings.notificationEmail}
+            onChange={(e) => update('notificationEmail', e.target.value)}
+            className={inputClass}
+            placeholder="pedidos@tunegocio.com"
+          />
+          <p className="mt-1 text-xs text-muted">
+            Cada vez que alguien complete un pedido, te llega un correo con el detalle — igual que las
+            notificaciones de Shopify. Requiere tener configurado RESEND_API_KEY en el servidor (ver README.md).
+          </p>
+        </Field>
       </Section>
 
       <Section

@@ -7,6 +7,7 @@ import { useCartStore } from '@/lib/cart-store';
 import { useSiteSettings } from '@/lib/settings-context';
 import { computeBundlePricing } from '@/lib/bundle';
 import { buildCartWhatsAppMessage, formatPrice, whatsappLinkTo } from '@/lib/utils';
+import BundleUpsellBanner from '@/components/BundleUpsellBanner';
 
 export default function CartDrawer() {
   const [mounted, setMounted] = useState(false);
@@ -101,13 +102,7 @@ export default function CartDrawer() {
               </div>
             )}
             {oneAwayFromBundle && (
-              <Link
-                href="/catalogo"
-                onClick={close}
-                className="mb-3 block rounded-lg bg-urgent/10 px-3 py-2 text-xs font-bold text-urgent hover:bg-urgent/15"
-              >
-                🔥 ¡Agrega 1 par más y activa el 2×1 con envío gratis!
-              </Link>
+              <BundleUpsellBanner totalUnits={totalUnits} bundlePrice={settings.bundle2x1.price} onNavigate={close} />
             )}
             {bundle.savings > 0 && (
               <div className="mb-1 flex items-center justify-between text-sm text-muted line-through">

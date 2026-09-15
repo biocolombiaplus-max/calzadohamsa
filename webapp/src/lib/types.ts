@@ -147,6 +147,7 @@ export interface SiteSettings {
   logoHeight: number;
   whatsappCountryCode: string;
   whatsappNumber: string;
+  notificationEmail: string;
   collectionsMenu: CollectionMenuItem[];
   colors: SiteColors;
   fonts: {

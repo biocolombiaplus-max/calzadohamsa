@@ -10,6 +10,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   logoHeight: 72,
   whatsappCountryCode: process.env.NEXT_PUBLIC_WHATSAPP_COUNTRY_CODE || '57',
   whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '',
+  notificationEmail: process.env.NEXT_PUBLIC_NOTIFICATION_EMAIL || '',
   collectionsMenu: [],
   colors: {
     primary: '#A9673A',

@@ -55,6 +55,50 @@ export function buildCartWhatsAppMessage(items: { title: string; size: string; c
   return `Hola! Quiero terminar mi compra:\n\n${lines}\n\n¿Me ayudan a confirmar el pedido?`;
 }
 
+// Mensaje de WhatsApp con el resumen completo de un pedido YA CONFIRMADO —
+// se usa tanto para llevar automáticamente a la clienta a WhatsApp cuando
+// elige pago contra entrega, como en el botón de respaldo de la página de
+// confirmación. Formato tipo factura, profesional, listo para enviar tal cual.
+export function buildOrderWhatsAppMessage(order: {
+  orderNumber: string;
+  items: { title: string; size: string; color: string; quantity: number; price: number }[];
+  subtotal: number;
+  shipping: number;
+  total: number;
+  paymentMethod: 'contra_entrega' | 'transferencia' | 'wompi';
+  customer: { name: string; phone: string; address: string; city: string; department: string; locationUrl?: string };
+}): string {
+  const itemsList = order.items
+    .map((i) => `- ${i.title} (talla ${i.size}, ${i.color}) x${i.quantity} — ${formatPrice(i.price * i.quantity)}`)
+    .join('\n');
+  const paymentLabel =
+    order.paymentMethod === 'contra_entrega'
+      ? '💵 Pago contra entrega'
+      : order.paymentMethod === 'wompi'
+        ? '⚡ Pagado en línea'
+        : '🏦 Transferencia bancaria';
+
+  return `✅ *Pedido confirmado* — ${order.orderNumber}
+
+🛍️ *Productos:*
+${itemsList}
+
+💰 Subtotal: ${formatPrice(order.subtotal)}
+🚚 Envío: ${order.shipping === 0 ? 'GRATIS' : formatPrice(order.shipping)}
+*Total: ${formatPrice(order.total)}*
+
+${paymentLabel}
+
+📍 *Datos de entrega:*
+${order.customer.name}
+📱 ${order.customer.phone}
+${order.customer.address}, ${order.customer.city}, ${order.customer.department}${
+    order.customer.locationUrl ? `\n📍 Ubicación: ${order.customer.locationUrl}` : ''
+  }
+
+¿Me confirman que quedó todo listo? ¡Gracias! 😊`;
+}
+
 export function generateOrderNumber(): string {
   const date = new Date();
   const stamp = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(

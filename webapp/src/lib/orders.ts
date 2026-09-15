@@ -1,6 +1,6 @@
 import { collection, doc, getDoc, getDocs, addDoc, updateDoc, orderBy, query, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { db } from './firebase';
-import type { Carrier, Order, OrderInput, OrderStatus } from './types';
+import type { Carrier, CartItem, Order, OrderCustomer, OrderInput, OrderStatus, PaymentMethod } from './types';
 import { generateOrderNumber, stripUndefined } from './utils';
 
 const COLLECTION = 'orders';
@@ -48,6 +48,29 @@ export async function getAllOrders(): Promise<Order[]> {
 
 export async function updateOrderStatus(id: string, status: OrderStatus): Promise<void> {
   await updateDoc(doc(db, COLLECTION, id), { status });
+}
+
+// Avisa por correo a la tienda que llegó un pedido nuevo — igual que la
+// notificación automática de Shopify. Nunca debe romper el checkout: si no
+// hay correo configurado o el envío falla, simplemente no pasa nada.
+export function notifyOrderByEmail(payload: {
+  to: string;
+  storeName: string;
+  accentColor?: string;
+  orderNumber: string;
+  items: CartItem[];
+  subtotal: number;
+  shipping: number;
+  total: number;
+  paymentMethod: PaymentMethod;
+  customer: OrderCustomer;
+}): void {
+  if (!payload.to) return;
+  fetch('/api/notify-order', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  }).catch(() => {});
 }
 
 export async function updateOrderShipping(

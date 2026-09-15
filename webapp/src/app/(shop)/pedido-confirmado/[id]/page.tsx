@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { getOrderById } from '@/lib/orders';
-import { formatPrice, whatsappLinkTo } from '@/lib/utils';
+import { buildOrderWhatsAppMessage, formatPrice, whatsappLinkTo } from '@/lib/utils';
 import { useSiteSettings } from '@/lib/settings-context';
 import PostPurchaseUpsell from '@/components/product/PostPurchaseUpsell';
 import type { Order } from '@/lib/types';
@@ -39,15 +39,7 @@ export default function OrderConfirmationPage() {
     );
   }
 
-  const itemsSummary = order.items
-    .map((i) => `- ${i.title} (talla ${i.size}, ${i.color}) x${i.quantity}`)
-    .join('\n');
-
-  const waMessage = `Hola! Acabo de hacer el pedido *${order.orderNumber}*\n\n${itemsSummary}\n\nTotal: ${formatPrice(
-    order.total,
-  )}\nMétodo de pago: ${order.paymentMethod === 'contra_entrega' ? 'Pago contra entrega' : 'Transferencia'}\n\nMis datos:\n${order.customer.name}\n${order.customer.phone}\n${order.customer.address}, ${order.customer.city}, ${order.customer.department}${
-    order.customer.locationUrl ? `\n\n📍 Mi ubicación: ${order.customer.locationUrl}` : ''
-  }`;
+  const waMessage = buildOrderWhatsAppMessage(order);
 
   return (
     <div className="container-page py-14">
@@ -62,7 +54,9 @@ export default function OrderConfirmationPage() {
 
         <div className="mt-8 rounded-card border-2 border-primary bg-primary-light/10 p-5 text-left">
           <p className="mb-3 text-sm font-bold text-ink">
-            📲 Un último paso — confirma tu pedido por WhatsApp para que lo alistemos hoy mismo:
+            {order.paymentMethod === 'contra_entrega'
+              ? '📲 Ya deberíamos haberte llevado a WhatsApp para confirmar — si no se abrió solo, toca aquí:'
+              : '📲 Un último paso — confirma tu pedido por WhatsApp para que lo alistemos hoy mismo:'}
           </p>
           <a
             href={whatsappLinkTo(whatsappNumber, waMessage, whatsappCountryCode)}
