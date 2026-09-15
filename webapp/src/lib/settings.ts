@@ -27,7 +27,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     bodyFont: 'Inter',
   },
   announcementMessages: [
-    '🔥 2×1 en sandalias — $159.900 + ENVÍO GRATIS',
+    '🔥 2×1 en sandalias — $169.900 + ENVÍO GRATIS',
     '💵 PAGO CONTRA ENTREGA — paga al recibir',
     '✨ +2.400 mujeres ya las tienen',
     '↩️ CAMBIO DE TALLA sin costo',
@@ -56,7 +56,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     exceptions: [],
   },
   bundle2x1: {
-    price: 159900,
+    price: 169900,
   },
   trustItems: [
     { icon: '🔥', title: '2×1 + envío GRATIS', sub: 'Solo en la oferta especial' },
@@ -70,7 +70,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     { icon: '⭐', title: 'Calidad garantizada', text: 'Materiales premium, cambio fácil si algo no queda perfecto.' },
     { icon: '🛡️', title: 'Pago 100% seguro', text: 'Contra entrega o en línea con Wompi.' },
     { icon: '💵', title: 'Contra entrega', text: 'Paga cuando el paquete llega a tu puerta. Sin riesgo.' },
-    { icon: '🔥', title: '2×1 con envío gratis', text: 'Lleva 2 pares por $159.900 y el envío corre por nuestra cuenta.' },
+    { icon: '🔥', title: '2×1 con envío gratis', text: 'Lleva 2 pares por $169.900 y el envío corre por nuestra cuenta.' },
   ],
   testimonialsHeading: 'Ellas ya lo tienen — y no paran de recomendarnos',
   testimonialsSubtext: 'Reseñas reales de clientas en toda Colombia',
