@@ -129,24 +129,35 @@ aquí apuntando Vercel a esta subcarpeta (paso siguiente).
 Cada vez que hagas `git push` a la rama conectada, Vercel vuelve a desplegar
 automáticamente.
 
-## Favicon y vista previa al compartir el link
+## Favicon, "instalar como app" y vista previa al compartir el link
 
-Al entrar al sitio, el ícono de la pestaña del navegador y la imagen que
+Al entrar al sitio, el ícono de la pestaña del navegador, los íconos que se
+usan al **instalar la tienda como app en el celular**, y la imagen que
 aparece al compartir `calzadohamsa.com` (WhatsApp, Facebook, iMessage,
-etc.) se generan automáticamente a partir de tu logo y el nombre de la
-tienda — no necesitas subir nada aparte. Si ya tienes un logo en
+etc.) se generan automáticamente a partir de tu logo y tus colores de marca
+— no necesitas subir nada aparte. Si ya tienes un logo en
 `/admin/configuracion`, se usa ese mismo logo (recortado/centrado
-automáticamente); si no, se genera un ícono de respaldo con la inicial del
-nombre de tu tienda sobre tu color primario, así que nunca se ve el ícono
-genérico de Next.js.
+automáticamente, sobre una tarjeta con degradado de tus colores para que
+se vea premium); si no, se genera un ícono de respaldo con la inicial del
+nombre de tu tienda, así que nunca se ve el ícono genérico de Next.js.
 
-Esto vive en `src/app/icon.tsx` (ícono del navegador), `src/app/apple-icon.tsx`
-(ícono al agregar a inicio en iPhone) y `src/app/opengraph-image.tsx` (la
-tarjeta que se ve al compartir el link). Si cambias el logo o el color
-primario en el admin, estas imágenes se actualizan solas (se regeneran
-cada hora como máximo). Recuerda configurar `NEXT_PUBLIC_SITE_URL` en
-Vercel con tu dominio real para que las vistas previas usen la URL
-correcta.
+**Cómo instalar la tienda como app:**
+- **Android (Chrome):** entra a calzadohamsa.com → menú (⋮) → "Instalar app"
+  o "Agregar a pantalla principal".
+- **iPhone (Safari):** entra a calzadohamsa.com → botón de compartir (□↑) →
+  "Agregar a pantalla de inicio".
+
+En ambos casos queda un ícono con tu logo en el celular que abre la tienda
+a pantalla completa, sin la barra del navegador — como una app nativa.
+
+Esto vive en `src/app/icon.tsx` (favicon del navegador), `src/app/apple-icon.tsx`
++ `src/app/icon-192`, `src/app/icon-512` y `src/app/icon-512-maskable`
+(íconos al instalar como app, en varios tamaños para que se vean nítidos en
+cualquier teléfono) y `src/app/opengraph-image.tsx` (la tarjeta que se ve al
+compartir el link). Si cambias el logo o los colores en el admin, todas
+estas imágenes se actualizan solas (se regeneran cada hora como máximo).
+Recuerda configurar `NEXT_PUBLIC_SITE_URL` en Vercel con tu dominio real
+para que las vistas previas usen la URL correcta.
 
 ## Cómo funciona el checkout (sin pasarela de pago)
 

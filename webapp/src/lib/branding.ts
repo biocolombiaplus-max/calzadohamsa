@@ -10,14 +10,18 @@ export interface Branding {
   storeName: string;
   logoUrl: string;
   primary: string;
+  primaryHover: string;
   cream: string;
+  ink: string;
 }
 
 const DEFAULTS: Branding = {
   storeName: process.env.NEXT_PUBLIC_STORE_NAME || 'Hamsa Shoes',
   logoUrl: '',
   primary: '#A9673A',
+  primaryHover: '#8C5429',
   cream: '#FBF3E5',
+  ink: '#1C1208',
 };
 
 export async function getBranding(): Promise<Branding> {
@@ -42,7 +46,9 @@ export async function getBranding(): Promise<Branding> {
       storeName: fields.storeName?.stringValue || DEFAULTS.storeName,
       logoUrl: fields.logoUrl?.stringValue || '',
       primary: colorFields.primary?.stringValue || DEFAULTS.primary,
+      primaryHover: colorFields.primaryHover?.stringValue || DEFAULTS.primaryHover,
       cream: colorFields.cream?.stringValue || DEFAULTS.cream,
+      ink: colorFields.ink?.stringValue || DEFAULTS.ink,
     };
   } catch {
     return DEFAULTS;

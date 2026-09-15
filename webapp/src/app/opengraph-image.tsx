@@ -6,8 +6,13 @@ export const contentType = 'image/png';
 
 const BADGES = ['💵 Contra entrega', '🔥 2×1 con envío gratis', '🔒 Compra segura'];
 
+function siteDomain(): string {
+  const raw = process.env.NEXT_PUBLIC_SITE_URL || 'https://calzadohamsa.com';
+  return raw.replace(/^https?:\/\//, '').replace(/\/$/, '');
+}
+
 export default async function OgImage() {
-  const { storeName, logoUrl, primary, cream } = await getBranding();
+  const { storeName, logoUrl, primary, primaryHover, ink, cream } = await getBranding();
 
   return new ImageResponse(
     (
@@ -16,51 +21,89 @@ export default async function OgImage() {
           width: '100%',
           height: '100%',
           display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: cream,
+          position: 'relative',
+          background: `linear-gradient(135deg, ${primary} 0%, ${primaryHover} 55%, ${ink} 100%)`,
+          overflow: 'hidden',
         }}
       >
-        <div style={{ display: 'flex', height: 10, width: '100%', background: primary }} />
+        {/* Manchas decorativas translúcidas — le dan profundidad al fondo */}
+        <div
+          style={{
+            position: 'absolute',
+            top: -180,
+            left: -140,
+            width: 480,
+            height: 480,
+            borderRadius: 480,
+            background: 'rgba(255,255,255,0.08)',
+            display: 'flex',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            bottom: -220,
+            right: -160,
+            width: 560,
+            height: 560,
+            borderRadius: 560,
+            background: 'rgba(255,255,255,0.06)',
+            display: 'flex',
+          }}
+        />
 
         <div
           style={{
-            display: 'flex',
-            flex: 1,
+            position: 'relative',
             width: '100%',
+            height: '100%',
+            display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
-          {logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={paddedLogoUrl(logoUrl, 560, 220, cream)}
-              width={560}
-              height={220}
-              style={{ objectFit: 'contain' }}
-              alt=""
-            />
-          ) : (
-            <div style={{ display: 'flex', fontSize: 92, fontWeight: 700, color: primary }}>{storeName}</div>
-          )}
+          {/* Tarjeta elevada con el logo */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: cream,
+              borderRadius: 36,
+              border: '3px solid rgba(255,255,255,0.5)',
+              padding: logoUrl ? '38px 64px' : '48px 72px',
+            }}
+          >
+            {logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={paddedLogoUrl(logoUrl, 480, 180, cream)}
+                width={480}
+                height={180}
+                style={{ objectFit: 'contain' }}
+                alt=""
+              />
+            ) : (
+              <div style={{ display: 'flex', fontSize: 76, fontWeight: 700, color: primary }}>{storeName}</div>
+            )}
+          </div>
 
-          <div style={{ display: 'flex', marginTop: 22, fontSize: 30, color: '#6b5847' }}>
+          <div style={{ display: 'flex', marginTop: 34, fontSize: 30, fontWeight: 600, color: cream }}>
             Sandalias y calzado femenino · Envío a toda Colombia
           </div>
 
-          <div style={{ display: 'flex', marginTop: 40, gap: 16 }}>
+          <div style={{ display: 'flex', marginTop: 36, gap: 16 }}>
             {BADGES.map((label) => (
               <div
                 key={label}
                 style={{
                   display: 'flex',
-                  padding: '12px 22px',
+                  padding: '13px 24px',
                   borderRadius: 999,
-                  background: 'white',
-                  color: '#3a2a1c',
+                  background: 'rgba(255,255,255,0.16)',
+                  border: '1px solid rgba(255,255,255,0.35)',
+                  color: cream,
                   fontSize: 22,
                   fontWeight: 600,
                 }}
@@ -68,6 +111,10 @@ export default async function OgImage() {
                 {label}
               </div>
             ))}
+          </div>
+
+          <div style={{ display: 'flex', marginTop: 42, fontSize: 22, letterSpacing: 2, color: 'rgba(255,255,255,0.6)' }}>
+            {siteDomain().toUpperCase()}
           </div>
         </div>
       </div>

@@ -26,9 +26,16 @@ export const metadata: Metadata = {
     title: `${STORE_NAME} — Sandalias y calzado femenino`,
     description: DESCRIPTION,
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: STORE_NAME,
+  },
 };
 
 export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
   themeColor: '#A9673A',
 };
 
