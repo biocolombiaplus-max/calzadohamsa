@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, addDoc, updateDoc, orderBy, query, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, addDoc, updateDoc, orderBy, query, limit, onSnapshot, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Carrier, CartItem, Order, OrderCustomer, OrderInput, OrderStatus, PaymentMethod } from './types';
 import { generateOrderNumber, stripUndefined } from './utils';
@@ -48,6 +48,31 @@ export async function getAllOrders(): Promise<Order[]> {
 
 export async function updateOrderStatus(id: string, status: OrderStatus): Promise<void> {
   await updateDoc(doc(db, COLLECTION, id), { status });
+}
+
+// Escucha en vivo los pedidos nuevos que van llegando mientras el admin
+// tiene el panel abierto (para la campanita de aviso) — ignora la primera
+// tanda de resultados (los pedidos ya existentes) y solo notifica los que
+// se crean después de empezar a escuchar.
+export function subscribeToNewOrders(onNewOrder: (order: Order) => void): () => void {
+  const q = query(collection(db, COLLECTION), orderBy('createdAt', 'desc'), limit(15));
+  let isFirstSnapshot = true;
+  const unsubscribe = onSnapshot(
+    q,
+    (snapshot) => {
+      if (isFirstSnapshot) {
+        isFirstSnapshot = false;
+        return;
+      }
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === 'added') {
+          onNewOrder(toOrder(change.doc.id, change.doc.data()));
+        }
+      });
+    },
+    () => {},
+  );
+  return unsubscribe;
 }
 
 // Avisa por correo a la tienda que llegó un pedido nuevo — igual que la
