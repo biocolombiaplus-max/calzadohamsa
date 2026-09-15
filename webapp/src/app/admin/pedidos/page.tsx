@@ -241,7 +241,7 @@ function OrderCard({
           href={whatsappLinkTo(order.customer.phone, buildStatusMessage(order, storeName))}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-sm font-semibold text-whatsapp hover:underline"
+          className="flex items-center gap-2 rounded-lg bg-whatsapp px-4 py-2.5 text-sm font-bold text-white shadow-soft transition-transform hover:scale-[1.03] active:scale-[0.98]"
         >
           💬 Avisar por WhatsApp ({STATUSES.find((s) => s.value === order.status)?.label})
         </a>
