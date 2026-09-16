@@ -43,7 +43,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     badge1: '🔥 2×1 con envío gratis',
     badge2: '💵 Contra entrega',
     badge3: '⭐ +2.400 felices',
-    button1Text: '🛍️ Ver colección',
+    button1Text: '🛍️ Ver catálogo',
     button1Url: '/catalogo',
     button2Text: '🔥 Oferta 2×1',
     button2Url: '/oferta-2x1',

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getActiveProducts } from '@/lib/products';
 import type { Product, CartItem } from '@/lib/types';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, resolveColorImage } from '@/lib/utils';
 import { useSiteSettings } from '@/lib/settings-context';
 import BundleSlotPicker, { type BundleSelection } from '@/components/product/BundleSlotPicker';
 import UrgencyTimer from '@/components/product/UrgencyTimer';
@@ -16,7 +16,7 @@ function toCartItem(selection: BundleSelection): CartItem {
     slug: selection.product.slug,
     title: selection.product.title,
     price: selection.product.price,
-    image: selection.product.images[0] ?? '',
+    image: resolveColorImage(selection.product, selection.color) || selection.product.images[0] || '',
     size: selection.size,
     color: selection.color,
     quantity: 1,

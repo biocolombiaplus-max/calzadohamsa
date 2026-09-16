@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo, useState, type RefObject } from 'react';
 import type { Product } from '@/lib/types';
@@ -138,19 +139,38 @@ export default function BuyBox({
       {product.colors.length > 0 && (
         <div>
           <p className="mb-2 text-sm font-semibold text-ink">Color: {color}</p>
-          <div className="flex flex-wrap gap-2">
-            {product.colors.map((c) => (
-              <button
-                key={c.name}
-                onClick={() => handleColorChange(c.name)}
-                aria-label={c.name}
-                className={classNames(
-                  'h-10 w-10 rounded-full border-2 transition-transform',
-                  color === c.name ? 'scale-110 border-primary' : 'border-border',
-                )}
-                style={{ backgroundColor: c.hex }}
-              />
-            ))}
+          <div className="flex flex-wrap gap-3">
+            {product.colors.map((c) => {
+              const thumb = resolveColorImage(product, c.name);
+              const selected = color === c.name;
+              return (
+                <button
+                  key={c.name}
+                  type="button"
+                  onClick={() => handleColorChange(c.name)}
+                  aria-label={c.name}
+                  className="flex flex-col items-center gap-1.5"
+                >
+                  <span
+                    className={classNames(
+                      'block h-9 w-9 rounded-full border-2 transition-transform',
+                      selected ? 'scale-110 border-primary' : 'border-border',
+                    )}
+                    style={{ backgroundColor: c.hex }}
+                  />
+                  {thumb && (
+                    <span
+                      className={classNames(
+                        'relative block h-11 w-11 overflow-hidden rounded-lg border-2 transition-colors',
+                        selected ? 'border-primary' : 'border-border',
+                      )}
+                    >
+                      <Image src={thumb} alt={c.name} fill sizes="44px" className="object-cover" />
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

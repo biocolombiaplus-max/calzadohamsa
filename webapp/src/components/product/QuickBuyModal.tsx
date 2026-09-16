@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { createOrder } from '@/lib/orders';
+import { createOrder, notifyOrderByEmail, notifyOrderByPush } from '@/lib/orders';
 import { getDepartamentos, getMunicipios } from '@/lib/colombia';
 import { getShippingRate } from '@/lib/shipping';
 import { computeBundlePricing } from '@/lib/bundle';
@@ -134,17 +134,31 @@ export default function QuickBuyModal({
     try {
       if (mode === 'wompi') {
         const reference = generatePaymentReference();
-        const { id } = await createOrder({
+        const customer = locationUrl ? { ...form, locationUrl } : form;
+        const { id, orderNumber } = await createOrder({
           items,
           subtotal,
           shipping: shippingCost,
           total,
-          customer: locationUrl ? { ...form, locationUrl } : form,
+          customer,
           paymentMethod: 'wompi',
           status: 'pendiente',
           paymentReference: reference,
           couponCode: couponApplies ? coupon!.code : undefined,
         });
+        notifyOrderByEmail({
+          to: settings.notificationEmail,
+          storeName: settings.storeName,
+          accentColor: settings.colors.primary,
+          orderNumber,
+          items,
+          subtotal,
+          shipping: shippingCost,
+          total,
+          paymentMethod: 'wompi',
+          customer,
+        });
+        notifyOrderByPush({ orderNumber, total, customerName: form.name });
         if (couponApplies) clearCoupon();
         await redirectToWompiCheckout({
           amountInCents: Math.round(total * 100),
@@ -156,16 +170,30 @@ export default function QuickBuyModal({
         return;
       }
 
-      const { id } = await createOrder({
+      const customer = locationUrl ? { ...form, locationUrl } : form;
+      const { id, orderNumber } = await createOrder({
         items,
         subtotal,
         shipping: shippingCost,
         total,
-        customer: locationUrl ? { ...form, locationUrl } : form,
+        customer,
         paymentMethod: 'contra_entrega',
         status: 'pendiente',
         couponCode: couponApplies ? coupon!.code : undefined,
       });
+      notifyOrderByEmail({
+        to: settings.notificationEmail,
+        storeName: settings.storeName,
+        accentColor: settings.colors.primary,
+        orderNumber,
+        items,
+        subtotal,
+        shipping: shippingCost,
+        total,
+        paymentMethod: 'contra_entrega',
+        customer,
+      });
+      notifyOrderByPush({ orderNumber, total, customerName: form.name });
       if (couponApplies) clearCoupon();
       router.push(`/pedido-confirmado/${id}`);
     } catch (err) {

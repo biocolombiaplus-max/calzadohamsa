@@ -11,22 +11,37 @@ self.addEventListener('push', (event) => {
   }
 
   event.waitUntil(
-    self.registration.showNotification(data.title, {
-      body: data.body,
-      icon: '/icon-192',
-      badge: '/icon-192',
-      data: { url: data.url },
-      vibrate: [400, 150, 400, 150, 400, 150, 600],
-      requireInteraction: true,
-      silent: false,
-      // Sin esta combinación, si llegan dos pedidos seguidos, la segunda
-      // notificación con la misma "tag" reemplazaba a la primera SIN volver
-      // a sonar ni vibrar (comportamiento por defecto del navegador) — con
-      // "renotify" cada pedido nuevo vuelve a alertar de verdad.
-      tag: `pedido-${Date.now()}`,
-      renotify: true,
-      actions: [{ action: 'view', title: '👀 Ver pedido' }],
-    }),
+    (async () => {
+      await self.registration.showNotification(data.title, {
+        body: data.body,
+        icon: '/icon-192',
+        badge: '/icon-192',
+        data: { url: data.url },
+        vibrate: [400, 150, 400, 150, 400, 150, 600],
+        requireInteraction: true,
+        silent: false,
+        // Sin esta combinación, si llegan dos pedidos seguidos, la segunda
+        // notificación con la misma "tag" reemplazaba a la primera SIN volver
+        // a sonar ni vibrar (comportamiento por defecto del navegador) — con
+        // "renotify" cada pedido nuevo vuelve a alertar de verdad.
+        tag: `pedido-${Date.now()}`,
+        renotify: true,
+        actions: [{ action: 'view', title: '👀 Ver pedido' }],
+      });
+
+      // Insignia numérica sobre el ícono de la app instalada (Android Chrome
+      // e iOS 16.4+ como PWA) — cuenta las notificaciones de pedido que
+      // siguen sin verse, para que la administradora note de un vistazo,
+      // sin abrir la app, cuántos pedidos nuevos le llegaron.
+      try {
+        if (self.navigator && 'setAppBadge' in self.navigator) {
+          const notifications = await self.registration.getNotifications();
+          await self.navigator.setAppBadge(notifications.length);
+        }
+      } catch {
+        // Badging API no soportada en este navegador/dispositivo — se ignora.
+      }
+    })(),
   );
 });
 
@@ -35,11 +50,18 @@ self.addEventListener('notificationclick', (event) => {
   const targetUrl = event.notification.data?.url || '/admin/pedidos';
 
   event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
-      for (const client of clients) {
+    (async () => {
+      try {
+        if (self.navigator && 'clearAppBadge' in self.navigator) await self.navigator.clearAppBadge();
+      } catch {
+        // Badging API no soportada — se ignora.
+      }
+
+      const clientsList = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      for (const client of clientsList) {
         if (client.url.includes(targetUrl) && 'focus' in client) return client.focus();
       }
       if (self.clients.openWindow) return self.clients.openWindow(targetUrl);
-    }),
+    })(),
   );
 });

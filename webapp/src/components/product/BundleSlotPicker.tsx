@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import type { Product } from '@/lib/types';
-import { classNames, formatPrice } from '@/lib/utils';
+import { classNames, formatPrice, resolveColorImage } from '@/lib/utils';
 
 export interface BundleSelection {
   product: Product;
@@ -74,9 +74,13 @@ export default function BundleSlotPicker({
         <div>
           <div className="flex gap-3">
             <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-cream-alt">
-              {selection.product.images[0] && (
-                <Image src={selection.product.images[0]} alt={selection.product.title} fill className="object-cover" />
-              )}
+              {(() => {
+                const displayImage =
+                  resolveColorImage(selection.product, selection.color) || selection.product.images[0];
+                return displayImage ? (
+                  <Image src={displayImage} alt={selection.product.title} fill className="object-cover" />
+                ) : null;
+              })()}
             </div>
             <div className="flex-1">
               <p className="text-sm font-bold text-ink">{selection.product.title}</p>
@@ -115,20 +119,38 @@ export default function BundleSlotPicker({
           {selection.product.colors.length > 0 && (
             <div className="mt-3">
               <p className="mb-1.5 text-xs font-semibold text-ink">Color</p>
-              <div className="flex flex-wrap gap-1.5">
-                {selection.product.colors.map((c) => (
-                  <button
-                    key={c.name}
-                    type="button"
-                    onClick={() => onChange({ ...selection, color: c.name })}
-                    aria-label={c.name}
-                    className={classNames(
-                      'h-7 w-7 rounded-full border-2 transition-transform',
-                      selection.color === c.name ? 'scale-110 border-primary' : 'border-border',
-                    )}
-                    style={{ backgroundColor: c.hex }}
-                  />
-                ))}
+              <div className="flex flex-wrap gap-2">
+                {selection.product.colors.map((c) => {
+                  const thumb = resolveColorImage(selection.product, c.name);
+                  const selected = selection.color === c.name;
+                  return (
+                    <button
+                      key={c.name}
+                      type="button"
+                      onClick={() => onChange({ ...selection, color: c.name })}
+                      aria-label={c.name}
+                      className="flex flex-col items-center gap-1"
+                    >
+                      <span
+                        className={classNames(
+                          'block h-7 w-7 rounded-full border-2 transition-transform',
+                          selected ? 'scale-110 border-primary' : 'border-border',
+                        )}
+                        style={{ backgroundColor: c.hex }}
+                      />
+                      {thumb && (
+                        <span
+                          className={classNames(
+                            'relative block h-8 w-8 overflow-hidden rounded-md border-2',
+                            selected ? 'border-primary' : 'border-border',
+                          )}
+                        >
+                          <Image src={thumb} alt={c.name} fill sizes="32px" className="object-cover" />
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}

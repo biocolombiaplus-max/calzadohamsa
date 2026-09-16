@@ -38,6 +38,11 @@ export default function OrderAlertListener() {
       setPushEnabled(!!sub);
       setPushChecked(true);
     });
+    // La administradora ya está viendo el panel — se apaga la insignia del
+    // ícono de la app, si el navegador la soporta.
+    if ('clearAppBadge' in navigator) {
+      (navigator as Navigator & { clearAppBadge: () => Promise<void> }).clearAppBadge().catch(() => {});
+    }
   }, []);
 
   useEffect(() => {
