@@ -72,7 +72,16 @@ export async function POST(request: Request) {
   const results = await Promise.allSettled(
     subscriptions
       .filter((s): s is Required<StoredSubscription> => !!s.endpoint && !!s.keys?.p256dh && !!s.keys?.auth)
-      .map((s) => webpush.sendNotification({ endpoint: s.endpoint, keys: s.keys } as any, payload)),
+      .map((s) =>
+        webpush.sendNotification({ endpoint: s.endpoint, keys: s.keys } as any, payload, {
+          // "urgency: high" le pide a Android/Chrome que despierte el
+          // teléfono y entregue la notificación de inmediato, en vez de
+          // agruparla con el ahorro de batería — clave para que realmente
+          // suene y vibre apenas entra el pedido, no minutos después.
+          urgency: 'high',
+          TTL: 60,
+        }),
+      ),
   );
 
   const sent = results.filter((r) => r.status === 'fulfilled').length;

@@ -80,7 +80,7 @@ export function buildOrderWhatsAppMessage(order: {
 
   return `✅ *Pedido confirmado* — ${order.orderNumber}
 
-🛍️ *Productos:*
+📦 *Productos:*
 ${itemsList}
 
 💰 Subtotal: ${formatPrice(order.subtotal)}

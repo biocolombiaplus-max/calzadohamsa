@@ -16,9 +16,16 @@ self.addEventListener('push', (event) => {
       icon: '/icon-192',
       badge: '/icon-192',
       data: { url: data.url },
-      vibrate: [200, 100, 200, 100, 300],
+      vibrate: [400, 150, 400, 150, 400, 150, 600],
       requireInteraction: true,
-      tag: 'nuevo-pedido',
+      silent: false,
+      // Sin esta combinación, si llegan dos pedidos seguidos, la segunda
+      // notificación con la misma "tag" reemplazaba a la primera SIN volver
+      // a sonar ni vibrar (comportamiento por defecto del navegador) — con
+      // "renotify" cada pedido nuevo vuelve a alertar de verdad.
+      tag: `pedido-${Date.now()}`,
+      renotify: true,
+      actions: [{ action: 'view', title: '👀 Ver pedido' }],
     }),
   );
 });
