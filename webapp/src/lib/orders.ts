@@ -1,7 +1,7 @@
 import { collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, orderBy, query, limit, onSnapshot, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Carrier, CartItem, Order, OrderCustomer, OrderInput, OrderStatus, PaymentMethod } from './types';
-import { generateOrderNumber, stripUndefined } from './utils';
+import { formatPrice, generateOrderNumber, stripUndefined } from './utils';
 
 const COLLECTION = 'orders';
 
@@ -99,6 +99,22 @@ export function notifyOrderByEmail(payload: {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
+  }).catch(() => {});
+}
+
+// Notificación push al celular de la administradora — llega como aviso del
+// sistema (con sonido y vibración) aunque la tienda no esté abierta, igual
+// que la app de Shopify. Si nadie activó las notificaciones o faltan las
+// llaves VAPID en el servidor, no pasa nada (el checkout sigue normal).
+export function notifyOrderByPush(payload: { orderNumber: string; total: number; customerName: string }): void {
+  fetch('/api/send-push', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      title: '🎉 ¡Nuevo pedido!',
+      bodyText: `${payload.orderNumber} · ${formatPrice(payload.total)} · ${payload.customerName}`,
+      url: '/admin/pedidos',
+    }),
   }).catch(() => {});
 }
 

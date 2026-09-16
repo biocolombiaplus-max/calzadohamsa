@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useCartStore } from '@/lib/cart-store';
-import { createOrder, notifyOrderByEmail } from '@/lib/orders';
+import { createOrder, notifyOrderByEmail, notifyOrderByPush } from '@/lib/orders';
 import { buildOrderWhatsAppMessage, classNames, formatPrice, whatsappLinkTo } from '@/lib/utils';
 import { getDepartamentos, getMunicipios } from '@/lib/colombia';
 import { getShippingRate } from '@/lib/shipping';
@@ -136,6 +136,7 @@ export default function CheckoutPage() {
           paymentMethod: 'wompi',
           customer,
         });
+        notifyOrderByPush({ orderNumber, total: wompiTotal, customerName: form.name });
         if (coupon) clearCoupon();
         await redirectToWompiCheckout({
           amountInCents: Math.round(wompiTotal * 100),
@@ -169,6 +170,7 @@ export default function CheckoutPage() {
         paymentMethod: method,
         customer,
       });
+      notifyOrderByPush({ orderNumber, total, customerName: form.name });
 
       if (method === 'contra_entrega') {
         const waUrl = whatsappLinkTo(

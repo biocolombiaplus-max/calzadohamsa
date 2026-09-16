@@ -1,6 +1,7 @@
-// Campanita de "caja registradora" para avisar pedidos nuevos en el admin —
-// sintetizada en el navegador con Web Audio API (sin archivo de audio de
-// por medio), para que suene igual sin depender de conexión ni licencias.
+// Campanita de "caja registradora antigua" para avisar pedidos nuevos en el
+// admin — sintetizada en el navegador con Web Audio API (sin archivo de
+// audio de por medio), para que suene igual sin depender de conexión ni
+// licencias.
 
 let sharedContext: AudioContext | null = null;
 let sharedMasterBus: AudioNode | null = null;
@@ -63,7 +64,7 @@ function playTone(
   osc.type = type;
   osc.frequency.setValueAtTime(freq, time);
   gain.gain.setValueAtTime(0, time);
-  gain.gain.linearRampToValueAtTime(peakGain, time + 0.008);
+  gain.gain.linearRampToValueAtTime(peakGain, time + 0.006);
   gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
   osc.connect(gain);
   gain.connect(bus);
@@ -102,37 +103,46 @@ function playNoiseBurst(
   noise.stop(time + durationSec);
 }
 
-// Golpe grave del mecanismo (el "clank" metálico de la caja registradora al
-// abrirse), le da peso y cuerpo antes de las campanadas.
+// Golpe grave del mecanismo (el "clank" metálico del cajón al abrirse).
 function playMechThunk(ctx: AudioContext, bus: AudioNode, time: number) {
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
   osc.type = 'square';
-  osc.frequency.setValueAtTime(190, time);
-  osc.frequency.exponentialRampToValueAtTime(90, time + 0.11);
-  gain.gain.setValueAtTime(0.9, time);
-  gain.gain.exponentialRampToValueAtTime(0.001, time + 0.14);
+  osc.frequency.setValueAtTime(180, time);
+  osc.frequency.exponentialRampToValueAtTime(85, time + 0.12);
+  gain.gain.setValueAtTime(0.85, time);
+  gain.gain.exponentialRampToValueAtTime(0.001, time + 0.15);
   osc.connect(gain);
   gain.connect(bus);
   osc.start(time);
-  osc.stop(time + 0.16);
+  osc.stop(time + 0.17);
 }
 
-// El clásico "cha-ching": golpe del mecanismo + un pequeño repique metálico
-// (el trinquete de la caja) y dos campanadas brillantes bien marcadas.
+// Una sola campanada brillante y resonante, como la campanita de escritorio
+// de una caja registradora de manivela: dos frecuencias casi idénticas
+// (para el "aleteo" natural de un timbre real) más un armónico agudo por
+// encima, con una caída larga como si siguiera vibrando.
+function playBell(ctx: AudioContext, bus: AudioNode, time: number) {
+  playTone(ctx, bus, time, 2100, 1.1, 0.5, 'triangle');
+  playTone(ctx, bus, time, 2114, 1.1, 0.45, 'sine');
+  playTone(ctx, bus, time, 4200, 0.6, 0.14, 'sine');
+}
+
+// El clásico timbre de caja registradora antigua: la manivela (trinquete
+// mecánico), el golpe del cajón al abrirse y la campanada de escritorio.
 export function playCashRegisterSound(): void {
   const ctx = getAudioContext();
   if (!ctx || ctx.state !== 'running') return;
   const bus = getMasterBus(ctx);
   const now = ctx.currentTime;
 
-  playMechThunk(ctx, bus, now);
-  playNoiseBurst(ctx, bus, now, 0.07, 2400, 1.1, 0.9);
-  playNoiseBurst(ctx, bus, now + 0.035, 0.03, 3600, 2, 0.5);
-  playNoiseBurst(ctx, bus, now + 0.06, 0.03, 4200, 2, 0.4);
+  // Manivela: 4 clics mecánicos parejos.
+  for (let i = 0; i < 4; i++) {
+    playNoiseBurst(ctx, bus, now + i * 0.045, 0.025, 3200, 2.5, 0.4);
+  }
 
-  playTone(ctx, bus, now + 0.14, 1568, 0.4, 0.55, 'triangle');
-  playTone(ctx, bus, now + 0.14, 1976, 0.4, 0.4, 'sine');
-  playTone(ctx, bus, now + 0.32, 2093, 0.6, 0.55, 'triangle');
-  playTone(ctx, bus, now + 0.32, 2637, 0.6, 0.38, 'sine');
+  playMechThunk(ctx, bus, now + 0.19);
+  playNoiseBurst(ctx, bus, now + 0.19, 0.06, 2200, 1.1, 0.6);
+
+  playBell(ctx, bus, now + 0.34);
 }

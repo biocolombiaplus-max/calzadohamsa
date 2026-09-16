@@ -299,6 +299,48 @@ el método de pago). Usa [Resend](https://resend.com) — tiene plan gratis
 Si no configuras `RESEND_API_KEY`, el checkout sigue funcionando normal —
 simplemente no se envía el correo.
 
+## Notificación push al celular (como la app de Shopify)
+
+Además del correo, la administradora puede recibir un **aviso push en el
+celular** cada vez que llega un pedido — con sonido y vibración del
+sistema, funcione o no la tienda abierta en ese momento, exactamente como
+la app de Shopify. Se activa una sola vez y queda guardado en el
+navegador/teléfono para siempre, sin tener que repetirlo cada vez que se
+vuelve a entrar.
+
+**Activarlo (una sola vez, gratis, sin servicios externos):**
+
+1. En tu computador, corre este comando dentro de la carpeta `webapp/`
+   (no hace falta instalar nada aparte, `npx` lo descarga solo):
+   ```bash
+   npx web-push generate-vapid-keys
+   ```
+2. Te va a dar dos líneas, "Public Key" y "Private Key". En **Vercel >
+   Project Settings > Environment Variables** agrega:
+   - `NEXT_PUBLIC_VAPID_PUBLIC_KEY` → la llave pública
+   - `VAPID_PRIVATE_KEY` → la llave privada (nunca lleva `NEXT_PUBLIC_`
+     porque solo se usa en el servidor, en `/api/send-push`)
+   - `VAPID_SUBJECT` → `mailto:` seguido de un correo tuyo, por ejemplo
+     `mailto:contacto@calzadohamsa.com`
+3. Vuelve a desplegar el sitio en Vercel para que tome las variables.
+4. Desde el celular de la administradora, entra a `/admin` (idealmente ya
+   instalada como app, ver más abajo) y toca el botón **"🔔 Activar
+   notificaciones de pedidos"**. El teléfono va a pedir permiso de
+   notificaciones — hay que aceptar.
+
+Importante: genera esas llaves **una sola vez** y no las cambies después
+— si las regeneras, todos los celulares que ya se habían suscrito dejan de
+recibir avisos y tendrían que volver a activarlos.
+
+**Compatibilidad:** funciona perfecto en Android (Chrome, directamente).
+En iPhone requiere iOS 16.4 o superior y que la tienda esté **agregada a
+la pantalla de inicio** como app (ver la sección de abajo) — Safari no
+entrega notificaciones push a pestañas normales, solo a la app instalada.
+
+Sin `VAPID_PRIVATE_KEY` configurada, el botón de activar simplemente no
+hace nada — el checkout y el resto de la tienda siguen funcionando
+normal.
+
 ## Pago contra entrega: pedido automático a WhatsApp
 
 Cuando la clienta elige **pago contra entrega** en el checkout, apenas se
