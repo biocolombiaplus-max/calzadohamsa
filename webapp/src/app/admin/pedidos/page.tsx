@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { getAllOrders, updateOrderStatus, updateOrderShipping, deleteOrder } from '@/lib/orders';
 import { getSiteSettings } from '@/lib/settings';
 import { CARRIERS, type Order, type OrderStatus, type Carrier } from '@/lib/types';
@@ -90,8 +91,15 @@ export default function AdminOrdersPage() {
 
   return (
     <div>
-      <h1 className="mb-1 font-heading text-2xl font-bold text-ink">Pedidos</h1>
-      <p className="mb-6 text-sm text-muted">Gestiona el estado, el envío y el seguimiento de cada pedido</p>
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="mb-1 font-heading text-2xl font-bold text-ink">Pedidos</h1>
+          <p className="text-sm text-muted">Gestiona el estado, el envío y el seguimiento de cada pedido</p>
+        </div>
+        <Link href="/admin/pedidos/nuevo" className="btn-primary shrink-0 text-sm">
+          + Nuevo pedido
+        </Link>
+      </div>
 
       <div className="space-y-4">
         {orders === null ? (
