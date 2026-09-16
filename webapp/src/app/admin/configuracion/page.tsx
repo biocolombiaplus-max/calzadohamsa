@@ -204,6 +204,83 @@ function ImageUploadField({
   );
 }
 
+// Varias fotos que rotan solas en el hero — misma idea que "Fotos del
+// producto" (subir varias a la vez, quitar una por una), pero guardando
+// un arreglo de URLs en vez de una sola imagen.
+function MultiImageUploadField({
+  label,
+  help,
+  values,
+  folder,
+  onChange,
+}: {
+  label: string;
+  help?: string;
+  values: string[];
+  folder: string;
+  onChange: (urls: string[]) => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+
+  async function handleFiles(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setUploadError('');
+    const queued = Array.from(files);
+    e.target.value = '';
+
+    setUploading(true);
+    try {
+      for (const file of queued) {
+        try {
+          const url = await uploadProductImage(file, folder);
+          onChange([...values, url]);
+        } catch (err) {
+          setUploadError(err instanceof Error ? err.message : 'No se pudo subir la foto. Intenta de nuevo.');
+        }
+      }
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function removeAt(url: string) {
+    onChange(values.filter((v) => v !== url));
+  }
+
+  return (
+    <Field label={label}>
+      <div className="mb-2 flex flex-wrap gap-3">
+        {values.map((url, i) => (
+          <div key={url + i} className="relative h-20 w-20 overflow-hidden rounded-lg border border-border bg-cream-alt">
+            <Image src={url} alt="" fill className="object-cover" />
+            {i === 0 && (
+              <span className="absolute bottom-0 left-0 right-0 bg-ink/70 py-0.5 text-center text-[9px] font-bold text-white">
+                Portada
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => removeAt(url)}
+              className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-ink/80 text-xs text-white"
+              aria-label="Quitar"
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+        <label className="flex h-20 w-20 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-border text-center text-[11px] text-muted hover:border-primary">
+          {uploading ? 'Subiendo...' : '+ Agregar'}
+          <input type="file" accept="image/*" multiple className="hidden" onChange={handleFiles} disabled={uploading} />
+        </label>
+      </div>
+      {uploadError && <p className="mb-1 text-xs text-urgent">{uploadError}</p>}
+      {help && <p className="text-xs text-muted">{help}</p>}
+    </Field>
+  );
+}
+
 export default function ConfiguracionPage() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [saving, setSaving] = useState(false);
@@ -697,11 +774,12 @@ export default function ConfiguracionPage() {
             className={inputClass}
           />
         </Field>
-        <ImageUploadField
-          label="Imagen del hero"
-          value={settings.hero.image}
+        <MultiImageUploadField
+          label="Fotos del hero (van rotando solas si subes varias)"
+          help="La primera foto es la portada. Se recomienda máximo 4-5 fotos para que roten con buen ritmo."
+          values={settings.hero.images}
           folder="site"
-          onChange={(url) => updateNested('hero', 'image', url)}
+          onChange={(urls) => updateNested('hero', 'images', urls)}
         />
         <div className="grid gap-4 sm:grid-cols-3">
           <Field label="Badge 1">

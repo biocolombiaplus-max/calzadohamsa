@@ -39,7 +39,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     heading: 'Sandalias que te hacen brillar',
     subtext:
       'Diseños exclusivos para la mujer colombiana. Pago al recibir · Envío a todo el país · Cambio de talla gratis.',
-    image: '/hero-placeholder.svg',
+    images: ['/hero-placeholder.svg'],
     badge1: '🔥 2×1 con envío gratis',
     badge2: '💵 Contra entrega',
     badge3: '⭐ +2.400 felices',
@@ -128,7 +128,19 @@ export function mergeWithDefaults(data: Partial<SiteSettings> | undefined): Site
     ...data,
     colors: { ...DEFAULT_SETTINGS.colors, ...data.colors },
     fonts: { ...DEFAULT_SETTINGS.fonts, ...data.fonts },
-    hero: { ...DEFAULT_SETTINGS.hero, ...data.hero },
+    hero: {
+      ...DEFAULT_SETTINGS.hero,
+      ...data.hero,
+      // Sitios que guardaron su configuración antes de que el hero
+      // soportara varias fotos rotando solo tenían un campo "image" (una
+      // sola foto) en vez de "images" — se migra automáticamente para no
+      // perder la foto que ya tenían puesta.
+      images: data.hero?.images?.length
+        ? data.hero.images
+        : (data.hero as { image?: string } | undefined)?.image
+          ? [(data.hero as { image?: string }).image as string]
+          : DEFAULT_SETTINGS.hero.images,
+    },
     cta: { ...DEFAULT_SETTINGS.cta, ...data.cta },
     footer: { ...DEFAULT_SETTINGS.footer, ...data.footer },
     shipping: {

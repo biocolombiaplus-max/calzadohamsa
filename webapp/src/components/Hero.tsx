@@ -2,8 +2,25 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
 import { useSiteSettings } from '@/lib/settings-context';
 import { classNames, whatsappLinkTo } from '@/lib/utils';
+
+const ROTATE_MS = 4500;
+
+// Si el admin subió varias fotos, van rotando solas cada pocos segundos
+// (con un cruce suave entre una y otra) para mostrar más modelos sin que
+// la clienta tenga que hacer nada — si solo hay una foto, se queda fija.
+function useRotatingIndex(length: number): number {
+  const [index, setIndex] = useState(0);
+  useEffect(() => {
+    if (length <= 1) return;
+    setIndex(0);
+    const id = setInterval(() => setIndex((i) => (i + 1) % length), ROTATE_MS);
+    return () => clearInterval(id);
+  }, [length]);
+  return index;
+}
 
 const TITLE_SIZE_CLASSES: Record<string, string> = {
   sm: 'text-3xl sm:text-4xl lg:text-5xl',
@@ -20,6 +37,8 @@ const SUBTEXT_SIZE_CLASSES: Record<string, string> = {
 
 export default function Hero() {
   const { hero, storeName, whatsappCountryCode, whatsappNumber } = useSiteSettings();
+  const images = hero.images.length > 0 ? hero.images : ['/hero-placeholder.svg'];
+  const activeIndex = useRotatingIndex(images.length);
 
   return (
     <section className="bg-cream">
@@ -86,7 +105,32 @@ export default function Hero() {
         </div>
 
         <div className="relative aspect-[4/5] overflow-hidden rounded-card bg-cream-alt shadow-soft">
-          <Image src={hero.image || '/hero-placeholder.svg'} alt={storeName} fill priority className="object-cover" />
+          {images.map((src, i) => (
+            <Image
+              key={src + i}
+              src={src}
+              alt={storeName}
+              fill
+              priority={i === 0}
+              className={classNames(
+                'object-cover transition-opacity duration-1000 ease-in-out',
+                i === activeIndex ? 'opacity-100' : 'opacity-0',
+              )}
+            />
+          ))}
+          {images.length > 1 && (
+            <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
+              {images.map((_, i) => (
+                <span
+                  key={i}
+                  className={classNames(
+                    'h-1.5 rounded-full shadow-sm transition-all',
+                    i === activeIndex ? 'w-5 bg-white' : 'w-1.5 bg-white/60',
+                  )}
+                />
+              ))}
+            </div>
+          )}
           <div className="absolute right-4 top-4 rounded-card bg-white/95 px-4 py-2.5 shadow-soft">
             <p className="text-xs font-bold text-ink">🆕 Nuevo ingreso</p>
             <p className="text-[11px] text-muted">+2.400 clientas nos recomiendan</p>

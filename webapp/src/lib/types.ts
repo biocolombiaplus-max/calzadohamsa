@@ -164,7 +164,7 @@ export interface SiteSettings {
     eyebrow: string;
     heading: string;
     subtext: string;
-    image: string;
+    images: string[];
     badge1: string;
     badge2: string;
     badge3: string;
