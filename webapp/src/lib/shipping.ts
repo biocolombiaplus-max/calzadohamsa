@@ -1,4 +1,4 @@
-import type { ShippingSettings } from './types';
+import type { BundleShippingException, ShippingSettings } from './types';
 
 export function getShippingRate(shipping: ShippingSettings, department: string, municipio: string): number {
   if (!department) return shipping.defaultRate;
@@ -10,4 +10,18 @@ export function getShippingRate(shipping: ShippingSettings, department: string, 
 
   const rate = shipping.rates.find((r) => r.department === department);
   return rate ? rate.rate : shipping.defaultRate;
+}
+
+// El combo 2x1 trae envío gratis por defecto, pero algunos departamentos
+// (por su costo real de transporte) pueden quedar marcados como excepción
+// desde el admin — ahí sí se cobra el envío que se configure para ese
+// departamento en vez de dejarlo gratis. Devuelve null si no aplica ninguna
+// excepción (o sea, sigue siendo gratis).
+export function getBundleShippingOverride(
+  exceptions: BundleShippingException[],
+  department: string,
+): number | null {
+  if (!department) return null;
+  const exception = exceptions.find((e) => e.department === department);
+  return exception ? exception.rate : null;
 }

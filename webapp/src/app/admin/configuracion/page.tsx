@@ -13,6 +13,7 @@ import type {
   TestimonialItem,
   DepartmentRate,
   ShippingException,
+  BundleShippingException,
   CollectionMenuItem,
 } from '@/lib/types';
 
@@ -369,7 +370,7 @@ export default function ConfiguracionPage() {
 
       <Section
         title="Envíos y oferta 2×1"
-        description="Costo de envío según departamento/municipio, y el precio del combo 2×1"
+        description="Costo de envío según departamento/municipio, el precio del combo 2×1 y en qué departamentos ese combo NO trae envío gratis"
       >
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Costo de envío por defecto (si el departamento no tiene tarifa propia)">
@@ -386,7 +387,7 @@ export default function ConfiguracionPage() {
               type="number"
               min={0}
               value={settings.bundle2x1.price}
-              onChange={(e) => update('bundle2x1', { price: Number(e.target.value) })}
+              onChange={(e) => update('bundle2x1', { ...settings.bundle2x1, price: Number(e.target.value) })}
               className={inputClass}
             />
           </Field>
@@ -457,6 +458,41 @@ export default function ConfiguracionPage() {
                   {getMunicipios(item.department).map((m) => (
                     <option key={m} value={m}>
                       {m}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  min={0}
+                  value={item.rate}
+                  onChange={(e) => onEdit({ ...item, rate: Number(e.target.value) })}
+                  className={inputClass}
+                  placeholder="Costo de envío"
+                />
+              </>
+            )}
+          />
+        </div>
+
+        <div>
+          <p className="mb-2 text-sm font-semibold text-ink">
+            Departamentos SIN envío gratis en el 2×1 (se cobra el valor que pongas)
+          </p>
+          <ListEditor<BundleShippingException>
+            items={settings.bundle2x1.shippingExceptions}
+            onChange={(items) => update('bundle2x1', { ...settings.bundle2x1, shippingExceptions: items })}
+            empty={{ department: '', rate: settings.shipping.defaultRate }}
+            renderRow={(item, onEdit) => (
+              <>
+                <select
+                  value={item.department}
+                  onChange={(e) => onEdit({ ...item, department: e.target.value })}
+                  className={`${inputClass} bg-white`}
+                >
+                  <option value="">Departamento...</option>
+                  {DEPARTAMENTOS.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
                     </option>
                   ))}
                 </select>

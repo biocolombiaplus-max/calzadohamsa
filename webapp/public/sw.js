@@ -17,7 +17,10 @@ self.addEventListener('push', (event) => {
         icon: '/icon-192',
         badge: '/icon-192',
         data: { url: data.url },
-        vibrate: [400, 150, 400, 150, 400, 150, 600],
+        // Patrón de vibración más largo e intenso que antes — pulsos más
+        // fuertes y una repetición extra, para que se note bien aunque el
+        // celular esté en la mesa o en el bolsillo.
+        vibrate: [600, 150, 600, 150, 600, 150, 600, 150, 800],
         requireInteraction: true,
         silent: false,
         // Sin esta combinación, si llegan dos pedidos seguidos, la segunda

@@ -57,6 +57,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   },
   bundle2x1: {
     price: 169900,
+    shippingExceptions: [],
   },
   trustItems: [
     { icon: '🔥', title: '2×1 + envío GRATIS', sub: 'Solo en la oferta especial' },
@@ -132,7 +133,11 @@ export function mergeWithDefaults(data: Partial<SiteSettings> | undefined): Site
       rates: data.shipping?.rates ?? DEFAULT_SETTINGS.shipping.rates,
       exceptions: data.shipping?.exceptions ?? DEFAULT_SETTINGS.shipping.exceptions,
     },
-    bundle2x1: { ...DEFAULT_SETTINGS.bundle2x1, ...data.bundle2x1 },
+    bundle2x1: {
+      ...DEFAULT_SETTINGS.bundle2x1,
+      ...data.bundle2x1,
+      shippingExceptions: data.bundle2x1?.shippingExceptions ?? DEFAULT_SETTINGS.bundle2x1.shippingExceptions,
+    },
     logoHeight: data.logoHeight ?? DEFAULT_SETTINGS.logoHeight,
     collectionsMenu: data.collectionsMenu ?? DEFAULT_SETTINGS.collectionsMenu,
     announcementMessages: data.announcementMessages?.length ? data.announcementMessages : DEFAULT_SETTINGS.announcementMessages,

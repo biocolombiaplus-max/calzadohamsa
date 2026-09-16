@@ -21,13 +21,16 @@ function getAudioContext(): AudioContext | null {
 function getMasterBus(ctx: AudioContext): AudioNode {
   if (!sharedMasterBus) {
     const compressor = ctx.createDynamicsCompressor();
-    compressor.threshold.value = -16;
-    compressor.knee.value = 10;
-    compressor.ratio.value = 9;
+    compressor.threshold.value = -20;
+    compressor.knee.value = 6;
+    compressor.ratio.value = 14;
     compressor.attack.value = 0.001;
     compressor.release.value = 0.12;
+    // Ganancia final más alta que antes — la clienta pidió que sonara "más
+    // duro" al llegar un pedido; el compresor de arriba evita que se
+    // distorsione al subir tanto el volumen.
     const boost = ctx.createGain();
-    boost.gain.value = 1.7;
+    boost.gain.value = 2.3;
     compressor.connect(boost);
     boost.connect(ctx.destination);
     sharedMasterBus = compressor;
@@ -73,6 +76,14 @@ function playTone(
   osc.stop(time + duration + 0.02);
 }
 
+// Un golpe grave y corto justo al inicio — le da peso/impacto al aviso (como
+// un "thump" de campana grande) para que se sienta más fuerte de entrada,
+// no solo agudo.
+function playThud(ctx: AudioContext, bus: AudioNode, time: number, peakGain: number) {
+  playTone(ctx, bus, time, 110, 0.16, peakGain, 'sine');
+  playTone(ctx, bus, time, 165, 0.12, peakGain * 0.6, 'triangle');
+}
+
 // Un "clink" metálico y brillante — dos tonos altísimos casi juntos, como
 // una moneda cayendo sobre otra. Varias de estas seguidas dan el efecto de
 // "monedas" del cha-ching clásico.
@@ -99,10 +110,12 @@ export function playCashRegisterSound(): void {
   const bus = getMasterBus(ctx);
   const now = ctx.currentTime;
 
-  playCoinClink(ctx, bus, now, 0.5);
-  playCoinClink(ctx, bus, now + 0.05, 0.4);
-  playCoinClink(ctx, bus, now + 0.095, 0.3);
+  playThud(ctx, bus, now, 0.55);
 
-  playBell(ctx, bus, now + 0.09, 1568, 0.35, 0.5); // "cha"
-  playBell(ctx, bus, now + 0.26, 2349, 0.75, 0.6); // "ching"
+  playCoinClink(ctx, bus, now, 0.6);
+  playCoinClink(ctx, bus, now + 0.05, 0.5);
+  playCoinClink(ctx, bus, now + 0.095, 0.4);
+
+  playBell(ctx, bus, now + 0.09, 1568, 0.35, 0.6); // "cha"
+  playBell(ctx, bus, now + 0.26, 2349, 0.75, 0.75); // "ching"
 }

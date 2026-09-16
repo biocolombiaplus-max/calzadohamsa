@@ -5,11 +5,11 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { createOrder, notifyOrderByEmail, notifyOrderByPush } from '@/lib/orders';
 import { getDepartamentos, getMunicipios } from '@/lib/colombia';
-import { getShippingRate } from '@/lib/shipping';
+import { getBundleShippingOverride, getShippingRate } from '@/lib/shipping';
 import { computeBundlePricing } from '@/lib/bundle';
 import { getActiveCoupon, clearCoupon, redeemCouponCode } from '@/lib/coupon';
 import { useSiteSettings } from '@/lib/settings-context';
-import { classNames, formatPrice } from '@/lib/utils';
+import { buildOrderWhatsAppMessage, classNames, formatPrice, whatsappLinkTo } from '@/lib/utils';
 import { generatePaymentReference, redirectToWompiCheckout } from '@/lib/wompi';
 import type { CartItem } from '@/lib/types';
 import LocationCapture from './LocationCapture';
@@ -93,16 +93,20 @@ export default function QuickBuyModal({
   const couponApplies = totalOverride === undefined && !!coupon;
   const couponDiscount = couponApplies ? Math.round(preCouponSubtotal * (coupon!.percent / 100)) : 0;
   const subtotal = preCouponSubtotal - couponDiscount;
-  const effectiveFreeShipping = freeShipping || bundleApplies;
+  const bundleShippingOverride =
+    (freeShipping || bundleApplies) ? getBundleShippingOverride(settings.bundle2x1.shippingExceptions, form.department) : null;
+  const effectiveFreeShipping = (freeShipping || bundleApplies) && bundleShippingOverride === null;
   const autoDiscountLabel = bundleApplies
     ? `🎉 2×1 aplicado — ahorras ${formatPrice(bundle.savings)}`
     : undefined;
   const shownDiscountLabel = discountLabel ?? autoDiscountLabel;
   const shippingCost = effectiveFreeShipping
     ? 0
-    : form.department
-      ? getShippingRate(settings.shipping, form.department, form.city)
-      : 0;
+    : bundleShippingOverride !== null
+      ? bundleShippingOverride
+      : form.department
+        ? getShippingRate(settings.shipping, form.department, form.city)
+        : 0;
   const total = subtotal + shippingCost;
 
   // Empuje al 2×1: solo tiene sentido en una compra rápida de UN par que
@@ -129,6 +133,11 @@ export default function QuickBuyModal({
       setError('Por favor completa los campos marcados en rojo.');
       return;
     }
+
+    // Se abre la pestaña de WhatsApp ANTES de esperar la creación del pedido
+    // (todavía dentro del clic de la clienta) para que los navegadores no la
+    // bloqueen como pop-up; se le pone la URL real una vez el pedido exista.
+    const waWindow = mode === 'cod' ? window.open('', '_blank') : null;
 
     setSubmitting(true);
     try {
@@ -194,10 +203,28 @@ export default function QuickBuyModal({
         customer,
       });
       notifyOrderByPush({ orderNumber, total, customerName: form.name });
+
+      const waUrl = whatsappLinkTo(
+        settings.whatsappNumber,
+        buildOrderWhatsAppMessage({
+          orderNumber,
+          items,
+          subtotal,
+          shipping: shippingCost,
+          total,
+          paymentMethod: 'contra_entrega',
+          customer,
+        }),
+        settings.whatsappCountryCode,
+      );
+      if (waWindow) waWindow.location.href = waUrl;
+      else window.open(waUrl, '_blank');
+
       if (couponApplies) clearCoupon();
       router.push(`/pedido-confirmado/${id}`);
     } catch (err) {
       console.error(err);
+      waWindow?.close();
       setError(err instanceof Error ? err.message : 'No pudimos registrar tu pedido. Intenta de nuevo.');
       setSubmitting(false);
     }

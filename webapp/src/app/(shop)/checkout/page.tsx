@@ -7,7 +7,7 @@ import { useCartStore } from '@/lib/cart-store';
 import { createOrder, notifyOrderByEmail, notifyOrderByPush } from '@/lib/orders';
 import { buildOrderWhatsAppMessage, classNames, formatPrice, whatsappLinkTo } from '@/lib/utils';
 import { getDepartamentos, getMunicipios } from '@/lib/colombia';
-import { getShippingRate } from '@/lib/shipping';
+import { getBundleShippingOverride, getShippingRate } from '@/lib/shipping';
 import { computeBundlePricing } from '@/lib/bundle';
 import { getActiveCoupon, clearCoupon, redeemCouponCode } from '@/lib/coupon';
 import { useSiteSettings } from '@/lib/settings-context';
@@ -39,11 +39,17 @@ export default function CheckoutPage() {
   const municipios = useMemo(() => getMunicipios(form.department), [form.department]);
   const couponDiscount = coupon ? Math.round(bundle.discountedSubtotal * (coupon.percent / 100)) : 0;
   const finalSubtotal = bundle.discountedSubtotal - couponDiscount;
-  const shippingCost = bundle.hasFreeShipping
+  const bundleShippingOverride = bundle.hasFreeShipping
+    ? getBundleShippingOverride(settings.bundle2x1.shippingExceptions, form.department)
+    : null;
+  const bundleHasFreeShipping = bundle.hasFreeShipping && bundleShippingOverride === null;
+  const shippingCost = bundleHasFreeShipping
     ? 0
-    : form.department
-      ? getShippingRate(settings.shipping, form.department, form.city)
-      : 0;
+    : bundleShippingOverride !== null
+      ? bundleShippingOverride
+      : form.department
+        ? getShippingRate(settings.shipping, form.department, form.city)
+        : 0;
   const total = finalSubtotal + shippingCost;
   const wompiSubtotal = Math.round(finalSubtotal * 0.95);
   const wompiTotal = wompiSubtotal + shippingCost;
@@ -297,7 +303,7 @@ export default function CheckoutPage() {
               )}
             </div>
           </div>
-          {bundle.hasFreeShipping ? (
+          {bundleHasFreeShipping ? (
             <p className="-mt-2 text-xs font-semibold text-primary">🚚 Envío GRATIS por tu 2×1</p>
           ) : (
             form.department && (
@@ -470,7 +476,7 @@ export default function CheckoutPage() {
           <div className="flex justify-between text-sm text-muted">
             <span>Envío</span>
             <span className="font-semibold text-ink">
-              {bundle.hasFreeShipping ? 'GRATIS' : form.department ? formatPrice(shippingCost) : 'Elige tu ubicación'}
+              {bundleHasFreeShipping ? 'GRATIS' : form.department ? formatPrice(shippingCost) : 'Elige tu ubicación'}
             </span>
           </div>
           {paymentMethod === 'wompi' && (

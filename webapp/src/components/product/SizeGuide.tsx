@@ -1,10 +1,10 @@
 const SIZE_TABLE = [
-  { size: '35', cm: '22.0' },
-  { size: '36', cm: '22.7' },
-  { size: '37', cm: '23.4' },
-  { size: '38', cm: '24.1' },
-  { size: '39', cm: '24.8' },
-  { size: '40', cm: '25.5' },
+  { size: '35', cm: '22' },
+  { size: '36', cm: '23' },
+  { size: '37', cm: '24' },
+  { size: '38', cm: '25' },
+  { size: '39', cm: '26' },
+  { size: '40', cm: '27' },
 ];
 
 export default function SizeGuide() {

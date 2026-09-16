@@ -119,6 +119,11 @@ export interface ShippingException {
   rate: number;
 }
 
+export interface BundleShippingException {
+  department: string;
+  rate: number;
+}
+
 export interface ShippingSettings {
   defaultRate: number;
   rates: DepartmentRate[];
@@ -173,6 +178,7 @@ export interface SiteSettings {
   shipping: ShippingSettings;
   bundle2x1: {
     price: number;
+    shippingExceptions: BundleShippingException[];
   };
   trustItems: TrustItem[];
   benefitsHeading: string;
