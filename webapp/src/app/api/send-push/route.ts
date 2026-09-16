@@ -85,5 +85,16 @@ export async function POST(request: Request) {
   );
 
   const sent = results.filter((r) => r.status === 'fulfilled').length;
-  return NextResponse.json({ sent, total: subscriptions.length });
+  // Si algo falló, se devuelve el motivo real del primer error (ej: "410
+  // Gone" = la suscripción quedó vieja/inválida y hay que reactivarla en
+  // ese celular; esto pasa sobre todo si alguien activó las notificaciones
+  // ANTES de terminar de configurar las llaves VAPID en Vercel) — así el
+  // botón de prueba en el admin puede explicar el problema real, no solo
+  // decir "no llegó".
+  const firstError = results.find((r): r is PromiseRejectedResult => r.status === 'rejected');
+  const errorDetail = firstError
+    ? `${firstError.reason?.statusCode ?? ''} ${firstError.reason?.body ?? firstError.reason?.message ?? ''}`.trim()
+    : undefined;
+
+  return NextResponse.json({ sent, total: subscriptions.length, ...(errorDetail ? { errorDetail } : {}) });
 }

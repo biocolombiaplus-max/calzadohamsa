@@ -20,6 +20,8 @@ export default function OrderAlertListener() {
   const [pushEnabled, setPushEnabled] = useState(false);
   const [pushChecked, setPushChecked] = useState(false);
   const [activating, setActivating] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<string | null>(null);
   const [toastOrder, setToastOrder] = useState<Order | null>(null);
   const soundEnabledRef = useRef(false);
   const toastTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -69,6 +71,43 @@ export default function OrderAlertListener() {
     }
   }
 
+  // Botón de diagnóstico: manda un push real ahora mismo y explica en
+  // pantalla exactamente por qué no llegó, en vez de dejar a la
+  // administradora adivinando (¿faltan las llaves VAPID?, ¿nadie se
+  // suscribió?, ¿la suscripción venció?) — así no hace falta simular un
+  // pedido completo solo para confirmar que las notificaciones funcionan.
+  async function handleTestNotification() {
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const res = await fetch('/api/send-push', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: '🔔 Notificación de prueba',
+          bodyText: 'Si ves y escuchas esto, las notificaciones están funcionando perfecto.',
+          url: '/admin/pedidos',
+        }),
+      });
+      const data = await res.json();
+      if (data.skipped) setTestResult(`⚠️ ${data.reason}. Revisa las variables VAPID en Vercel y vuelve a desplegar.`);
+      else if (data.error) setTestResult(`❌ Error del servidor: ${data.error}`);
+      else if (data.total === 0)
+        setTestResult('⚠️ Ningún dispositivo está suscrito todavía. Toca primero "Activar notificaciones de pedidos".');
+      else if (data.sent === 0)
+        setTestResult(
+          `⚠️ Había ${data.total} dispositivo(s) registrado(s) pero ninguno recibió el envío${
+            data.errorDetail ? ` (${data.errorDetail})` : ''
+          } — desactiva y vuelve a activar las notificaciones en ese celular.`,
+        );
+      else setTestResult(`✅ Enviada a ${data.sent} de ${data.total} dispositivo(s). Revisa tu celular.`);
+    } catch {
+      setTestResult('❌ No se pudo contactar el servidor.');
+    } finally {
+      setTesting(false);
+    }
+  }
+
   const fullyActive = soundEnabled && (pushEnabled || !isPushSupported());
   // Antes de saber si ya hay una suscripción push guardada, no mostramos
   // nada para no parpadear el botón de "activar" un instante de más.
@@ -95,6 +134,20 @@ export default function OrderAlertListener() {
           🔔 Notificaciones activas
         </div>
       )}
+
+      <div className="fixed bottom-20 left-5 z-40 flex flex-col items-start gap-2">
+        <button
+          type="button"
+          onClick={handleTestNotification}
+          disabled={testing}
+          className="rounded-full border border-border bg-white px-3.5 py-2 text-xs font-bold text-ink shadow-soft transition-transform hover:scale-105 disabled:opacity-60"
+        >
+          {testing ? 'Enviando...' : '🔔 Probar notificación push'}
+        </button>
+        {testResult && (
+          <p className="max-w-xs rounded-card bg-white p-3 text-xs font-semibold text-ink shadow-soft">{testResult}</p>
+        )}
+      </div>
 
       {toastOrder && (
         <div className="fixed bottom-20 right-5 z-40 w-80 max-w-[calc(100vw-2.5rem)] animate-popIn rounded-card border-2 border-primary bg-white p-4 shadow-lift relative">
