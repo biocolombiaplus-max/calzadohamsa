@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { createOrder } from '@/lib/orders';
 import { getDepartamentos, getMunicipios } from '@/lib/colombia';
@@ -103,6 +104,17 @@ export default function QuickBuyModal({
       ? getShippingRate(settings.shipping, form.department, form.city)
       : 0;
   const total = subtotal + shippingCost;
+
+  // Empuje al 2×1: solo tiene sentido en una compra rápida de UN par que
+  // todavía no viene con el combo ya aplicado (la propia oferta 2×1 pasa su
+  // propio total fijo y no debe mostrar esto). Se calcula el ahorro real de
+  // envío y una estimación honesta del ahorro de precio (asumiendo que el
+  // segundo par cuesta similar a este) para que el número se sienta
+  // creíble, no inflado.
+  const showBundleUpsell = totalOverride === undefined && !bundleApplies;
+  const upsellShipping = shippingCost || settings.shipping.defaultRate;
+  const upsellFirstItemPrice = items[0]?.price ?? 0;
+  const upsellPriceSavings = Math.max(0, upsellFirstItemPrice * 2 - settings.bundle2x1.price);
 
   function updateField<K extends keyof typeof form>(key: K, value: string) {
     setForm((f) => (key === 'department' ? { ...f, department: value, city: '' } : { ...f, [key]: value }));
@@ -243,6 +255,33 @@ export default function QuickBuyModal({
             <span className="text-primary">{formatPrice(total)}</span>
           </div>
         </div>
+
+        {showBundleUpsell && (
+          <div className="mb-4 overflow-hidden rounded-card border-2 border-urgent/30 bg-gradient-to-br from-urgent/10 via-primary-light/10 to-primary/10 p-4">
+            <p className="mb-1.5 text-sm font-extrabold leading-snug text-ink">
+              🎁 ¡Agrega <span className="text-urgent">otro par</span> y llévate los 2 por{' '}
+              {formatPrice(settings.bundle2x1.price)}!
+            </p>
+            <p className="mb-3 text-xs leading-relaxed text-ink/70">
+              En vez de pagar cada par por separado, los 2 quedan en{' '}
+              <strong className="text-primary">{formatPrice(settings.bundle2x1.price)}</strong> en total
+              {upsellPriceSavings > 0 && (
+                <>
+                  {' '}
+                  — ahorras <strong className="text-primary">{formatPrice(upsellPriceSavings)}</strong>
+                </>
+              )}{' '}
+              + <strong className="text-primary">envío GRATIS</strong> (ahorras {formatPrice(upsellShipping)} más).
+            </p>
+            <Link
+              href="/oferta-2x1"
+              onClick={onClose}
+              className="flex items-center justify-center gap-2 rounded-lg bg-ink px-4 py-2.5 text-sm font-bold text-white shadow-soft transition-transform hover:scale-[1.02] active:scale-[0.98]"
+            >
+              ✨ Elegir mi segundo par →
+            </Link>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} noValidate className="space-y-3">
           <div>
