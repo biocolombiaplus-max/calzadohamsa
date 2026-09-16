@@ -20,6 +20,16 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Bloquea cualquier scroll o "rebote" horizontal — el sitio debe sentirse
+   como una app de celular, nunca como una página que se puede arrastrar
+   hacia los lados dejando contenido cortado fuera de la pantalla. */
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+}
+
 body {
   background-color: rgb(var(--color-cream));
   color: rgb(var(--color-ink));

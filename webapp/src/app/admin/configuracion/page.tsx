@@ -996,12 +996,14 @@ function ListEditor<T>({
   return (
     <div className="space-y-2">
       {items.map((item, i) => (
-        <div key={i} className="flex items-center gap-2">
-          {renderRow(item, (updated) => updateAt(i, updated))}
+        <div key={i} className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="grid min-w-0 flex-1 grid-cols-1 gap-2 sm:flex sm:items-center">
+            {renderRow(item, (updated) => updateAt(i, updated))}
+          </div>
           <button
             type="button"
             onClick={() => removeAt(i)}
-            className="shrink-0 text-lg text-urgent"
+            className="shrink-0 self-end text-lg text-urgent sm:self-auto"
             aria-label="Eliminar"
           >
             ✕

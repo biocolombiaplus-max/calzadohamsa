@@ -13,10 +13,10 @@ type Prize =
 // el 10% es el premio "raro" y las dos de "sigue intentando" reparten el
 // resto para que el juego no se sienta como una victoria garantizada.
 const PRIZES: Prize[] = [
-  { type: 'discount', percent: 5, code: 'HAMSA5', weight: 65, color: '#FFB800' },
-  { type: 'retry', weight: 15, color: '#7C3AED' },
-  { type: 'discount', percent: 10, code: 'HAMSA10', weight: 5, color: '#FF3D71' },
-  { type: 'retry', weight: 15, color: '#06B6D4' },
+  { type: 'discount', percent: 5, code: 'HAMSA5', weight: 65, color: '#FFD59A' },
+  { type: 'retry', weight: 15, color: '#C3B4EE' },
+  { type: 'discount', percent: 10, code: 'HAMSA10', weight: 5, color: '#FFAEC0' },
+  { type: 'retry', weight: 15, color: '#9BE3EA' },
 ];
 
 const GOLD = '#F4C542';
@@ -45,25 +45,41 @@ export default function SpinWheel() {
     if (typeof window === 'undefined') return;
     if (sessionStorage.getItem(SESSION_KEY)) return;
 
-    function handleExit(e: MouseEvent) {
-      if (e.clientY <= 0 && !shownRef.current) {
-        shownRef.current = true;
-        setVisible(true);
-        sessionStorage.setItem(SESSION_KEY, '1');
-      }
+    function trigger() {
+      if (shownRef.current) return;
+      shownRef.current = true;
+      setVisible(true);
+      sessionStorage.setItem(SESSION_KEY, '1');
     }
 
-    const fallback = setTimeout(() => {
-      if (!shownRef.current) {
-        shownRef.current = true;
-        setVisible(true);
-        sessionStorage.setItem(SESSION_KEY, '1');
-      }
-    }, 25000);
+    // Escritorio: el mouse sale por arriba de la ventana (yendo a cerrar la
+    // pestaña o cambiar de página) — la señal clásica de "se está yendo".
+    function handleMouseExit(e: MouseEvent) {
+      if (e.clientY <= 0) trigger();
+    }
 
-    document.addEventListener('mouseleave', handleExit);
+    // Celular (no hay mouse, así que "mouseleave" nunca ocurre ahí): después
+    // de que la clienta ya se metió a ver el contenido (bajó harto scroll),
+    // si de repente sube rápido hacia arriba —como quien va a cerrar la
+    // pestaña o darle atrás— se toma como la misma señal de salida.
+    let lastScrollY = window.scrollY;
+    let maxScrollY = window.scrollY;
+    function handleScroll() {
+      const currentY = window.scrollY;
+      maxScrollY = Math.max(maxScrollY, currentY);
+      if (maxScrollY > 500 && currentY < lastScrollY - 60 && currentY < 250) trigger();
+      lastScrollY = currentY;
+    }
+
+    // Respaldo: si nunca se detecta ninguna señal de salida, igual aparece,
+    // pero mucho más tarde — no debe sentirse como que aparece de inmediato.
+    const fallback = setTimeout(trigger, 60000);
+
+    document.addEventListener('mouseleave', handleMouseExit);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => {
-      document.removeEventListener('mouseleave', handleExit);
+      document.removeEventListener('mouseleave', handleMouseExit);
+      window.removeEventListener('scroll', handleScroll);
       clearTimeout(fallback);
     };
   }, []);
