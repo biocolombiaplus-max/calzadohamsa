@@ -92,7 +92,13 @@ export default function QuickBuyModal({
   const preCouponSubtotal = totalOverride ?? (bundleApplies ? bundle.discountedSubtotal : bundle.subtotal);
   const couponApplies = totalOverride === undefined && !!coupon;
   const couponDiscount = couponApplies ? Math.round(preCouponSubtotal * (coupon!.percent / 100)) : 0;
-  const subtotal = preCouponSubtotal - couponDiscount;
+  const subtotalBeforeWompi = preCouponSubtotal - couponDiscount;
+  // El 5% de descuento por pagar en línea se calcula siempre aquí (nunca en
+  // la página que abre este modal), para que sea imposible que alguna
+  // pantalla muestre "ahorra 5%" sin que el pedido real quede con ese
+  // descuento aplicado.
+  const subtotal = mode === 'wompi' ? Math.round(subtotalBeforeWompi * 0.95) : subtotalBeforeWompi;
+  const wompiDiscount = subtotalBeforeWompi - subtotal;
   const bundleShippingOverride =
     (freeShipping || bundleApplies) ? getBundleShippingOverride(settings.bundle2x1.shippingExceptions, form.department) : null;
   const effectiveFreeShipping = (freeShipping || bundleApplies) && bundleShippingOverride === null;
@@ -270,6 +276,12 @@ export default function QuickBuyModal({
                   Quitar
                 </button>
               </span>
+            </div>
+          )}
+          {wompiDiscount > 0 && (
+            <div className="flex items-center justify-between border-t border-border pt-2 text-xs font-bold text-primary">
+              <span>⚡ Descuento por pagar en línea (-5%)</span>
+              <span>-{formatPrice(wompiDiscount)}</span>
             </div>
           )}
           {totalOverride === undefined && !coupon && (

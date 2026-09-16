@@ -145,8 +145,8 @@ export default function Oferta2x1Page() {
       {modal === 'wompi' && (
         <QuickBuyModal
           items={items}
-          totalOverride={wompiTotal}
-          discountLabel={`${discountLabel} + 5% adicional por pago en línea`}
+          totalOverride={discountedTotal}
+          discountLabel={discountLabel}
           title="⚡ Confirma tu 2×1 — Pago en línea"
           mode={isWompiConfigured() ? 'wompi' : 'cod'}
           freeShipping

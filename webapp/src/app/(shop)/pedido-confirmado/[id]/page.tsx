@@ -2,17 +2,21 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { getOrderById } from '@/lib/orders';
 import { buildOrderWhatsAppMessage, formatPrice, whatsappLinkTo } from '@/lib/utils';
 import { useSiteSettings } from '@/lib/settings-context';
 import PostPurchaseUpsell from '@/components/product/PostPurchaseUpsell';
 import type { Order } from '@/lib/types';
 
+type WompiCheck = 'checking' | 'approved' | 'declined' | 'pending' | null;
+
 export default function OrderConfirmationPage() {
   const params = useParams<{ id: string }>();
+  const searchParams = useSearchParams();
   const { whatsappCountryCode, whatsappNumber } = useSiteSettings();
   const [order, setOrder] = useState<Order | null | undefined>(undefined);
+  const [wompiCheck, setWompiCheck] = useState<WompiCheck>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -23,6 +27,43 @@ export default function OrderConfirmationPage() {
       cancelled = true;
     };
   }, [params.id]);
+
+  // Cuando Wompi redirige de vuelta aquí, trae "?id=<transacción>" — se
+  // verifica esa transacción contra la propia API de Wompi (en vez de
+  // confiar en que llegar a esta página ya significa que el pago quedó
+  // aprobado) y se compara la referencia/monto con lo que nosotros mismos
+  // generamos al iniciar el pago, para mostrarle a la clienta un estado real.
+  useEffect(() => {
+    const transactionId = searchParams.get('id');
+    if (!transactionId) return;
+
+    let cancelled = false;
+    setWompiCheck('checking');
+
+    fetch('/api/wompi-verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ transactionId }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled) return;
+        const expectedRef = searchParams.get('wompi_ref');
+        const expectedAmt = searchParams.get('wompi_amt');
+        const matches =
+          (!expectedRef || data.reference === expectedRef) &&
+          (!expectedAmt || String(data.amountInCents) === expectedAmt);
+
+        if (data.status === 'APPROVED' && matches) setWompiCheck('approved');
+        else if (data.status === 'PENDING') setWompiCheck('pending');
+        else setWompiCheck('declined');
+      })
+      .catch(() => !cancelled && setWompiCheck('declined'));
+
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParams]);
 
   if (order === undefined) {
     return <div className="container-page py-24 text-center text-muted">Cargando tu pedido...</div>;
@@ -51,6 +92,24 @@ export default function OrderConfirmationPage() {
         <p className="mt-2 text-muted">
           Tu número de pedido es <strong className="text-ink">{order.orderNumber}</strong>
         </p>
+
+        {order.paymentMethod === 'wompi' && wompiCheck && (
+          <div
+            className={
+              wompiCheck === 'approved'
+                ? 'mt-5 rounded-card border-2 border-primary bg-primary-light/15 p-4 text-sm font-bold text-primary'
+                : wompiCheck === 'declined'
+                  ? 'mt-5 rounded-card border-2 border-urgent bg-urgent/10 p-4 text-sm font-bold text-urgent'
+                  : 'mt-5 rounded-card border-2 border-border bg-cream-alt p-4 text-sm font-bold text-ink'
+            }
+          >
+            {wompiCheck === 'checking' && '⏳ Verificando tu pago con Wompi...'}
+            {wompiCheck === 'approved' && '✅ Tu pago fue aprobado por Wompi'}
+            {wompiCheck === 'pending' && '⏳ Tu pago quedó pendiente de confirmación — te avisamos por WhatsApp apenas se confirme.'}
+            {wompiCheck === 'declined' &&
+              '⚠️ No pudimos confirmar tu pago. Si ya pagaste, escríbenos por WhatsApp con tu número de pedido; si no, puedes intentar de nuevo.'}
+          </div>
+        )}
 
         <div className="mt-8 rounded-card border-2 border-primary bg-primary-light/10 p-5 text-left">
           <p className="mb-3 text-sm font-bold text-ink">

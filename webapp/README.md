@@ -245,32 +245,35 @@ el botón "Pagar ahora" simplemente cae de vuelta al flujo de pago contra
 entrega (no se rompe nada). Para activarlo:
 
 1. En tu [panel de Wompi](https://comercios.wompi.co) ve a
-   **Desarrolladores > Llaves de la API**.
+   **Desarrolladores > Llaves de la API**. Ahí verás TRES valores
+   distintos — no dos:
 2. Copia la **llave pública** (`pub_prod_...` o `pub_test_...` en modo
    pruebas) en `NEXT_PUBLIC_WOMPI_PUBLIC_KEY`.
-3. Copia la **llave secreta de integridad** (`prod_integrity_...` /
-   `test_integrity_...`) en `WOMPI_INTEGRITY_SECRET`. Esta nunca debe
-   llevar el prefijo `NEXT_PUBLIC_` porque solo se usa en el servidor
-   (`/api/wompi-signature`) para firmar el pago sin exponerla al navegador.
-4. Agrega ambas variables en **Vercel > Project Settings > Environment
+3. Copia el **secreto de integridad** (una cadena larga, NO empieza con
+   `prv_`) en `WOMPI_INTEGRITY_SECRET`. Esta nunca debe llevar el prefijo
+   `NEXT_PUBLIC_` porque solo se usa en el servidor (`/api/wompi-signature`)
+   para firmar el pago sin exponerla al navegador. **Ojo:** esto NO es lo
+   mismo que la llave privada del paso 4 — si usas la llave privada aquí,
+   el pago falla con "firma inválida".
+4. Copia la **llave privada** (`prv_prod_...` / `prv_test_...`) en
+   `WOMPI_PRIVATE_KEY`. Es opcional, pero sin ella no se puede verificar
+   automáticamente si un pago quedó aprobado (ver abajo).
+5. Agrega las tres variables en **Vercel > Project Settings > Environment
    Variables** y vuelve a desplegar.
 
-**Importante — confirmación de pagos:** el pedido se crea en Firestore con
-estado `pendiente` antes de enviar a la clienta a Wompi. Wompi confirma el
-pago en su propio checkout y redirige de vuelta a la página de
-confirmación, pero por ahora la actualización del estado del pedido a
-"pagado/confirmado" es **manual**: revisa el pago en tu
-[panel de Wompi](https://comercios.wompi.co) (o el correo de notificación
-que te llega por cada transacción) y marca el pedido como confirmado desde
-`/admin/pedidos`, igual que ya haces con la transportadora y el número de
-guía. Automatizar esa confirmación requeriría un webhook con credenciales
-de servidor adicionales (Firebase Admin SDK) — si más adelante quieres ese
-nivel de automatización, es un paso aparte que podemos construir.
-
-Si más adelante quieres aceptar pagos con tarjeta en línea, se puede integrar
-una pasarela como **Wompi** o **PayU** (ambas soportan Colombia) sin cambiar
-la arquitectura — es un paso independiente que se puede agregar cuando lo
-necesites.
+**Confirmación de pagos:** el pedido se crea en Firestore con estado
+`pendiente` antes de enviar a la clienta a Wompi. Al volver del checkout de
+Wompi, la página de confirmación llama a `/api/wompi-verify`, que consulta
+la transacción directamente en la API de Wompi (usando `WOMPI_PRIVATE_KEY`)
+y le muestra a la clienta si su pago quedó realmente aprobado, pendiente o
+rechazado — no se confía solo en que el navegador haya vuelto a la página.
+Aun así, el campo `status` del pedido (pendiente → confirmado → enviado →
+entregado) lo sigue moviendo la administradora a mano desde
+`/admin/pedidos`, igual que con la transportadora y el número de guía —
+marcar eso automáticamente en Firestore apenas Wompi aprueba requeriría
+credenciales de servidor con permisos de escritura (Firebase Admin SDK),
+que este proyecto no tiene configuradas; es un paso aparte que podemos
+construir si lo necesitas.
 
 ## Notificación por correo de cada pedido nuevo
 

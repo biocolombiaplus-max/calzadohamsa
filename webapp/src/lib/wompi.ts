@@ -39,13 +39,21 @@ export async function redirectToWompiCheckout(params: WompiCheckoutParams): Prom
 
   const { signature } = (await res.json()) as { signature: string };
 
+  // Wompi agrega su propio "?id=<transacción>" a esta URL al volver — se le
+  // suman también la referencia y el monto que nosotros generamos, para que
+  // la página de confirmación pueda verificar el pago contra la transacción
+  // real (ver /api/wompi-verify) sin depender de leer nada más.
+  const redirectUrl = new URL(params.redirectUrl);
+  redirectUrl.searchParams.set('wompi_ref', params.reference);
+  redirectUrl.searchParams.set('wompi_amt', String(params.amountInCents));
+
   const url = new URL('https://checkout.wompi.co/p/');
   url.searchParams.set('public-key', PUBLIC_KEY);
   url.searchParams.set('currency', currency);
   url.searchParams.set('amount-in-cents', String(params.amountInCents));
   url.searchParams.set('reference', params.reference);
   url.searchParams.set('signature:integrity', signature);
-  url.searchParams.set('redirect-url', params.redirectUrl);
+  url.searchParams.set('redirect-url', redirectUrl.toString());
   if (params.customerEmail) url.searchParams.set('customer-data:email', params.customerEmail);
   if (params.customerFullName) url.searchParams.set('customer-data:full-name', params.customerFullName);
   if (params.customerPhone) url.searchParams.set('customer-data:phone-number', params.customerPhone);

@@ -7,6 +7,7 @@ import type { Product } from '@/lib/types';
 import { classNames, formatPrice, resolveColorImage, whatsappLinkTo } from '@/lib/utils';
 import { useCartStore } from '@/lib/cart-store';
 import { useSiteSettings } from '@/lib/settings-context';
+import { isWompiConfigured } from '@/lib/wompi';
 import UrgencyTimer from './UrgencyTimer';
 import QuickBuyModal from './QuickBuyModal';
 
@@ -30,7 +31,7 @@ export default function BuyBox({
   }
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
-  const [showQuickBuy, setShowQuickBuy] = useState(false);
+  const [quickBuyMode, setQuickBuyMode] = useState<'cod' | 'wompi' | null>(null);
 
   const hasDiscount = !!product.compareAtPrice && product.compareAtPrice > product.price;
   const discountPercent = hasDiscount
@@ -58,7 +59,11 @@ export default function BuyBox({
   }
 
   function handleBuyNow() {
-    setShowQuickBuy(true);
+    setQuickBuyMode('cod');
+  }
+
+  function handleBuyWompi() {
+    setQuickBuyMode('wompi');
   }
 
   const waMessage = `Hola, quiero pedir: ${product.title}${size ? ` (talla ${size})` : ''}${
@@ -189,7 +194,24 @@ export default function BuyBox({
       </div>
 
       <div ref={ctaRef} className="space-y-3">
-        <button onClick={handleBuyNow} className="btn-primary w-full text-base shadow-lift">
+        {isWompiConfigured() && (
+          <div>
+            <button
+              onClick={handleBuyWompi}
+              className="relative w-full overflow-hidden rounded-card bg-gradient-to-r from-urgent to-primary px-6 py-4 text-base font-bold text-white shadow-lift transition-transform hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <span className="pointer-events-none absolute inset-0 animate-shimmer bg-[length:200%_100%] bg-gradient-to-r from-transparent via-white/35 to-transparent" />
+              <span className="absolute -top-1 right-3 rounded-b-md bg-ink px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-white">
+                Recomendado
+              </span>
+              <span className="relative block">⚡ Pagar en línea — Ahorra 5%</span>
+              <span className="relative block text-sm font-semibold opacity-90">
+                {formatPrice(Math.round(product.price * quantity * 0.95))} con tarjeta, PSE o Nequi
+              </span>
+            </button>
+          </div>
+        )}
+        <button onClick={handleBuyNow} className={isWompiConfigured() ? 'btn-secondary w-full text-base' : 'btn-primary w-full text-base shadow-lift'}>
           💵 Comprar ya — Pago contra entrega
         </button>
         <button onClick={handleAddToCart} className="btn-secondary w-full">
@@ -224,7 +246,14 @@ export default function BuyBox({
         </p>
       </div>
 
-      {showQuickBuy && <QuickBuyModal items={[buildItem()]} onClose={() => setShowQuickBuy(false)} />}
+      {quickBuyMode && (
+        <QuickBuyModal
+          items={[buildItem()]}
+          mode={quickBuyMode}
+          title={quickBuyMode === 'wompi' ? '⚡ Confirma tu pago en línea' : undefined}
+          onClose={() => setQuickBuyMode(null)}
+        />
+      )}
     </div>
   );
 }

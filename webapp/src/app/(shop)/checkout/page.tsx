@@ -28,7 +28,9 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('contra_entrega');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(() =>
+    isWompiConfigured() ? 'wompi' : 'contra_entrega',
+  );
   const [form, setForm] = useState({ name: '', phone: '', address: '', city: '', department: '', note: '' });
   const [locationUrl, setLocationUrl] = useState('');
   const [coupon, setCoupon] = useState(() => getActiveCoupon());
@@ -330,6 +332,32 @@ export default function CheckoutPage() {
           <div>
             <p className="mb-2 text-sm font-semibold text-ink">Método de pago</p>
             <div className="space-y-2">
+              {isWompiConfigured() && (
+                <label
+                  className={classNames(
+                    'relative flex cursor-pointer items-center gap-3 overflow-hidden rounded-lg border-2 p-4 transition-colors',
+                    paymentMethod === 'wompi'
+                      ? 'border-primary bg-gradient-to-r from-urgent/10 to-primary/10'
+                      : 'border-urgent/40 bg-gradient-to-r from-urgent/5 to-primary/5',
+                  )}
+                >
+                  <span className="absolute -top-1 right-3 rounded-b-md bg-ink px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-white">
+                    Recomendado
+                  </span>
+                  <input
+                    type="radio"
+                    name="payment"
+                    checked={paymentMethod === 'wompi'}
+                    onChange={() => setPaymentMethod('wompi')}
+                  />
+                  <span>
+                    <span className="block text-sm font-bold text-ink">
+                      ⚡ Pagar en línea <span className="text-primary">— 5% de descuento adicional</span>
+                    </span>
+                    <span className="block text-xs text-muted">Tarjeta, PSE o Nequi, procesado por Wompi</span>
+                  </span>
+                </label>
+              )}
               <label className="flex items-center gap-3 rounded-lg border border-border p-4 has-[:checked]:border-primary has-[:checked]:bg-primary-light/10">
                 <input
                   type="radio"
@@ -354,22 +382,6 @@ export default function CheckoutPage() {
                   <span className="block text-xs text-muted">Te enviamos los datos por WhatsApp al confirmar</span>
                 </span>
               </label>
-              {isWompiConfigured() && (
-                <label className="flex items-center gap-3 rounded-lg border border-border p-4 has-[:checked]:border-primary has-[:checked]:bg-primary-light/10">
-                  <input
-                    type="radio"
-                    name="payment"
-                    checked={paymentMethod === 'wompi'}
-                    onChange={() => setPaymentMethod('wompi')}
-                  />
-                  <span>
-                    <span className="block text-sm font-bold text-ink">
-                      ⚡ Pagar en línea <span className="text-primary">— 5% de descuento adicional</span>
-                    </span>
-                    <span className="block text-xs text-muted">Tarjeta, PSE o Nequi, procesado por Wompi</span>
-                  </span>
-                </label>
-              )}
             </div>
           </div>
 
