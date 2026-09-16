@@ -12,7 +12,6 @@ export interface WonCoupon {
 // ejemplo si la clienta lo recibió por WhatsApp o redes sociales).
 export const COUPON_CODES: Record<string, number> = {
   HAMSA5: 5,
-  HAMSA10: 10,
 };
 
 // Valida un código escrito a mano y, si es válido, lo guarda como el cupón

@@ -7,16 +7,16 @@ type Prize =
   | { type: 'discount'; percent: number; code: string; weight: number; color: string }
   | { type: 'retry'; weight: number; color: string };
 
-// El orden alterna premio / "sigue intentando" para que el disco se vea
-// balanceado. El "weight" controla qué tan seguido cae cada casilla (no es
-// un sorteo parejo): el 5% está pensado para salir la mayoría de las veces,
-// el 10% es el premio "raro" y las dos de "sigue intentando" reparten el
-// resto para que el juego no se sienta como una victoria garantizada.
+// Único premio posible: 5% de descuento, y solo 1 de cada 20 giros lo
+// reparte (weight 1 sobre un total de 20) — las otras 3 casillas son
+// "sigue intentando" y se llevan el resto del peso. Antes existía también
+// un premio raro de 10%, pero se quitó: ahora el único descuento que puede
+// salir es el de 5%, y sale con poca frecuencia a propósito.
 const PRIZES: Prize[] = [
-  { type: 'discount', percent: 5, code: 'HAMSA5', weight: 65, color: '#FFD59A' },
-  { type: 'retry', weight: 15, color: '#C3B4EE' },
-  { type: 'discount', percent: 10, code: 'HAMSA10', weight: 5, color: '#FFAEC0' },
-  { type: 'retry', weight: 15, color: '#9BE3EA' },
+  { type: 'discount', percent: 5, code: 'HAMSA5', weight: 1, color: '#FFD59A' },
+  { type: 'retry', weight: 6, color: '#C3B4EE' },
+  { type: 'retry', weight: 7, color: '#FFAEC0' },
+  { type: 'retry', weight: 6, color: '#9BE3EA' },
 ];
 
 const GOLD = '#F4C542';
