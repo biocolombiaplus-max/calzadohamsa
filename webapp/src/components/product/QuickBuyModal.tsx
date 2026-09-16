@@ -313,8 +313,18 @@ export default function QuickBuyModal({
           )}
           <div className="flex items-center justify-between border-t border-border pt-2 text-sm text-muted">
             <span>Envío</span>
-            <span className={effectiveFreeShipping ? 'font-bold text-primary' : 'font-semibold text-ink'}>
-              {effectiveFreeShipping ? 'GRATIS' : form.department ? formatPrice(shippingCost) : 'Elige tu ubicación'}
+            <span
+              className={
+                effectiveFreeShipping || (form.department && shippingCost === 0)
+                  ? 'font-bold text-primary'
+                  : 'font-semibold text-ink'
+              }
+            >
+              {!form.department
+                ? 'Elige tu ubicación'
+                : effectiveFreeShipping || shippingCost === 0
+                  ? 'GRATIS 🔥'
+                  : formatPrice(shippingCost)}
             </span>
           </div>
           <div className="flex items-center justify-between border-t border-border pt-2 font-bold text-ink">
@@ -416,7 +426,10 @@ export default function QuickBuyModal({
           {attemptedSubmit && (fieldErrors.department || fieldErrors.city) && (
             <p className="-mt-2 text-xs text-urgent">Elige tu departamento y municipio.</p>
           )}
-          {!effectiveFreeShipping && form.department && (
+          {!effectiveFreeShipping && form.department && shippingCost === 0 && (
+            <p className="-mt-1 text-xs font-bold text-whatsapp">🔥 ¡Envío GRATIS hoy en tu pedido!</p>
+          )}
+          {!effectiveFreeShipping && form.department && shippingCost > 0 && (
             <p className="-mt-1 text-xs text-muted">
               🚚 Envío a {form.city || form.department}: <span className="font-semibold text-ink">{formatPrice(shippingCost)}</span>
             </p>

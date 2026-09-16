@@ -307,6 +307,8 @@ export default function CheckoutPage() {
           </div>
           {bundleHasFreeShipping ? (
             <p className="-mt-2 text-xs font-semibold text-primary">🚚 Envío GRATIS por tu 2×1</p>
+          ) : form.department && shippingCost === 0 ? (
+            <p className="-mt-2 text-xs font-bold text-whatsapp">🔥 ¡Envío GRATIS hoy en tu pedido!</p>
           ) : (
             form.department && (
               <p className="-mt-2 text-xs text-muted">
@@ -487,8 +489,8 @@ export default function CheckoutPage() {
           )}
           <div className="flex justify-between text-sm text-muted">
             <span>Envío</span>
-            <span className="font-semibold text-ink">
-              {bundleHasFreeShipping ? 'GRATIS' : form.department ? formatPrice(shippingCost) : 'Elige tu ubicación'}
+            <span className={form.department && shippingCost === 0 ? 'font-bold text-whatsapp' : 'font-semibold text-ink'}>
+              {!form.department ? 'Elige tu ubicación' : shippingCost === 0 ? 'GRATIS 🔥' : formatPrice(shippingCost)}
             </span>
           </div>
           {paymentMethod === 'wompi' && (

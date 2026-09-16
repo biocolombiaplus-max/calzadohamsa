@@ -99,6 +99,17 @@ export default function BuyBox({
         )}
       </div>
 
+      <div className="relative overflow-hidden rounded-card border-2 border-whatsapp/40 bg-gradient-to-r from-whatsapp/15 to-whatsapp/5 px-4 py-3">
+        <span className="absolute -top-1 right-3 rounded-b-md bg-whatsapp px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-white">
+          Solo hoy
+        </span>
+        <p className="flex items-center gap-2 text-sm font-extrabold text-whatsapp sm:text-base">
+          <span className="h-2 w-2 shrink-0 animate-pulseSoft rounded-full bg-whatsapp" />
+          🚚 Envío GRATIS en tu pedido
+        </p>
+        <p className="mt-0.5 text-xs text-ink/70">Aprovecha antes de que se acabe la promoción de hoy.</p>
+      </div>
+
       {product.stock > 0 && product.stock <= 15 && (
         <div>
           <p className="mb-1.5 text-xs font-semibold text-urgent">

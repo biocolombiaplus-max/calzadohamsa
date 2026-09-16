@@ -370,10 +370,10 @@ export default function ConfiguracionPage() {
 
       <Section
         title="Envíos y oferta 2×1"
-        description="Costo de envío según departamento/municipio, el precio del combo 2×1 y en qué departamentos ese combo NO trae envío gratis"
+        description="Un pedido de UN SOLO PAR trae envío GRATIS por defecto (el gatillo de 'envío gratis hoy') — solo se cobra en los departamentos/municipios que agregues abajo. El combo 2×1 tiene su propia lista de excepciones más abajo."
       >
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Costo de envío por defecto (si el departamento no tiene tarifa propia)">
+          <Field label="Costo de envío por defecto (déjalo en 0 para que sea gratis en todo el país salvo las excepciones de abajo)">
             <input
               type="number"
               min={0}
@@ -394,7 +394,9 @@ export default function ConfiguracionPage() {
         </div>
 
         <div>
-          <p className="mb-2 text-sm font-semibold text-ink">Tarifas por departamento</p>
+          <p className="mb-2 text-sm font-semibold text-ink">
+            Departamentos donde SÍ se cobra envío para un pedido de un solo par
+          </p>
           <ListEditor<DepartmentRate>
             items={settings.shipping.rates}
             onChange={(items) => updateShipping('rates', items)}

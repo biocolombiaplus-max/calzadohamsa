@@ -1,5 +1,9 @@
 import type { BundleShippingException, ShippingSettings } from './types';
 
+// El envío de un pedido de UN SOLO PAR es gratis por defecto — el "gatillo
+// mental" de "envío gratis hoy" — salvo en los departamentos/municipios que
+// el administrador agregue explícitamente en "Tarifas por departamento" o
+// "Excepciones por municipio", donde sí se cobra el valor configurado.
 export function getShippingRate(shipping: ShippingSettings, department: string, municipio: string): number {
   if (!department) return shipping.defaultRate;
 

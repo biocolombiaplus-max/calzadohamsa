@@ -51,7 +51,11 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     subtextSize: 'md',
   },
   shipping: {
-    defaultRate: 15000,
+    // Por defecto el envío es GRATIS en cualquier departamento que no
+    // tenga una tarifa propia configurada abajo — el "gatillo mental" de
+    // "envío gratis hoy" en pedidos de un solo par. Solo se cobra en los
+    // departamentos/municipios que el administrador agregue explícitamente.
+    defaultRate: 0,
     rates: [],
     exceptions: [],
   },
