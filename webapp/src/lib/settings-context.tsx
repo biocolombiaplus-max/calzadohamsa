@@ -10,8 +10,14 @@ const FONT_LINK_ID = 'site-google-fonts';
 
 const SettingsContext = createContext<SiteSettings>(DEFAULT_SETTINGS);
 
-export function SettingsProvider({ children }: { children: React.ReactNode }) {
-  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
+export function SettingsProvider({
+  children,
+  initialSettings,
+}: {
+  children: React.ReactNode;
+  initialSettings?: SiteSettings;
+}) {
+  const [settings, setSettings] = useState<SiteSettings>(initialSettings ?? DEFAULT_SETTINGS);
 
   useEffect(() => {
     let cancelled = false;

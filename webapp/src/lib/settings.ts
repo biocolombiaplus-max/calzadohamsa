@@ -116,7 +116,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   },
 };
 
-function mergeWithDefaults(data: Partial<SiteSettings> | undefined): SiteSettings {
+export function mergeWithDefaults(data: Partial<SiteSettings> | undefined): SiteSettings {
   if (!data) return DEFAULT_SETTINGS;
   return {
     ...DEFAULT_SETTINGS,
