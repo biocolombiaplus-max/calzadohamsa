@@ -6,19 +6,32 @@
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
-// Recorta a cuadrado usando la IA de Cloudinary (g_auto detecta en qué
-// parte de la foto está el producto y encuadra ahí, sin importar el
-// tamaño o proporción de la foto original ni dejar franjas de fondo),
-// comprime y sirve en el formato más liviano posible (WebP/AVIF)
-// automáticamente — todo vía transformación en la propia URL, sin costo
-// extra y sin ningún paso manual del lado del admin.
-const AUTO_OPTIMIZE = 'c_fill,g_auto,w_1200,h_1200,q_auto,f_auto';
+// Dos formas de encuadrar la foto a cuadrado, elegidas por el admin al
+// subirla (ver el interruptor en "Fotos del producto"):
+//  - "fill" (por defecto, de siempre): recorta con IA (g_auto detecta el
+//    producto), llena todo el cuadrado sin franjas — pero en fotos muy
+//    verticales puede cortarle un pedazo al producto.
+//  - "fit": nunca recorta — encoge la foto completa dentro del cuadrado y
+//    rellena el espacio sobrante con un fondo automático a juego.
+// Cualquiera de los dos comprime y sirve en el formato más liviano posible
+// (WebP/AVIF) automáticamente, todo vía transformación en la propia URL,
+// sin costo extra.
+const CROP_TRANSFORMS = {
+  fill: 'c_fill,g_auto,w_1200,h_1200,q_auto,f_auto',
+  fit: 'c_pad,g_auto,b_auto,w_1200,h_1200,q_auto,f_auto',
+} as const;
 
-function withAutoOptimization(url: string): string {
-  return url.replace('/image/upload/', `/image/upload/${AUTO_OPTIMIZE}/`);
+export type ImageCropMode = keyof typeof CROP_TRANSFORMS;
+
+function withAutoOptimization(url: string, mode: ImageCropMode): string {
+  return url.replace('/image/upload/', `/image/upload/${CROP_TRANSFORMS[mode]}/`);
 }
 
-export async function uploadProductImage(file: File, _productSlug: string): Promise<string> {
+export async function uploadProductImage(
+  file: File,
+  _productSlug: string,
+  cropMode: ImageCropMode = 'fill',
+): Promise<string> {
   if (!CLOUD_NAME || !UPLOAD_PRESET) {
     throw new Error(
       'Cloudinary no está configurado. Agrega NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME y NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET (ver README.md).',
@@ -51,7 +64,7 @@ export async function uploadProductImage(file: File, _productSlug: string): Prom
     throw new Error('Cloudinary no devolvió la URL de la imagen. Intenta de nuevo.');
   }
 
-  return withAutoOptimization(data.secure_url as string);
+  return withAutoOptimization(data.secure_url as string, cropMode);
 }
 
 export async function deleteProductImage(_url: string): Promise<void> {

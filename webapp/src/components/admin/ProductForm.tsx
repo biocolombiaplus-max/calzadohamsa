@@ -6,7 +6,7 @@ import { useState } from 'react';
 import type { Product, ProductColor, ProductInput, ProductReview } from '@/lib/types';
 import { slugify } from '@/lib/utils';
 import { createProduct, updateProduct, deleteProduct } from '@/lib/products';
-import { uploadProductImage, deleteProductImage } from '@/lib/storage';
+import { uploadProductImage, deleteProductImage, type ImageCropMode } from '@/lib/storage';
 import { resizeForUpload } from '@/lib/imageCrop';
 
 const COMMON_SIZES = ['34', '35', '36', '37', '38', '39', '40', '41', '42'];
@@ -41,6 +41,7 @@ export default function ProductForm({ product }: { product?: Product }) {
   const [reviews, setReviews] = useState<ProductReview[]>(product?.reviews ?? []);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
+  const [cropMode, setCropMode] = useState<ImageCropMode>('fill');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -127,7 +128,7 @@ export default function ProductForm({ product }: { product?: Product }) {
         try {
           const resized = await resizeForUpload(original);
           const uploadFile = new File([resized], original.name || `${slug}.jpg`, { type: 'image/jpeg' });
-          const url = await uploadProductImage(uploadFile, slug);
+          const url = await uploadProductImage(uploadFile, slug, cropMode);
           setImages((prev) => [...prev, url]);
         } catch (err) {
           setUploadError(err instanceof Error ? err.message : 'No se pudo subir la foto. Intenta de nuevo.');
@@ -231,6 +232,34 @@ export default function ProductForm({ product }: { product?: Product }) {
 
         <div className="rounded-card bg-white p-6 shadow-soft">
           <h2 className="mb-4 font-heading text-lg font-bold text-ink">Fotos del producto</h2>
+
+          <div className="mb-4 flex gap-2 rounded-lg bg-cream-alt/60 p-1">
+            <button
+              type="button"
+              onClick={() => setCropMode('fill')}
+              className={`flex-1 rounded-md px-3 py-2 text-xs font-bold transition-colors ${
+                cropMode === 'fill' ? 'bg-white text-primary shadow-soft' : 'text-muted'
+              }`}
+            >
+              🔲 Recortar a cuadrado
+            </button>
+            <button
+              type="button"
+              onClick={() => setCropMode('fit')}
+              className={`flex-1 rounded-md px-3 py-2 text-xs font-bold transition-colors ${
+                cropMode === 'fit' ? 'bg-white text-primary shadow-soft' : 'text-muted'
+              }`}
+            >
+              🖼️ Ajustar sin recortar
+            </button>
+          </div>
+          <p className="mb-3 -mt-2 text-xs text-muted">
+            {cropMode === 'fill'
+              ? 'Llena todo el cuadro detectando el producto con IA — ideal para fotos ya cuadradas, pero en fotos muy verticales puede cortarle un pedazo al calzado.'
+              : 'Encoge la foto para que se vea COMPLETA, sin cortar nada, rellenando el espacio sobrante con un fondo a juego — recomendado para fotos verticales tipo redes sociales.'}
+            {' '}Este interruptor solo aplica a las fotos que subas de ahora en adelante.
+          </p>
+
           <div className="mb-4 flex flex-wrap gap-3">
             {images.map((url) => (
               <div key={url} className="relative h-24 w-24 overflow-hidden rounded-lg border border-border">
@@ -260,9 +289,8 @@ export default function ProductForm({ product }: { product?: Product }) {
             <p className="mb-2 rounded-lg bg-urgent/10 p-3 text-sm text-urgent">{uploadError}</p>
           )}
           <p className="text-xs text-muted">
-            Sube varias fotos a la vez, de cualquier tamaño o proporción — el encuadre a cuadrado (sin franjas
-            de fondo) se ajusta solo, detectando dónde está el producto en la foto. La primera foto será la
-            principal, y cada una se optimiza automáticamente para que la tienda cargue rápido.
+            Sube varias fotos a la vez, de cualquier tamaño o proporción. La primera foto será la principal, y
+            cada una se optimiza automáticamente para que la tienda cargue rápido.
           </p>
         </div>
 
