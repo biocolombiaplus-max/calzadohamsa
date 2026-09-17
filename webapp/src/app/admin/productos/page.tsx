@@ -16,6 +16,12 @@ export default function AdminProductsPage() {
       .catch(() => setProducts([]));
   }, []);
 
+  // Dos productos con la misma URL (slug) hacen que al abrir uno se muestre
+  // el otro, al azar — se cuenta cuántas veces se repite cada slug para
+  // avisar aquí mismo cuál hay que corregir.
+  const slugCounts = new Map<string, number>();
+  products?.forEach((p) => slugCounts.set(p.slug, (slugCounts.get(p.slug) ?? 0) + 1));
+
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
@@ -53,13 +59,21 @@ export default function AdminProductsPage() {
                 </td>
               </tr>
             ) : (
-              products.map((p) => (
+              products.map((p) => {
+                const slugDuplicated = (slugCounts.get(p.slug) ?? 0) > 1;
+                return (
                 <tr key={p.id} className="border-b border-border/60 last:border-0">
                   <td className="flex items-center gap-3 p-4">
                     <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-cream-alt">
                       {p.images[0] && <Image src={p.images[0]} alt={p.title} fill className="object-cover" />}
                     </div>
-                    <span className="font-semibold text-ink">{p.title}</span>
+                    <div>
+                      <span className="font-semibold text-ink">{p.title}</span>
+                      <p className={`text-xs ${slugDuplicated ? 'font-bold text-urgent' : 'text-muted'}`}>
+                        /{p.slug}
+                        {slugDuplicated && ' — ⚠️ URL duplicada, otro producto usa esta misma'}
+                      </p>
+                    </div>
                   </td>
                   <td className="p-4">{formatPrice(p.price)}</td>
                   <td className="p-4">{p.stock}</td>
@@ -78,7 +92,8 @@ export default function AdminProductsPage() {
                     </Link>
                   </td>
                 </tr>
-              ))
+                );
+              })
             )}
           </tbody>
         </table>

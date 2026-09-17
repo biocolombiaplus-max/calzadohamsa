@@ -180,8 +180,10 @@ export default function ProductForm({ product }: { product?: Product }) {
       }
       router.push('/admin/productos');
       router.refresh();
-    } catch {
-      setError('No se pudo guardar el producto. Verifica los datos e intenta de nuevo.');
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'No se pudo guardar el producto. Verifica los datos e intenta de nuevo.',
+      );
       setSaving(false);
     }
   }

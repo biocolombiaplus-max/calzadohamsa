@@ -76,7 +76,19 @@ export async function getRelatedProducts(currentId: string, collectionName: stri
   return products.filter((p) => p.id !== currentId && p.collection === collectionName).slice(0, max);
 }
 
+// Dos productos con la misma URL (slug) rompen la tienda: al abrir esa URL,
+// Firestore devuelve cualquiera de los dos (el que encuentre primero) sin
+// avisar — así fue como "Sandalia Prada" terminó abriendo otra referencia.
+// Se valida ANTES de guardar para que ese choque ya no pueda volver a pasar.
+async function isSlugTaken(slug: string, excludeId?: string): Promise<boolean> {
+  const snap = await getDocs(query(collection(db, COLLECTION), where('slug', '==', slug)));
+  return snap.docs.some((d) => d.id !== excludeId);
+}
+
 export async function createProduct(input: ProductInput): Promise<string> {
+  if (await isSlugTaken(input.slug)) {
+    throw new Error(`Ya existe otro producto con la URL "${input.slug}". Cambia el slug e intenta de nuevo.`);
+  }
   const ref = await addDoc(collection(db, COLLECTION), {
     ...stripUndefined(input),
     createdAt: serverTimestamp(),
@@ -86,6 +98,9 @@ export async function createProduct(input: ProductInput): Promise<string> {
 }
 
 export async function updateProduct(id: string, input: Partial<ProductInput>): Promise<void> {
+  if (input.slug && (await isSlugTaken(input.slug, id))) {
+    throw new Error(`Ya existe otro producto con la URL "${input.slug}". Cambia el slug e intenta de nuevo.`);
+  }
   const ref = doc(db, COLLECTION, id);
   await updateDoc(ref, { ...stripUndefined(input), updatedAt: serverTimestamp() });
 }
