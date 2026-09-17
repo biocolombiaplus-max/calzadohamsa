@@ -131,9 +131,9 @@ export default function Hero() {
               ))}
             </div>
           )}
-          <div className="absolute right-4 top-4 rounded-card bg-white/95 px-4 py-2.5 shadow-soft">
-            <p className="text-xs font-bold text-ink">🆕 Nuevo ingreso</p>
-            <p className="text-[11px] text-muted">+2.400 clientas nos recomiendan</p>
+          <div className="absolute right-3 top-3 rounded-lg bg-white/95 px-2.5 py-1.5 shadow-soft">
+            <p className="text-[10px] font-bold leading-tight text-ink">🆕 Nuevo ingreso</p>
+            <p className="text-[9px] leading-tight text-muted">+2.400 clientas nos recomiendan</p>
           </div>
         </div>
       </div>
