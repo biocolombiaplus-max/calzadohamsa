@@ -18,7 +18,12 @@ const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 // sin costo extra.
 const CROP_TRANSFORMS = {
   fill: 'c_fill,g_auto,w_1200,h_1200,q_auto,f_auto',
-  fit: 'c_pad,g_auto,b_auto,w_1200,h_1200,q_auto,f_auto',
+  // "g_auto" (gravedad con IA) solo tiene sentido cuando se recorta — en
+  // "pad" no se recorta nada, así que se quita. "b_auto" (fondo automático)
+  // no es confiable en todas las cuentas de Cloudinary sin firmar la
+  // petición, así que se usa un color sólido fijo (el mismo crema de fondo
+  // de la tienda) que siempre funciona, sin depender de ninguna cuenta.
+  fit: 'c_pad,b_rgb:F5E6CE,w_1200,h_1200,q_auto,f_auto',
 } as const;
 
 export type ImageCropMode = keyof typeof CROP_TRANSFORMS;
