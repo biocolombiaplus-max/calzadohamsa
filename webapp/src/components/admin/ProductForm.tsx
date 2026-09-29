@@ -6,7 +6,7 @@ import { useState } from 'react';
 import type { Product, ProductColor, ProductInput, ProductReview } from '@/lib/types';
 import { slugify } from '@/lib/utils';
 import { createProduct, updateProduct, deleteProduct } from '@/lib/products';
-import { uploadProductImage, deleteProductImage, type ImageCropMode } from '@/lib/storage';
+import { uploadProductImage, deleteProductImage } from '@/lib/storage';
 import { resizeForUpload } from '@/lib/imageCrop';
 
 const COMMON_SIZES = ['34', '35', '36', '37', '38', '39', '40', '41', '42'];
@@ -37,11 +37,11 @@ export default function ProductForm({ product }: { product?: Product }) {
   const [sizes, setSizes] = useState<string[]>(product?.sizes ?? []);
   const [colors, setColors] = useState<ProductColor[]>(product?.colors ?? []);
   const [images, setImages] = useState<string[]>(product?.images ?? []);
+  const [noCropImages, setNoCropImages] = useState<string[]>(product?.noCropImages ?? []);
   const [soldCount, setSoldCount] = useState(product?.soldCount?.toString() ?? '');
   const [reviews, setReviews] = useState<ProductReview[]>(product?.reviews ?? []);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
-  const [cropMode, setCropMode] = useState<ImageCropMode>('fill');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -128,7 +128,7 @@ export default function ProductForm({ product }: { product?: Product }) {
         try {
           const resized = await resizeForUpload(original);
           const uploadFile = new File([resized], original.name || `${slug}.jpg`, { type: 'image/jpeg' });
-          const url = await uploadProductImage(uploadFile, slug, cropMode);
+          const url = await uploadProductImage(uploadFile, slug);
           setImages((prev) => [...prev, url]);
         } catch (err) {
           setUploadError(err instanceof Error ? err.message : 'No se pudo subir la foto. Intenta de nuevo.');
@@ -141,7 +141,15 @@ export default function ProductForm({ product }: { product?: Product }) {
 
   async function handleRemoveImage(url: string) {
     setImages((prev) => prev.filter((i) => i !== url));
+    setNoCropImages((prev) => prev.filter((i) => i !== url));
     deleteProductImage(url);
+  }
+
+  // Marca/desmarca UNA foto ya subida para que se muestre completa (sin
+  // recortar) en la tienda — sirve para arreglar, foto por foto, las que
+  // quedan mal recortadas sin tener que volver a subirlas.
+  function toggleNoCrop(url: string) {
+    setNoCropImages((prev) => (prev.includes(url) ? prev.filter((i) => i !== url) : [...prev, url]));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -161,6 +169,7 @@ export default function ProductForm({ product }: { product?: Product }) {
       price: Number(price),
       compareAtPrice: compareAtPrice ? Number(compareAtPrice) : null,
       images,
+      noCropImages,
       sizes,
       colors,
       collection: collectionName,
@@ -235,46 +244,33 @@ export default function ProductForm({ product }: { product?: Product }) {
         <div className="rounded-card bg-white p-6 shadow-soft">
           <h2 className="mb-4 font-heading text-lg font-bold text-ink">Fotos del producto</h2>
 
-          <div className="mb-4 flex gap-2 rounded-lg bg-cream-alt/60 p-1">
-            <button
-              type="button"
-              onClick={() => setCropMode('fill')}
-              className={`flex-1 rounded-md px-3 py-2 text-xs font-bold transition-colors ${
-                cropMode === 'fill' ? 'bg-white text-primary shadow-soft' : 'text-muted'
-              }`}
-            >
-              🔲 Recortar a cuadrado
-            </button>
-            <button
-              type="button"
-              onClick={() => setCropMode('fit')}
-              className={`flex-1 rounded-md px-3 py-2 text-xs font-bold transition-colors ${
-                cropMode === 'fit' ? 'bg-white text-primary shadow-soft' : 'text-muted'
-              }`}
-            >
-              🖼️ Ajustar sin recortar
-            </button>
-          </div>
-          <p className="mb-3 -mt-2 text-xs text-muted">
-            {cropMode === 'fill'
-              ? 'Llena todo el cuadro detectando el producto con IA — ideal para fotos ya cuadradas, pero en fotos muy verticales puede cortarle un pedazo al calzado.'
-              : 'Encoge la foto para que se vea COMPLETA, sin cortar nada, rellenando el espacio sobrante con un fondo a juego — recomendado para fotos verticales tipo redes sociales.'}
-            {' '}Este interruptor solo aplica a las fotos que subas de ahora en adelante.
-          </p>
-
           <div className="mb-4 flex flex-wrap gap-3">
-            {images.map((url) => (
-              <div key={url} className="relative h-24 w-24 overflow-hidden rounded-lg border border-border">
-                <Image src={url} alt="" fill className="object-cover" />
-                <button
-                  type="button"
-                  onClick={() => handleRemoveImage(url)}
-                  className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-ink/80 text-xs text-white"
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
+            {images.map((url) => {
+              const isFull = noCropImages.includes(url);
+              return (
+                <div key={url} className="w-24">
+                  <div className="relative h-24 w-24 overflow-hidden rounded-lg border border-border bg-white">
+                    <Image src={url} alt="" fill className={isFull ? 'object-contain' : 'object-cover'} />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(url)}
+                      className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-ink/80 text-xs text-white"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => toggleNoCrop(url)}
+                    className={`mt-1 w-full rounded-md px-1 py-1 text-[10px] font-bold leading-tight ${
+                      isFull ? 'bg-primary-light/20 text-primary' : 'bg-cream-alt text-muted'
+                    }`}
+                  >
+                    {isFull ? '🖼️ Completa' : '🔲 Recortada'}
+                  </button>
+                </div>
+              );
+            })}
             <label className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-border text-xs text-muted hover:border-primary">
               {uploading ? 'Subiendo...' : '+ Agregar'}
               <input
@@ -291,8 +287,10 @@ export default function ProductForm({ product }: { product?: Product }) {
             <p className="mb-2 rounded-lg bg-urgent/10 p-3 text-sm text-urgent">{uploadError}</p>
           )}
           <p className="text-xs text-muted">
-            Sube varias fotos a la vez, de cualquier tamaño o proporción. La primera foto será la principal, y
-            cada una se optimiza automáticamente para que la tienda cargue rápido.
+            Sube varias fotos a la vez, de cualquier tamaño o proporción — cada una se recorta a cuadrado
+            automáticamente. Si alguna queda con un pedazo de la sandalia cortado, toca &ldquo;🔲 Recortada&rdquo;
+            debajo de esa foto para cambiarla a &ldquo;🖼️ Completa&rdquo; — se encoge para mostrarse entera, sin
+            afectar el tamaño ni el diseño del resto de la página. La primera foto será la principal.
           </p>
         </div>
 

@@ -6,38 +6,22 @@
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
-// Dos formas de encuadrar la foto a cuadrado, elegidas por el admin al
-// subirla (ver el interruptor en "Fotos del producto"):
-//  - "fill" (por defecto, de siempre): recorta con IA (g_auto detecta el
-//    producto), llena todo el cuadrado sin franjas — pero en fotos muy
-//    verticales puede cortarle un pedazo al producto.
-//  - "fit": nunca recorta — encoge la foto completa dentro del cuadrado y
-//    rellena el espacio sobrante con un fondo automático a juego.
-// Cualquiera de los dos comprime y sirve en el formato más liviano posible
-// (WebP/AVIF) automáticamente, todo vía transformación en la propia URL,
-// sin costo extra.
-const CROP_TRANSFORMS = {
-  fill: 'c_fill,g_auto,w_1200,h_1200,q_auto,f_auto',
-  // "g_auto" (gravedad con IA) solo tiene sentido cuando se recorta — en
-  // "pad" no se recorta nada, así que se quita. "b_auto" (fondo automático)
-  // no es confiable en todas las cuentas de Cloudinary sin firmar la
-  // petición, así que se usa un color sólido fijo — blanco, para que las
-  // franjas se noten lo menos posible tanto en las tarjetas de producto
-  // (fondo blanco) como en la ficha del producto.
-  fit: 'c_pad,b_white,w_1200,h_1200,q_auto,f_auto',
-} as const;
+// Recorta a cuadrado usando la IA de Cloudinary (g_auto detecta en qué
+// parte de la foto está el producto y encuadra ahí, sin importar el
+// tamaño o proporción de la foto original ni dejar franjas de fondo),
+// comprime y sirve en el formato más liviano posible (WebP/AVIF)
+// automáticamente — todo vía transformación en la propia URL, sin costo
+// extra. Si una foto en particular queda mal recortada, el admin la marca
+// como "Completa" en el panel — eso se resuelve con CSS al mostrarla (ver
+// ProductGallery/ProductCard), no aquí, para poder cambiarla en cualquier
+// momento sin volver a subir el archivo.
+const AUTO_OPTIMIZE = 'c_fill,g_auto,w_1200,h_1200,q_auto,f_auto';
 
-export type ImageCropMode = keyof typeof CROP_TRANSFORMS;
-
-function withAutoOptimization(url: string, mode: ImageCropMode): string {
-  return url.replace('/image/upload/', `/image/upload/${CROP_TRANSFORMS[mode]}/`);
+function withAutoOptimization(url: string): string {
+  return url.replace('/image/upload/', `/image/upload/${AUTO_OPTIMIZE}/`);
 }
 
-export async function uploadProductImage(
-  file: File,
-  _productSlug: string,
-  cropMode: ImageCropMode = 'fill',
-): Promise<string> {
+export async function uploadProductImage(file: File, _productSlug: string): Promise<string> {
   if (!CLOUD_NAME || !UPLOAD_PRESET) {
     throw new Error(
       'Cloudinary no está configurado. Agrega NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME y NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET (ver README.md).',
@@ -70,7 +54,7 @@ export async function uploadProductImage(
     throw new Error('Cloudinary no devolvió la URL de la imagen. Intenta de nuevo.');
   }
 
-  return withAutoOptimization(data.secure_url as string, cropMode);
+  return withAutoOptimization(data.secure_url as string);
 }
 
 export async function deleteProductImage(_url: string): Promise<void> {

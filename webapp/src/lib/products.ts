@@ -29,6 +29,7 @@ function toProduct(id: string, data: any): Product {
     price: data.price ?? 0,
     compareAtPrice: data.compareAtPrice ?? null,
     images: data.images ?? [],
+    noCropImages: data.noCropImages ?? [],
     sizes: data.sizes ?? [],
     colors: data.colors ?? [],
     collection: data.collection ?? 'sandalias',

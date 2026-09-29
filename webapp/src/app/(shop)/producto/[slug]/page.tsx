@@ -85,6 +85,7 @@ export default function ProductPage() {
               title={product.title}
               discountPercent={discountPercent}
               colorImage={colorImage}
+              noCropImages={product.noCropImages}
             />
           </div>
 

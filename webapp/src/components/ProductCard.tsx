@@ -9,9 +9,11 @@ export default function ProductCard({ product, priority = false }: { product: Pr
     ? Math.round((1 - product.price / (product.compareAtPrice as number)) * 100)
     : 0;
 
+  const isFull = !!product.images[0] && product.noCropImages?.includes(product.images[0]);
+
   return (
     <Link href={`/producto/${product.slug}`} className="group block">
-      <div className="relative aspect-square overflow-hidden rounded-card bg-cream-alt shadow-soft">
+      <div className="relative aspect-square overflow-hidden rounded-card bg-white shadow-soft">
         {product.images[0] ? (
           <Image
             src={product.images[0]}
@@ -19,7 +21,7 @@ export default function ProductCard({ product, priority = false }: { product: Pr
             fill
             priority={priority}
             sizes="(max-width: 768px) 50vw, 25vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className={`transition-transform duration-500 group-hover:scale-105 ${isFull ? 'object-contain' : 'object-cover'}`}
           />
         ) : (
           <div className="flex h-full items-center justify-center text-4xl">👡</div>

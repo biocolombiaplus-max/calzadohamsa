@@ -9,11 +9,13 @@ export default function ProductGallery({
   title,
   discountPercent = 0,
   colorImage,
+  noCropImages = [],
 }: {
   images: string[];
   title: string;
   discountPercent?: number;
   colorImage?: string;
+  noCropImages?: string[];
 }) {
   const gallery = useMemo(() => (images.length > 0 ? images : ['/hero-placeholder.svg']), [images]);
   const [active, setActive] = useState(() => (colorImage ? Math.max(0, gallery.indexOf(colorImage)) : 0));
@@ -29,14 +31,14 @@ export default function ProductGallery({
 
   return (
     <div>
-      <div className="relative aspect-square overflow-hidden rounded-card bg-cream-alt shadow-soft">
+      <div className="relative aspect-square overflow-hidden rounded-card bg-white shadow-soft">
         <Image
           src={gallery[active]}
           alt={title}
           fill
           priority
           sizes="(max-width: 1024px) 100vw, 50vw"
-          className="object-cover"
+          className={noCropImages.includes(gallery[active]) ? 'object-contain' : 'object-cover'}
         />
         {discountPercent > 0 && (
           <span className="absolute left-3 top-3 rounded-full bg-urgent px-3 py-1.5 text-sm font-extrabold text-white shadow-soft">
@@ -51,11 +53,16 @@ export default function ProductGallery({
               key={src + i}
               onClick={() => setActive(i)}
               className={classNames(
-                'relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2',
+                'relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 bg-white',
                 active === i ? 'border-primary' : 'border-transparent',
               )}
             >
-              <Image src={src} alt={`${title} ${i + 1}`} fill className="object-cover" />
+              <Image
+                src={src}
+                alt={`${title} ${i + 1}`}
+                fill
+                className={noCropImages.includes(src) ? 'object-contain' : 'object-cover'}
+              />
             </button>
           ))}
         </div>
