@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useState } from 'react';
 import type { Product, ProductColor, ProductInput, ProductReview } from '@/lib/types';
-import { cloudinaryFill, slugify } from '@/lib/utils';
+import { cloudinaryFill, cloudinaryOriginal, slugify } from '@/lib/utils';
 import { createProduct, updateProduct, deleteProduct } from '@/lib/products';
 import { uploadProductImage, deleteProductImage } from '@/lib/storage';
 import { resizeForUpload } from '@/lib/imageCrop';
@@ -269,7 +269,7 @@ export default function ProductForm({ product }: { product?: Product }) {
                 <div key={url} className="w-24">
                   <div className="relative h-24 w-24 overflow-hidden rounded-lg border border-border bg-white">
                     <Image
-                      src={isFull ? url : cloudinaryFill(url, 200)}
+                      src={isFull ? cloudinaryOriginal(url) : cloudinaryFill(url, 200)}
                       alt=""
                       fill
                       className={isFull ? 'object-contain' : 'object-cover'}

@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
-import { classNames, cloudinaryFill } from '@/lib/utils';
+import { classNames, cloudinaryFill, cloudinaryOriginal } from '@/lib/utils';
 
 export default function ProductGallery({
   images,
@@ -35,7 +35,11 @@ export default function ProductGallery({
     <div>
       <div className="relative aspect-square overflow-hidden rounded-card bg-white shadow-soft">
         <Image
-          src={noCropImages.includes(gallery[active]) ? gallery[active] : cloudinaryFill(gallery[active], 1000)}
+          src={
+            noCropImages.includes(gallery[active])
+              ? cloudinaryOriginal(gallery[active])
+              : cloudinaryFill(gallery[active], 1000)
+          }
           alt={title}
           fill
           priority
@@ -65,7 +69,7 @@ export default function ProductGallery({
               )}
             >
               <Image
-                src={noCropImages.includes(src) ? src : cloudinaryFill(src, 200)}
+                src={noCropImages.includes(src) ? cloudinaryOriginal(src) : cloudinaryFill(src, 200)}
                 alt={`${title} ${i + 1}`}
                 fill
                 className={noCropImages.includes(src) ? 'object-contain' : 'object-cover'}

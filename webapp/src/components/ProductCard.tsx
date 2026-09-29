@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Product } from '@/lib/types';
-import { cloudinaryFill, formatPrice } from '@/lib/utils';
+import { cloudinaryFill, cloudinaryOriginal, formatPrice } from '@/lib/utils';
 
 export default function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
   const hasDiscount = !!product.compareAtPrice && product.compareAtPrice > product.price;
@@ -17,7 +17,7 @@ export default function ProductCard({ product, priority = false }: { product: Pr
       <div className="relative aspect-square overflow-hidden rounded-card bg-white shadow-soft">
         {product.images[0] ? (
           <Image
-            src={isFull ? product.images[0] : cloudinaryFill(product.images[0], 800)}
+            src={isFull ? cloudinaryOriginal(product.images[0]) : cloudinaryFill(product.images[0], 800)}
             alt={product.title}
             fill
             priority={priority}

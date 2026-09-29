@@ -123,6 +123,17 @@ export function cloudinaryFill(url: string, size: number): string {
   return url.replace('/upload/', `/upload/c_fill,g_auto,w_${size},h_${size},q_auto,f_auto/`);
 }
 
+// Recupera la foto ORIGINAL sin recortar, incluso para fotos subidas antes
+// de este cambio (cuando el recorte a cuadrado se guardaba para siempre en
+// la URL) — el archivo real en Cloudinary nunca se tocó, solo se le pedía
+// una versión recortada, así que basta con quitar esa transformación de la
+// URL para volver a ver la foto completa. Se usa cuando una foto se marca
+// como "Completa" en el admin, sin importar cuándo se subió.
+export function cloudinaryOriginal(url: string): string {
+  if (!url.includes('res.cloudinary.com') || !url.includes('/upload/')) return url;
+  return url.replace(/\/upload\/(?:[a-z]+_[^/,]+,)*[a-z]+_[^/]+\//, '/upload/');
+}
+
 // Firestore rechaza addDoc()/updateDoc() si algún campo (a cualquier
 // profundidad, incluso dentro de arreglos como `colors`) queda en
 // `undefined` — hay que quitar esas llaves del todo antes de guardar.
