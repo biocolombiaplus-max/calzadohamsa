@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo, useState, type RefObject } from 'react';
 import type { Product } from '@/lib/types';
-import { classNames, formatPrice, resolveColorImage, whatsappLinkTo } from '@/lib/utils';
+import { classNames, cloudinaryFill, formatPrice, resolveColorImage, whatsappLinkTo } from '@/lib/utils';
 import { useCartStore } from '@/lib/cart-store';
 import { useSiteSettings } from '@/lib/settings-context';
 import { isWompiConfigured } from '@/lib/wompi';
@@ -181,7 +181,7 @@ export default function BuyBox({
                         selected ? 'border-primary' : 'border-border',
                       )}
                     >
-                      <Image src={thumb} alt={c.name} fill sizes="44px" className="object-cover" />
+                      <Image src={cloudinaryFill(thumb, 100)} alt={c.name} fill sizes="44px" className="object-cover" />
                     </span>
                   )}
                 </button>

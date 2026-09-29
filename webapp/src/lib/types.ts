@@ -24,6 +24,10 @@ export interface Product {
   // recortar a cuadrado, cuando esa foto no encuadra bien recortada — se
   // marca foto por foto desde el admin, sin afectar el resto del diseño.
   noCropImages?: string[];
+  // Porcentaje de tamaño (40-100) para encoger aún más una foto marcada como
+  // "Completa", foto por foto, hasta que se vea perfecta — 100 = tamaño
+  // normal. Mapa de URL de la foto -> porcentaje.
+  imageScale?: Record<string, number>;
   sizes: string[];
   colors: ProductColor[];
   collection: string;

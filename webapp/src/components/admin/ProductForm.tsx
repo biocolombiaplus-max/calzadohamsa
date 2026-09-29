@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useState } from 'react';
 import type { Product, ProductColor, ProductInput, ProductReview } from '@/lib/types';
-import { slugify } from '@/lib/utils';
+import { cloudinaryFill, slugify } from '@/lib/utils';
 import { createProduct, updateProduct, deleteProduct } from '@/lib/products';
 import { uploadProductImage, deleteProductImage } from '@/lib/storage';
 import { resizeForUpload } from '@/lib/imageCrop';
@@ -38,6 +38,7 @@ export default function ProductForm({ product }: { product?: Product }) {
   const [colors, setColors] = useState<ProductColor[]>(product?.colors ?? []);
   const [images, setImages] = useState<string[]>(product?.images ?? []);
   const [noCropImages, setNoCropImages] = useState<string[]>(product?.noCropImages ?? []);
+  const [imageScale, setImageScale] = useState<Record<string, number>>(product?.imageScale ?? {});
   const [soldCount, setSoldCount] = useState(product?.soldCount?.toString() ?? '');
   const [reviews, setReviews] = useState<ProductReview[]>(product?.reviews ?? []);
   const [uploading, setUploading] = useState(false);
@@ -142,6 +143,10 @@ export default function ProductForm({ product }: { product?: Product }) {
   async function handleRemoveImage(url: string) {
     setImages((prev) => prev.filter((i) => i !== url));
     setNoCropImages((prev) => prev.filter((i) => i !== url));
+    setImageScale((prev) => {
+      const { [url]: _unused, ...rest } = prev;
+      return rest;
+    });
     deleteProductImage(url);
   }
 
@@ -150,6 +155,17 @@ export default function ProductForm({ product }: { product?: Product }) {
   // quedan mal recortadas sin tener que volver a subirlas.
   function toggleNoCrop(url: string) {
     setNoCropImages((prev) => (prev.includes(url) ? prev.filter((i) => i !== url) : [...prev, url]));
+  }
+
+  // Encoge o agranda UNA foto marcada como "Completa" (40%-100%) para
+  // afinar exactamente cuánto espacio en blanco queda alrededor — con
+  // vista previa en vivo en la miniatura, para saber hasta dónde ajustar.
+  function adjustScale(url: string, delta: number) {
+    setImageScale((prev) => {
+      const current = prev[url] ?? 100;
+      const next = Math.min(100, Math.max(40, current + delta));
+      return { ...prev, [url]: next };
+    });
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -170,6 +186,7 @@ export default function ProductForm({ product }: { product?: Product }) {
       compareAtPrice: compareAtPrice ? Number(compareAtPrice) : null,
       images,
       noCropImages,
+      imageScale,
       sizes,
       colors,
       collection: collectionName,
@@ -247,10 +264,17 @@ export default function ProductForm({ product }: { product?: Product }) {
           <div className="mb-4 flex flex-wrap gap-3">
             {images.map((url) => {
               const isFull = noCropImages.includes(url);
+              const scale = imageScale[url] ?? 100;
               return (
                 <div key={url} className="w-24">
                   <div className="relative h-24 w-24 overflow-hidden rounded-lg border border-border bg-white">
-                    <Image src={url} alt="" fill className={isFull ? 'object-contain' : 'object-cover'} />
+                    <Image
+                      src={isFull ? url : cloudinaryFill(url, 200)}
+                      alt=""
+                      fill
+                      className={isFull ? 'object-contain' : 'object-cover'}
+                      style={isFull ? { transform: `scale(${scale / 100})` } : undefined}
+                    />
                     <button
                       type="button"
                       onClick={() => handleRemoveImage(url)}
@@ -268,6 +292,27 @@ export default function ProductForm({ product }: { product?: Product }) {
                   >
                     {isFull ? '🖼️ Completa' : '🔲 Recortada'}
                   </button>
+                  {isFull && (
+                    <div className="mt-1 flex items-center justify-between gap-1 rounded-md bg-cream-alt px-1 py-1">
+                      <button
+                        type="button"
+                        onClick={() => adjustScale(url, -10)}
+                        disabled={scale <= 40}
+                        className="flex h-5 w-5 items-center justify-center rounded bg-white text-xs font-bold text-ink shadow-sm disabled:opacity-30"
+                      >
+                        −
+                      </button>
+                      <span className="text-[10px] font-bold text-muted">{scale}%</span>
+                      <button
+                        type="button"
+                        onClick={() => adjustScale(url, 10)}
+                        disabled={scale >= 100}
+                        className="flex h-5 w-5 items-center justify-center rounded bg-white text-xs font-bold text-ink shadow-sm disabled:opacity-30"
+                      >
+                        +
+                      </button>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -287,10 +332,11 @@ export default function ProductForm({ product }: { product?: Product }) {
             <p className="mb-2 rounded-lg bg-urgent/10 p-3 text-sm text-urgent">{uploadError}</p>
           )}
           <p className="text-xs text-muted">
-            Sube varias fotos a la vez, de cualquier tamaño o proporción — cada una se recorta a cuadrado
-            automáticamente. Si alguna queda con un pedazo de la sandalia cortado, toca &ldquo;🔲 Recortada&rdquo;
-            debajo de esa foto para cambiarla a &ldquo;🖼️ Completa&rdquo; — se encoge para mostrarse entera, sin
-            afectar el tamaño ni el diseño del resto de la página. La primera foto será la principal.
+            Sube varias fotos de cualquier tamaño o proporción — por defecto se recortan a cuadrado. Si alguna
+            queda con un pedazo de la sandalia cortado, toca &ldquo;🔲 Recortada&rdquo; debajo de esa foto para
+            cambiarla a &ldquo;🖼️ Completa&rdquo; (se muestra entera, sin cortar nada). Ahí aparecen los botones
+            &ldquo;−&rdquo; y &ldquo;+&rdquo; para encoger o agrandar esa foto y ver en vivo hasta dónde ajustarla,
+            sin afectar el tamaño ni el diseño del resto de la página. La primera foto será la principal.
           </p>
         </div>
 
@@ -441,7 +487,7 @@ export default function ProductForm({ product }: { product?: Product }) {
                           c.image === url ? 'border-primary' : 'border-border'
                         }`}
                       >
-                        <Image src={url} alt={`Foto ${i + 1}`} fill className="object-cover" />
+                        <Image src={cloudinaryFill(url, 150)} alt={`Foto ${i + 1}`} fill className="object-cover" />
                       </button>
                     ))}
                   </div>

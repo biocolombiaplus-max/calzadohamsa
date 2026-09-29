@@ -112,6 +112,17 @@ export function classNames(...values: Array<string | false | null | undefined>):
   return values.filter(Boolean).join(' ');
 }
 
+// Pide a Cloudinary un recorte a cuadrado con IA (detecta en qué parte de
+// la foto está el producto y encuadra ahí) al TAMAÑO en que se va a mostrar
+// — a diferencia de recortar al subir, esto no borra nada de la foto
+// original: solo afecta cómo se sirve esta copia en particular, así que la
+// foto se puede mostrar completa (sin este recorte) en otro lugar sin
+// perder calidad. No hace nada si la URL no es de Cloudinary.
+export function cloudinaryFill(url: string, size: number): string {
+  if (!url.includes('res.cloudinary.com') || !url.includes('/upload/')) return url;
+  return url.replace('/upload/', `/upload/c_fill,g_auto,w_${size},h_${size},q_auto,f_auto/`);
+}
+
 // Firestore rechaza addDoc()/updateDoc() si algún campo (a cualquier
 // profundidad, incluso dentro de arreglos como `colors`) queda en
 // `undefined` — hay que quitar esas llaves del todo antes de guardar.

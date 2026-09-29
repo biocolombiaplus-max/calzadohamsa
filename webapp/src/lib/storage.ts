@@ -6,16 +6,17 @@
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
-// Recorta a cuadrado usando la IA de Cloudinary (g_auto detecta en qué
-// parte de la foto está el producto y encuadra ahí, sin importar el
-// tamaño o proporción de la foto original ni dejar franjas de fondo),
-// comprime y sirve en el formato más liviano posible (WebP/AVIF)
-// automáticamente — todo vía transformación en la propia URL, sin costo
-// extra. Si una foto en particular queda mal recortada, el admin la marca
-// como "Completa" en el panel — eso se resuelve con CSS al mostrarla (ver
-// ProductGallery/ProductCard), no aquí, para poder cambiarla en cualquier
-// momento sin volver a subir el archivo.
-const AUTO_OPTIMIZE = 'c_fill,g_auto,w_1200,h_1200,q_auto,f_auto';
+// Importante: NO se recorta a cuadrado aquí. Antes se usaba
+// "c_fill,g_auto,w_1200,h_1200" para forzar un cuadrado al subir, pero eso
+// recorta y DESCARTA para siempre los píxeles que quedan fuera del cuadrado
+// — por eso el interruptor "Completa/Recortada" del admin no cambiaba nada
+// visualmente (la foto guardada ya era cuadrada). Ahora solo se limita el
+// tamaño máximo (sin recortar nada) y se comprime/sirve en el formato más
+// liviano posible (WebP/AVIF). El recorte a cuadrado o el ajuste "completa"
+// se decide después, foto por foto, con CSS al mostrarla (ver
+// ProductGallery/ProductCard) — así se puede cambiar en cualquier momento
+// sin volver a subir el archivo y sin perder nada de la foto original.
+const AUTO_OPTIMIZE = 'c_limit,w_1600,h_1600,q_auto,f_auto';
 
 function withAutoOptimization(url: string): string {
   return url.replace('/image/upload/', `/image/upload/${AUTO_OPTIMIZE}/`);

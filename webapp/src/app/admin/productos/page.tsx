@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { getAllProducts } from '@/lib/products';
 import type { Product } from '@/lib/types';
-import { formatPrice } from '@/lib/utils';
+import { cloudinaryFill, formatPrice } from '@/lib/utils';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[] | null>(null);
@@ -65,7 +65,9 @@ export default function AdminProductsPage() {
                 <tr key={p.id} className="border-b border-border/60 last:border-0">
                   <td className="flex items-center gap-3 p-4">
                     <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-cream-alt">
-                      {p.images[0] && <Image src={p.images[0]} alt={p.title} fill className="object-cover" />}
+                      {p.images[0] && (
+                        <Image src={cloudinaryFill(p.images[0], 100)} alt={p.title} fill className="object-cover" />
+                      )}
                     </div>
                     <div>
                       <span className="font-semibold text-ink">{p.title}</span>

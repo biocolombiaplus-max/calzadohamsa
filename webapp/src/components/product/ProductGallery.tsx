@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
-import { classNames } from '@/lib/utils';
+import { classNames, cloudinaryFill } from '@/lib/utils';
 
 export default function ProductGallery({
   images,
@@ -10,12 +10,14 @@ export default function ProductGallery({
   discountPercent = 0,
   colorImage,
   noCropImages = [],
+  imageScale = {},
 }: {
   images: string[];
   title: string;
   discountPercent?: number;
   colorImage?: string;
   noCropImages?: string[];
+  imageScale?: Record<string, number>;
 }) {
   const gallery = useMemo(() => (images.length > 0 ? images : ['/hero-placeholder.svg']), [images]);
   const [active, setActive] = useState(() => (colorImage ? Math.max(0, gallery.indexOf(colorImage)) : 0));
@@ -33,12 +35,17 @@ export default function ProductGallery({
     <div>
       <div className="relative aspect-square overflow-hidden rounded-card bg-white shadow-soft">
         <Image
-          src={gallery[active]}
+          src={noCropImages.includes(gallery[active]) ? gallery[active] : cloudinaryFill(gallery[active], 1000)}
           alt={title}
           fill
           priority
           sizes="(max-width: 1024px) 100vw, 50vw"
           className={noCropImages.includes(gallery[active]) ? 'object-contain' : 'object-cover'}
+          style={
+            noCropImages.includes(gallery[active])
+              ? { transform: `scale(${(imageScale[gallery[active]] ?? 100) / 100})` }
+              : undefined
+          }
         />
         {discountPercent > 0 && (
           <span className="absolute left-3 top-3 rounded-full bg-urgent px-3 py-1.5 text-sm font-extrabold text-white shadow-soft">
@@ -58,10 +65,15 @@ export default function ProductGallery({
               )}
             >
               <Image
-                src={src}
+                src={noCropImages.includes(src) ? src : cloudinaryFill(src, 200)}
                 alt={`${title} ${i + 1}`}
                 fill
                 className={noCropImages.includes(src) ? 'object-contain' : 'object-cover'}
+                style={
+                  noCropImages.includes(src)
+                    ? { transform: `scale(${(imageScale[src] ?? 100) / 100})` }
+                    : undefined
+                }
               />
             </button>
           ))}

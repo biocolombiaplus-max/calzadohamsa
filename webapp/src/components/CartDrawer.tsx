@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { useCartStore } from '@/lib/cart-store';
 import { useSiteSettings } from '@/lib/settings-context';
 import { computeBundlePricing } from '@/lib/bundle';
-import { buildCartWhatsAppMessage, formatPrice, whatsappLinkTo } from '@/lib/utils';
+import { buildCartWhatsAppMessage, cloudinaryFill, formatPrice, whatsappLinkTo } from '@/lib/utils';
 import BundleUpsellBanner from '@/components/BundleUpsellBanner';
 
 export default function CartDrawer() {
@@ -53,7 +53,9 @@ export default function CartDrawer() {
               {items.map((item) => (
                 <li key={`${item.productId}-${item.size}-${item.color}`} className="flex gap-3 rounded-card bg-white p-3 shadow-soft">
                   <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-card bg-cream-alt">
-                    {item.image && <Image src={item.image} alt={item.title} fill className="object-cover" />}
+                    {item.image && (
+                      <Image src={cloudinaryFill(item.image, 160)} alt={item.title} fill className="object-cover" />
+                    )}
                   </div>
                   <div className="flex flex-1 flex-col justify-between">
                     <div>

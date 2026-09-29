@@ -86,6 +86,7 @@ export default function ProductPage() {
               discountPercent={discountPercent}
               colorImage={colorImage}
               noCropImages={product.noCropImages}
+              imageScale={product.imageScale}
             />
           </div>
 

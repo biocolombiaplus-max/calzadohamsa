@@ -10,10 +10,9 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 
 // Reduce el archivo si la foto es muy pesada (celulares modernos suben
 // fotos de 12+ MP), sin recortar ni deformar nada — se mantiene la
-// proporción original completa. El encuadre final a cuadrado, sin franjas
-// de fondo y sin importar el tamaño o proporción de la foto, lo hace
-// Cloudinary automáticamente al mostrarla (ver AUTO_OPTIMIZE en storage.ts),
-// detectando con IA en qué parte de la foto está el producto.
+// proporción original completa. El recorte a cuadrado (o mostrarla
+// completa, sin recortar) se decide después, foto por foto, al mostrarla
+// en la tienda — ver noCropImages/imageScale en ProductForm.tsx.
 export async function resizeForUpload(file: File, maxDimension = 2000): Promise<Blob> {
   const url = URL.createObjectURL(file);
   try {
