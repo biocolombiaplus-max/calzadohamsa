@@ -8,17 +8,7 @@ import { cloudinaryFill, cloudinaryOriginal, slugify } from '@/lib/utils';
 import { createProduct, updateProduct, deleteProduct } from '@/lib/products';
 import { uploadProductImage, deleteProductImage } from '@/lib/storage';
 import { resizeForUpload } from '@/lib/imageCrop';
-
-const COMMON_SIZES = ['34', '35', '36', '37', '38', '39', '40', '41', '42'];
-const QUICK_COLORS: ProductColor[] = [
-  { name: 'Camel', hex: '#C9A06C' },
-  { name: 'Terracota', hex: '#A9673A' },
-  { name: 'Beige', hex: '#F5E6CE' },
-  { name: 'Negro', hex: '#1C1208' },
-  { name: 'Blanco', hex: '#FFFFFF' },
-  { name: 'Vino', hex: '#7A4A22' },
-];
-const COMMON_COLLECTIONS = ['sandalias', 'tacones', 'flats', 'botas', 'accesorios'];
+import { COMMON_SIZES, QUICK_COLORS, COMMON_COLLECTIONS } from '@/lib/productConstants';
 
 export default function ProductForm({ product }: { product?: Product }) {
   const router = useRouter();

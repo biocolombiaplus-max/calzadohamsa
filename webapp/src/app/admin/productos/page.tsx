@@ -29,9 +29,14 @@ export default function AdminProductsPage() {
           <h1 className="font-heading text-2xl font-bold text-ink">Productos</h1>
           <p className="text-sm text-muted">Gestiona el catálogo de tu tienda</p>
         </div>
-        <Link href="/admin/productos/nuevo" className="btn-primary">
-          + Agregar producto
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/admin/productos/carga-rapida" className="btn-secondary">
+            ⚡ Carga rápida
+          </Link>
+          <Link href="/admin/productos/nuevo" className="btn-primary">
+            + Agregar producto
+          </Link>
+        </div>
       </div>
 
       <div className="overflow-x-auto rounded-card bg-white shadow-soft">

@@ -500,6 +500,30 @@ recortada, con botones **"−"/"+"** para ajustar cuánto se encoge, en vivo.
 Esto funciona tanto para fotos nuevas como para las que ya estaban subidas
 antes — no hace falta volver a subir nada.
 
+## Carga rápida de varios productos a la vez (`/admin/productos/carga-rapida`)
+
+Cuando tienes varios modelos nuevos para publicar de un tirón, en vez de
+crear un producto, subir sus fotos, guardar, y repetir uno por uno, este
+modo deja subir TODAS las fotos mezcladas primero y organizarlas después:
+
+1. **Sube todas las fotos** (de todos los modelos, sin importar el orden) —
+   se suben varias a la vez en paralelo, así cargar 20-30 fotos toma
+   segundos en vez de minutos.
+2. **Agrúpalas**: toca las fotos de un mismo modelo para seleccionarlas y
+   presiona "Agrupar en un producto nuevo" — aparece como una tarjeta de
+   producto con esas fotos.
+3. **Completa los datos de cada tarjeta**: título (genera la URL sola),
+   precio, tallas, colores, colección y stock. El precio/tallas/colores/
+   colección del producto anterior se copian automáticamente al siguiente,
+   para no volver a escribirlos cuando son modelos parecidos.
+4. Cada foto tiene el mismo control de **"🔲 Recortada" / "🖼️ Completa"**
+   con los botones **"−"/"+"** de la ficha normal de producto, para
+   ajustar las que no se vean bien recortadas — sin salir de la carga
+   rápida.
+5. **"✓ Crear N productos"** los publica todos de una — si alguno falla
+   (ej. una URL repetida), se queda en pantalla con el error debajo para
+   corregirlo, mientras los demás sí quedan creados.
+
 ## Estructura del proyecto
 
 ```
