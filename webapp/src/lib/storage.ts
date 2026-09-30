@@ -58,6 +58,41 @@ export async function uploadProductImage(file: File, _productSlug: string): Prom
   return withAutoOptimization(data.secure_url as string);
 }
 
+// Sube la guía de envío (foto del rótulo o PDF de la transportadora) al
+// mismo Cloudinary — usa el endpoint "auto" en vez de "image" porque un
+// PDF no es una imagen para Cloudinary, y así un mismo botón sirve para
+// cualquiera de los dos sin que la administradora tenga que pensar en el
+// formato. No se le aplica ningún recorte/optimización de foto de
+// producto, se guarda tal cual.
+export async function uploadShippingLabel(file: File): Promise<string> {
+  if (!CLOUD_NAME || !UPLOAD_PRESET) {
+    throw new Error(
+      'Cloudinary no está configurado. Agrega NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME y NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET (ver README.md).',
+    );
+  }
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', UPLOAD_PRESET);
+
+  const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const message = data?.error?.message || `No se pudo subir el archivo (error ${response.status}).`;
+    throw new Error(message);
+  }
+  if (!data?.secure_url) {
+    throw new Error('Cloudinary no devolvió la URL del archivo. Intenta de nuevo.');
+  }
+
+  return data.secure_url as string;
+}
+
 export async function deleteProductImage(_url: string): Promise<void> {
   // Borrar un archivo en Cloudinary requiere firmar la petición con la API
   // secret, que nunca debe exponerse en el navegador (necesitaría una

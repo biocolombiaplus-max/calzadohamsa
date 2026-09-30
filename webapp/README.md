@@ -354,6 +354,22 @@ y los datos de entrega) listo para enviar con un toque. Si el navegador
 bloquea la pestaña emergente, la página de confirmación del pedido muestra
 el mismo mensaje en un botón "Confirmar pedido por WhatsApp" como respaldo.
 
+## Adjuntar la guía de envío al avisar por WhatsApp
+
+En `/admin/pedidos`, junto a la transportadora y el número de guía, hay un
+botón **"📎 Subir guía (foto o PDF)"** — sube la foto de la etiqueta o el
+PDF de la transportadora en un toque (se ve de inmediato como miniatura o
+ícono de documento, con "Ver archivo" y "Quitar").
+
+Al tocar **"💬 Avisar por WhatsApp (Enviado)"**, el link de la guía se
+agrega dentro del mensaje ya escrito — la clienta lo toca y ve o descarga
+el archivo. WhatsApp normalmente muestra una vista previa de la imagen
+directo en el chat si es una foto. (El link de "clic para chatear" de
+WhatsApp que usa este botón no permite adjuntar un archivo de verdad como
+mensaje separado — solo texto — por eso se manda como link dentro del
+mismo mensaje, que es la forma más rápida y confiable de lograrlo sin
+depender de la API de Meta.)
+
 ## CRM de WhatsApp — bandeja + embudo de ventas (`/admin/crm`)
 
 Un CRM propio, integrado en el panel, para atender a cada clienta por

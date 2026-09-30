@@ -18,6 +18,7 @@ function toOrder(id: string, data: any): Order {
     status: data.status ?? 'pendiente',
     carrier: data.carrier || undefined,
     trackingNumber: data.trackingNumber || undefined,
+    shippingLabelUrl: data.shippingLabelUrl || undefined,
     paymentReference: data.paymentReference || undefined,
     couponCode: data.couponCode || undefined,
     createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toMillis() : Date.now(),
@@ -126,4 +127,8 @@ export async function updateOrderShipping(
     carrier: shipping.carrier ?? '',
     trackingNumber: shipping.trackingNumber ?? '',
   });
+}
+
+export async function updateOrderShippingLabel(id: string, url: string | null): Promise<void> {
+  await updateDoc(doc(db, COLLECTION, id), { shippingLabelUrl: url ?? '' });
 }

@@ -91,6 +91,10 @@ export interface Order {
   status: OrderStatus;
   carrier?: Carrier;
   trackingNumber?: string;
+  // Foto o PDF de la guía de envío, subida desde /admin/pedidos — se
+  // adjunta como link dentro del mensaje de WhatsApp al avisarle a la
+  // clienta que su pedido ya salió.
+  shippingLabelUrl?: string;
   paymentReference?: string;
   couponCode?: string;
   createdAt: number;

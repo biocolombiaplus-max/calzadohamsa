@@ -2,10 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getAllOrders, updateOrderStatus, updateOrderShipping, deleteOrder } from '@/lib/orders';
+import Image from 'next/image';
+import { getAllOrders, updateOrderStatus, updateOrderShipping, updateOrderShippingLabel, deleteOrder } from '@/lib/orders';
 import { getSiteSettings } from '@/lib/settings';
+import { uploadShippingLabel } from '@/lib/storage';
 import { CARRIERS, type Order, type OrderStatus, type Carrier } from '@/lib/types';
 import { formatPrice, whatsappLinkTo } from '@/lib/utils';
+
+const IMAGE_EXTENSION = /\.(jpe?g|png|webp|gif|heic)(\?|$)/i;
 
 const STATUSES: { value: OrderStatus; label: string }[] = [
   { value: 'pendiente', label: 'Pendiente' },
@@ -39,7 +43,13 @@ function buildStatusMessage(order: Order, storeName: string): string {
         order.carrier && order.trackingNumber
           ? `\n\nTransportadora: ${order.carrier}\nNúmero de guía: ${order.trackingNumber}`
           : '';
-      return `Hola ${firstName}! Tu pedido ${order.orderNumber} ya salió hacia ${order.customer.city}.${shippingInfo}\n\nCualquier novedad con la entrega, escríbenos por este mismo medio.`;
+      // wa.me (el link de "clic para chatear") no permite adjuntar un
+      // archivo de verdad — solo texto. Por eso se manda como un link
+      // dentro del mensaje: al tocarlo la clienta ve/descarga la foto o el
+      // PDF igual, y en la mayoría de los casos WhatsApp muestra una
+      // vista previa de la imagen directo en el chat.
+      const labelInfo = order.shippingLabelUrl ? `\n📎 Foto de la guía: ${order.shippingLabelUrl}` : '';
+      return `Hola ${firstName}! Tu pedido ${order.orderNumber} ya salió hacia ${order.customer.city}.${shippingInfo}${labelInfo}\n\nCualquier novedad con la entrega, escríbenos por este mismo medio.`;
     }
     case 'entregado':
       return `Hola ${firstName}! Vimos que tu pedido ${order.orderNumber} ya fue entregado. Esperamos que te encanten tus sandalias 💛 Si necesitas cambio de talla o tienes alguna duda, aquí estamos.`;
@@ -54,6 +64,8 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[] | null>(null);
   const [storeName, setStoreName] = useState('la tienda');
   const [savingShipping, setSavingShipping] = useState<string | null>(null);
+  const [uploadingLabel, setUploadingLabel] = useState<string | null>(null);
+  const [labelErrors, setLabelErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     getAllOrders()
@@ -81,6 +93,31 @@ export default function AdminOrdersPage() {
     } finally {
       setSavingShipping(null);
     }
+  }
+
+  // Sube la foto/PDF de la guía en cuanto se elige el archivo (sin botón
+  // aparte de "guardar") y la deja lista para ir dentro del mensaje de
+  // WhatsApp — así queda "rápido y fácil" como se pidió.
+  async function handleLabelUpload(order: Order, file: File) {
+    setUploadingLabel(order.id);
+    setLabelErrors((prev) => ({ ...prev, [order.id]: '' }));
+    try {
+      const url = await uploadShippingLabel(file);
+      await updateOrderShippingLabel(order.id, url);
+      setOrders((prev) => (prev ? prev.map((o) => (o.id === order.id ? { ...o, shippingLabelUrl: url } : o)) : prev));
+    } catch (err) {
+      setLabelErrors((prev) => ({
+        ...prev,
+        [order.id]: err instanceof Error ? err.message : 'No se pudo subir el archivo.',
+      }));
+    } finally {
+      setUploadingLabel(null);
+    }
+  }
+
+  async function handleLabelRemove(order: Order) {
+    await updateOrderShippingLabel(order.id, null);
+    setOrders((prev) => (prev ? prev.map((o) => (o.id === order.id ? { ...o, shippingLabelUrl: undefined } : o)) : prev));
   }
 
   async function handleDeleteOrder(order: Order) {
@@ -113,8 +150,12 @@ export default function AdminOrdersPage() {
               order={order}
               storeName={storeName}
               saving={savingShipping === order.id}
+              uploadingLabel={uploadingLabel === order.id}
+              labelError={labelErrors[order.id]}
               onStatusChange={(status) => handleStatusChange(order.id, status)}
               onShippingSave={(carrier, trackingNumber) => handleShippingSave(order, carrier, trackingNumber)}
+              onLabelUpload={(file) => handleLabelUpload(order, file)}
+              onLabelRemove={() => handleLabelRemove(order)}
               onDelete={() => handleDeleteOrder(order)}
             />
           ))
@@ -128,15 +169,23 @@ function OrderCard({
   order,
   storeName,
   saving,
+  uploadingLabel,
+  labelError,
   onStatusChange,
   onShippingSave,
+  onLabelUpload,
+  onLabelRemove,
   onDelete,
 }: {
   order: Order;
   storeName: string;
   saving: boolean;
+  uploadingLabel: boolean;
+  labelError?: string;
   onStatusChange: (status: OrderStatus) => void;
   onShippingSave: (carrier: Carrier | '', trackingNumber: string) => void;
+  onLabelUpload: (file: File) => void;
+  onLabelRemove: () => void;
   onDelete: () => void;
 }) {
   const [carrier, setCarrier] = useState<Carrier | ''>(order.carrier ?? '');
@@ -241,6 +290,65 @@ function OrderCard({
             >
               {saving ? 'Guardando...' : 'Guardar guía'}
             </button>
+          )}
+        </div>
+
+        <div className="mt-3">
+          <label className="mb-1 block text-xs text-muted">📎 Foto o PDF de la guía</label>
+          {order.shippingLabelUrl ? (
+            <div className="flex items-center gap-2">
+              {IMAGE_EXTENSION.test(order.shippingLabelUrl) ? (
+                <a
+                  href={order.shippingLabelUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="relative h-14 w-14 overflow-hidden rounded-lg border border-border bg-cream-alt"
+                >
+                  <Image src={order.shippingLabelUrl} alt="Guía de envío" fill className="object-cover" />
+                </a>
+              ) : (
+                <a
+                  href={order.shippingLabelUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex h-14 w-14 items-center justify-center rounded-lg border border-border bg-cream-alt text-2xl"
+                >
+                  📄
+                </a>
+              )}
+              <div>
+                <a
+                  href={order.shippingLabelUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-xs font-semibold text-primary hover:underline"
+                >
+                  Ver archivo ↗
+                </a>
+                <button type="button" onClick={onLabelRemove} className="text-xs text-urgent hover:underline">
+                  Quitar
+                </button>
+              </div>
+            </div>
+          ) : (
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border-2 border-dashed border-border px-3 py-2 text-xs text-muted hover:border-primary">
+              {uploadingLabel ? 'Subiendo...' : '+ Subir guía (foto o PDF)'}
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                className="hidden"
+                disabled={uploadingLabel}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) onLabelUpload(file);
+                  e.target.value = '';
+                }}
+              />
+            </label>
+          )}
+          {labelError && <p className="mt-1 text-xs text-urgent">{labelError}</p>}
+          {order.shippingLabelUrl && (
+            <p className="mt-1 text-xs text-muted">Se incluye como link en el mensaje de WhatsApp al avisar &ldquo;Enviado&rdquo;.</p>
           )}
         </div>
       </div>
