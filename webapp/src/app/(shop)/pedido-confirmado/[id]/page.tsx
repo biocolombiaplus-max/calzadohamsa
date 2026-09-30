@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
 import { getOrderById } from '@/lib/orders';
 import { buildOrderWhatsAppMessage, formatPrice, whatsappLinkTo } from '@/lib/utils';
+import { trackPurchaseOnce } from '@/lib/metaPixel';
 import { useSiteSettings } from '@/lib/settings-context';
 import PostPurchaseUpsell from '@/components/product/PostPurchaseUpsell';
 import type { Order } from '@/lib/types';
@@ -27,6 +28,10 @@ export default function OrderConfirmationPage() {
       cancelled = true;
     };
   }, [params.id]);
+
+  useEffect(() => {
+    if (order) trackPurchaseOnce(order);
+  }, [order]);
 
   // Cuando Wompi redirige de vuelta aquí, trae "?id=<transacción>" — se
   // verifica esa transacción contra la propia API de Wompi (en vez de

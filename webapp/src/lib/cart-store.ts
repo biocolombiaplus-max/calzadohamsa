@@ -3,6 +3,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { CartItem } from './types';
+import { trackPixelEvent } from './metaPixel';
 
 interface CartState {
   items: CartItem[];
@@ -28,7 +29,14 @@ export const useCartStore = create<CartState>()(
       isOpen: false,
       open: () => set({ isOpen: true }),
       close: () => set({ isOpen: false }),
-      addItem: (item) =>
+      addItem: (item) => {
+        trackPixelEvent('AddToCart', {
+          content_ids: [item.productId],
+          content_type: 'product',
+          content_name: item.title,
+          value: item.price * item.quantity,
+          currency: 'COP',
+        });
         set((state) => {
           const existing = state.items.find((i) => sameLine(i, item.productId, item.size, item.color));
           if (existing) {
@@ -42,7 +50,8 @@ export const useCartStore = create<CartState>()(
             };
           }
           return { items: [...state.items, item], isOpen: true };
-        }),
+        });
+      },
       removeItem: (productId, size, color) =>
         set((state) => ({
           items: state.items.filter((i) => !sameLine(i, productId, size, color)),

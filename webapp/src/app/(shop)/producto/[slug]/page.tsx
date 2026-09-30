@@ -14,6 +14,7 @@ import Accordion, { AccordionItem } from '@/components/product/Accordion';
 import ProductReviews from '@/components/product/ProductReviews';
 import RelatedProducts from '@/components/product/RelatedProducts';
 import HowItWorks from '@/components/HowItWorks';
+import { trackPixelEvent } from '@/lib/metaPixel';
 
 export default function ProductPage() {
   const params = useParams<{ slug: string }>();
@@ -48,6 +49,17 @@ export default function ProductPage() {
       cancelled = true;
     };
   }, [params.slug]);
+
+  useEffect(() => {
+    if (!product) return;
+    trackPixelEvent('ViewContent', {
+      content_ids: [product.id],
+      content_type: 'product',
+      content_name: product.title,
+      value: product.price,
+      currency: 'COP',
+    });
+  }, [product]);
 
   if (product === null) return notFound();
 

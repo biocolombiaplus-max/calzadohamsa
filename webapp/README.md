@@ -500,6 +500,48 @@ Sin estas variables configuradas, `/admin/crm` se ve y funciona la
 interfaz (embudo, notas, etiquetas), pero no puede mandar ni recibir
 mensajes reales todavía — no rompe nada del resto de la tienda.
 
+## Meta Pixel — medir y optimizar campañas de Meta Ads
+
+El sitio ya tiene todo el código listo para medir quién ve un producto,
+agrega al carrito, empieza a pagar y compra de verdad — los 4 eventos que
+Meta necesita para que una campaña de Facebook/Instagram Ads aprenda a
+encontrar más clientas parecidas a las que sí compran. Solo falta
+conectarlo con tu cuenta de Meta (5 minutos):
+
+1. Ve a [Meta Events Manager](https://business.facebook.com/events_manager2)
+   → **Conectar orígenes de datos → Web** → crea un pixel nuevo (o usa uno
+   que ya tengas) → ponle un nombre como "Hamsa Shoes Web".
+2. Copia el **ID del pixel** (son solo números) en
+   `NEXT_PUBLIC_META_PIXEL_ID`.
+3. **(Recomendado)** En el mismo pixel → **Configuración → API de
+   conversiones → Generar token de acceso manualmente** → copia ese token
+   en `META_CONVERSIONS_API_TOKEN`. Esto hace que el evento de Compra
+   llegue también directo desde el servidor, no solo desde el navegador
+   de la clienta — en iPhone/Safari es muy común que bloqueen el pixel de
+   JavaScript, así no se pierde ninguna venta en las métricas.
+4. Agrega esas variables en **Vercel > Project Settings > Environment
+   Variables** y vuelve a desplegar.
+5. Para comprobar que quedó funcionando: instala la extensión de Chrome
+   **[Meta Pixel Helper](https://chromewebstore.google.com/detail/meta-pixel-helper/fdgfkebogiimcoedlicjlajpkdmockpc)**,
+   entra a calzadohamsa.com y deberías ver el ícono ponerse azul con
+   "PageView" — o revisa **Events Manager → Probar eventos**, pegando la
+   URL de tu sitio (ahí ves los eventos llegar en vivo).
+
+**Eventos que ya están conectados, en todo el sitio:**
+- `PageView` — cada página que se abre (incluye la navegación interna sin
+  recargar, típica de Next.js).
+- `ViewContent` — al abrir la ficha de un producto.
+- `AddToCart` — al agregar algo al carrito (desde cualquier botón del
+  sitio: ficha de producto, compra rápida, oferta 2×1).
+- `InitiateCheckout` — al entrar a pagar.
+- `Purchase` — al confirmarse un pedido (con el valor real cobrado), con
+  protección para no contarlo dos veces si la clienta recarga la página
+  de confirmación. Es el único evento que también se manda desde el
+  servidor (API de Conversiones) si configuraste el token del paso 3.
+
+Sin `NEXT_PUBLIC_META_PIXEL_ID` configurada, todo esto simplemente no
+hace nada — el sitio sigue funcionando exactamente igual.
+
 ## Fotos de producto: encuadre a cuadrado, ajustable foto por foto
 
 Al subir fotos en `/admin/productos` no hace falta recortarlas antes: se
