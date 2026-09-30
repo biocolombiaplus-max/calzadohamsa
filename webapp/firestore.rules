@@ -45,5 +45,21 @@ service cloud.firestore {
       allow create, update: if isAdmin();
       allow delete: if isAdmin();
     }
+
+    // CRM de WhatsApp: datos privados de conversaciones con clientas, solo
+    // la administradora puede verlos o tocarlos desde el panel. El webhook
+    // de Meta (que recibe los mensajes entrantes sin ninguna sesión de por
+    // medio) escribe usando el SDK de administrador de Firebase, que se
+    // salta estas reglas — así que esto solo protege el acceso desde el
+    // navegador.
+    match /crmContacts/{contactId} {
+      allow read, write: if isAdmin();
+    }
+    match /crmMessages/{messageId} {
+      allow read, write: if isAdmin();
+    }
+    match /crmConfig/{docId} {
+      allow read, write: if isAdmin();
+    }
   }
 }

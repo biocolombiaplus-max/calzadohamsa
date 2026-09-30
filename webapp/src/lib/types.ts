@@ -98,6 +98,74 @@ export interface Order {
 
 export type OrderInput = Omit<Order, 'id' | 'createdAt' | 'orderNumber'>;
 
+// ---- CRM / WhatsApp ----
+// Embudo de ventas estilo Kommo: cada clienta que escribe por WhatsApp
+// entra como "nuevo" y la administradora la va moviendo a mano por las
+// etapas según avanza la conversación real.
+export const CRM_STAGES = ['nuevo', 'interesado', 'negociando', 'cliente', 'perdido'] as const;
+export type CrmStage = (typeof CRM_STAGES)[number];
+
+export const CRM_STAGE_LABELS: Record<CrmStage, string> = {
+  nuevo: '🆕 Nuevo',
+  interesado: '👀 Interesado',
+  negociando: '💬 Negociando',
+  cliente: '✅ Cliente',
+  perdido: '❌ Perdido',
+};
+
+export interface CrmContact {
+  id: string;
+  // Teléfono en formato E.164 sin "+" (como lo entrega la API de Meta), ej. "573001234567".
+  phone: string;
+  name: string;
+  stage: CrmStage;
+  notes?: string;
+  tags?: string[];
+  lastMessageAt: number;
+  lastMessagePreview: string;
+  lastInboundAt?: number;
+  unreadCount: number;
+  nextFollowUpAt?: number | null;
+  createdAt: number;
+}
+
+export type CrmMessageDirection = 'in' | 'out';
+export type CrmMessageStatus = 'sent' | 'delivered' | 'read' | 'failed';
+
+export interface CrmMessage {
+  id: string;
+  contactId: string;
+  direction: CrmMessageDirection;
+  text: string;
+  status?: CrmMessageStatus;
+  waMessageId?: string;
+  templateName?: string;
+  createdAt: number;
+}
+
+export interface CrmQuickReply {
+  id: string;
+  label: string;
+  text: string;
+}
+
+// Plantillas APROBADAS por Meta para escribirle primero a una clienta
+// después de que la ventana de 24 horas de mensajes libres se cierra — el
+// nombre y la cantidad de variables deben coincidir EXACTO con lo aprobado
+// en Meta Business Manager, si no el envío falla.
+export interface CrmTemplate {
+  id: string;
+  name: string;
+  label: string;
+  language: string;
+  variableCount: number;
+}
+
+export interface CrmConfig {
+  quickReplies: CrmQuickReply[];
+  templates: CrmTemplate[];
+}
+
 export interface TrustItem {
   icon: string;
   title: string;

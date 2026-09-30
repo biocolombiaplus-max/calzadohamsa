@@ -354,24 +354,151 @@ y los datos de entrega) listo para enviar con un toque. Si el navegador
 bloquea la pestaña emergente, la página de confirmación del pedido muestra
 el mismo mensaje en un botón "Confirmar pedido por WhatsApp" como respaldo.
 
-## Fotos de producto: encuadre automático a cuadrado
+## CRM de WhatsApp — bandeja + embudo de ventas (`/admin/crm`)
 
-Al subir fotos en `/admin/productos` no hace falta recortarlas ni ajustar
-nada manualmente: se suben tal cual (cualquier tamaño o proporción), y
-Cloudinary las encuadra a cuadrado automáticamente usando su función de
-"gravedad automática" (`g_auto`), que detecta con IA en qué parte de la
-foto está el producto y recorta ahí — sin dejar franjas de fondo ni
-cortar el producto, sin importar si quedó centrado o no en la foto
-original. Esto pasa en la propia URL de Cloudinary (parámetro
-`AUTO_OPTIMIZE` en `src/lib/storage.ts`), no en el navegador, así que
-funciona igual de bien para cualquier foto que subas.
+Un CRM propio, integrado en el panel, para atender a cada clienta por
+WhatsApp uno a uno **desde el navegador** (sin usar el celular) y llevar un
+embudo de ventas visual — igual que Kommo, pero sin mensualidad ni un
+sistema externo más que administrar.
 
-Las fotos que ya estaban subidas antes de este cambio y que se ven con
-franjas de fondo a los lados hay que volver a subirlas (editar el
-producto → reemplazar la foto) para que tomen el nuevo encuadre — esas
-fotos anteriores ya se guardaron recortadas a cuadrado con la franja
-"quemada" en los píxeles, así que no hay forma de arreglarlas sin volver
-a procesar la imagen original.
+**Incluye:**
+- **Bandeja** de conversaciones (como WhatsApp Web): lista de clientas
+  ordenada por el mensaje más reciente, con contador de no leídos, e hilo de
+  conversación completo por clienta.
+- **Ficha de cada clienta**: nombre, etiquetas, notas internas (no se
+  envían, solo las ve tu equipo) y fecha de próximo seguimiento.
+- **Embudo visual** (`Nuevo → Interesado → Negociando → Cliente → Perdido`)
+  con tablero tipo Kanban — mueves a cada clienta de etapa con un toque.
+- **Respuestas rápidas**: frases guardadas que aparecen como botones sobre
+  el cuadro de texto, para responder preguntas frecuentes sin escribir de
+  nuevo cada vez.
+- **Plantillas aprobadas por Meta**, para retomar una conversación después
+  de que se cierra la ventana de 24 horas sin arriesgar el número (ver
+  "Por qué esto no bloquea tu WhatsApp" más abajo).
+
+### Importante: esto usa la API OFICIAL de Meta, no un atajo
+
+Kommo, y cualquier otro CRM serio, conecta WhatsApp usando **WhatsApp
+Business Platform (Cloud API)** de Meta — la única forma oficial y segura
+de automatizar WhatsApp desde un sistema externo. Este CRM hace exactamente
+lo mismo, directo, sin intermediarios de pago:
+
+- **Nunca** usa WhatsApp Web automatizado, librerías no oficiales ni
+  "hackea" la app del celular — eso es lo que hace que Meta banee números.
+- Respeta la **ventana de 24 horas**: solo puedes escribir libremente
+  dentro de las 24 horas siguientes al último mensaje que la clienta te
+  envió. Pasado ese tiempo, el CRM bloquea el cuadro de texto normal y te
+  pide usar una **plantilla pre-aprobada por Meta** — es la única forma
+  permitida de escribir primero o retomar una conversación vieja.
+- Manda **un mensaje a la vez**, a una clienta que ya te escribió (o que
+  aceptó una plantilla) — nunca mensajes masivos ni listas de difusión, que
+  es la causa más común de bloqueo.
+
+Siguiendo estas reglas (que el CRM ya aplica automáticamente) tu número
+está tan seguro como el de cualquier negocio grande que usa WhatsApp
+Business Platform.
+
+### Cómo conectarlo (una sola vez)
+
+**Meta cobra por conversación después de cierto volumen gratis al mes**
+(las primeras conversaciones de servicio al cliente son gratis; revisa los
+precios vigentes en [business.whatsapp.com](https://business.whatsapp.com)
+antes de activarlo) — no es necesario tarjeta de crédito para empezar a
+configurarlo y probarlo con un número de pruebas.
+
+**1. Crea tu app en Meta for Developers**
+1. Ve a [developers.facebook.com](https://developers.facebook.com) → **Mis
+   apps → Crear app** → tipo **"Empresa"**.
+2. Dentro de la app, en el panel izquierdo, agrega el producto
+   **WhatsApp**.
+3. Meta te da automáticamente un **número de prueba** gratis y un **Access
+   Token temporal** (dura 24h, solo para probar) — en
+   **WhatsApp → Configuración de la API** verás:
+   - **Phone number ID** → `WHATSAPP_PHONE_NUMBER_ID`
+   - **Token de acceso temporal** (para probar rápido; el paso 3 explica
+     cómo conseguir uno permanente).
+
+**2. Verifica tu negocio y pasa a un número real (cuando quieras recibir
+pedidos reales, no solo probar)**
+1. En [business.facebook.com](https://business.facebook.com), completa la
+   **verificación de tu negocio** (datos legales, puede tardar 1-2 días).
+2. En **WhatsApp Manager**, agrega y verifica tu número real de WhatsApp
+   Business (recibirás un código por SMS o llamada — este número ya NO
+   puede usarse al mismo tiempo en la app normal de WhatsApp Business del
+   celular).
+
+**3. Genera un Access Token PERMANENTE** (el temporal expira cada 24h y
+dejaría de funcionar el CRM):
+1. En [business.facebook.com](https://business.facebook.com) →
+   **Configuración del negocio → Usuarios → Usuarios del sistema → Agregar**.
+   Créalo con rol **Administrador**.
+2. Asígnale tu app de WhatsApp con permiso **Control total**.
+3. **Generar nuevo token** → selecciona tu app → marca los permisos
+   `whatsapp_business_messaging` y `whatsapp_business_management` → sin
+   fecha de expiración. Copia ese token en `WHATSAPP_ACCESS_TOKEN`.
+
+**4. Configura el webhook** (para que los mensajes entrantes lleguen al
+CRM):
+1. Inventa una palabra para `WHATSAPP_VERIFY_TOKEN` (ej: un password
+   largo cualquiera) y agrégala como variable de entorno.
+2. En **Configuración básica** de tu app, copia el **App Secret** en
+   `WHATSAPP_APP_SECRET`.
+3. Agrega TODAS las variables de esta sección en **Vercel > Project
+   Settings > Environment Variables** (ver también el paso 5) y despliega.
+4. En Meta for Developers → tu app → **WhatsApp → Configuración →
+   Webhook → Editar**:
+   - **URL de devolución de llamada**: `https://tudominio.com/api/whatsapp/webhook`
+   - **Verify token**: el mismo valor que pusiste en `WHATSAPP_VERIFY_TOKEN`.
+   - Clic en **Verificar y guardar**.
+   - En **Campos del webhook**, suscríbete a **`messages`**.
+
+**5. Cuenta de servicio de Firebase** (para que el webhook pueda guardar
+los mensajes que van llegando):
+1. [Firebase Console](https://console.firebase.google.com) → tu proyecto →
+   **⚙️ Configuración del proyecto → Cuentas de servicio → Generar nueva
+   clave privada**. Descarga el archivo `.json`.
+2. De ese archivo, copia:
+   - `project_id` → `FIREBASE_ADMIN_PROJECT_ID`
+   - `client_email` → `FIREBASE_ADMIN_CLIENT_EMAIL`
+   - `private_key` → `FIREBASE_ADMIN_PRIVATE_KEY` (pégalo tal cual, con los
+     `\n` incluidos, entre comillas).
+3. Agrega las 3 en **Vercel > Project Settings > Environment Variables**
+   junto con las de WhatsApp del paso 4, y vuelve a desplegar.
+
+**6. Prueba de punta a punta**
+1. Entra a `/admin/crm` → pestaña **⚙️ Configuración** — debe mostrar las 4
+   marcas en verde.
+2. Desde tu celular (con otro número), escríbele por WhatsApp al número
+   configurado. El mensaje debe aparecer en la **Bandeja** en segundos.
+3. Respóndele desde el CRM — debe llegarte al celular.
+
+**7. (Opcional) Agrega plantillas para retomar conversaciones viejas**
+1. En **WhatsApp Manager → Plantillas de mensajes → Crear plantilla**, crea
+   y espera la aprobación de Meta (suele tardar minutos a pocas horas) de
+   mensajes como *"Hola {{1}}, ¿sigues interesada en la sandalia que
+   preguntaste? Todavía tenemos disponibilidad 😊"*.
+2. En `/admin/crm → ⚙️ Configuración → Plantillas aprobadas por Meta`,
+   agrégala con el nombre EXACTO que le pusiste en Meta.
+
+Sin estas variables configuradas, `/admin/crm` se ve y funciona la
+interfaz (embudo, notas, etiquetas), pero no puede mandar ni recibir
+mensajes reales todavía — no rompe nada del resto de la tienda.
+
+## Fotos de producto: encuadre a cuadrado, ajustable foto por foto
+
+Al subir fotos en `/admin/productos` no hace falta recortarlas antes: se
+suben tal cual (cualquier tamaño o proporción) y se guarda la foto
+ORIGINAL completa, sin recortar nada. El encuadre a cuadrado se aplica
+solo al MOSTRARLA (usando la "gravedad automática" de Cloudinary, que
+detecta con IA en qué parte de la foto está el producto y encuadra ahí),
+nunca se pierde información de la foto original.
+
+Si alguna foto queda con un pedazo de la sandalia cortado, en el editor de
+ese producto toca **"🔲 Recortada"** debajo de esa foto para cambiarla a
+**"🖼️ Completa"** — se muestra entera (con fondo blanco) en vez de
+recortada, con botones **"−"/"+"** para ajustar cuánto se encoge, en vivo.
+Esto funciona tanto para fotos nuevas como para las que ya estaban subidas
+antes — no hace falta volver a subir nada.
 
 ## Estructura del proyecto
 
@@ -380,11 +507,13 @@ webapp/
   src/
     app/
       (shop)/          → páginas públicas (inicio, catálogo, producto, carrito, checkout)
-      admin/            → panel administrativo (protegido)
+      admin/            → panel administrativo (protegido), incluye admin/crm
+      api/whatsapp/     → webhook + envío de mensajes (API oficial de Meta)
     components/         → componentes de la tienda (Hero, ProductCard, CartDrawer, etc.)
     components/admin/   → formulario de productos, sidebar, guard de autenticación
+    components/admin/crm/ → bandeja, hilo de conversación, ficha, embudo Kanban, configuración
     components/product/ → galería, timer, guía de tallas, etc. de la ficha de producto
-    lib/                → Firebase, Cloudinary, tipos, carrito (zustand), productos, pedidos, utilidades
+    lib/                → Firebase (cliente y admin), Cloudinary, WhatsApp, tipos, carrito (zustand), productos, pedidos, CRM, utilidades
   firestore.rules
   scripts/seed.ts
 ```

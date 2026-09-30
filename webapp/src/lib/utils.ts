@@ -13,6 +13,22 @@ export function resolveColorImage(
   return color.image || product.images[0];
 }
 
+// Hora relativa tipo WhatsApp para la bandeja del CRM ("Ahora", "5 min",
+// "2 h", "Ayer", o la fecha corta si ya pasó más de una semana).
+export function formatRelativeTime(ms: number): string {
+  if (!ms) return '';
+  const diff = Date.now() - ms;
+  const minute = 60 * 1000;
+  const hour = 60 * minute;
+  const day = 24 * hour;
+  if (diff < minute) return 'Ahora';
+  if (diff < hour) return `${Math.floor(diff / minute)} min`;
+  if (diff < day) return `${Math.floor(diff / hour)} h`;
+  if (diff < 2 * day) return 'Ayer';
+  if (diff < 7 * day) return `${Math.floor(diff / day)} d`;
+  return new Date(ms).toLocaleDateString('es-CO', { day: 'numeric', month: 'short' });
+}
+
 export function formatPrice(value: number): string {
   return new Intl.NumberFormat('es-CO', {
     style: 'currency',
