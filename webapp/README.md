@@ -542,6 +542,46 @@ conectarlo con tu cuenta de Meta (5 minutos):
 Sin `NEXT_PUBLIC_META_PIXEL_ID` configurada, todo esto simplemente no
 hace nada — el sitio sigue funcionando exactamente igual.
 
+## Catálogo de productos para Meta Commerce Manager
+
+Si vienes de Shopify, es muy probable que Meta Commerce Manager tenga
+conectado un **catálogo viejo** (con productos de esa tienda anterior) —
+por eso al armar un anuncio de "Colección" o activar "Mostrar Productos"
+aparecen modelos que ya no existen. Este proyecto expone un **feed en
+vivo** en:
+
+```
+https://calzadohamsa.com/api/product-feed
+```
+
+Es un feed en formato RSS/Google Shopping con los productos REALES y
+activos de la tienda — lee Firestore directo en cada visita (con caché de
+30 minutos), así que cuando agregas, editas o desactivas un producto en
+`/admin/productos`, el feed se actualiza solo, sin tocar nada aquí ni en
+Meta.
+
+**Para crear el catálogo correcto en Meta (una sola vez):**
+1. Ve a [Meta Commerce Manager](https://business.facebook.com/commerce_manager)
+   → **Agregar catálogo** → tipo **E-commerce**.
+2. En "¿Cómo quieres agregar los artículos?" elige **Usar un feed de
+   datos** (datos programados).
+3. Pega la URL de arriba (`https://calzadohamsa.com/api/product-feed`) y
+   elige una frecuencia de actualización (diaria es suficiente).
+4. Espera a que termine la primera subida (unos minutos) — ahí ya deberías
+   ver tus sandalias reales, con su foto, precio y link correctos.
+5. Vuelve al anuncio o conjunto de anuncios donde te aparecía el catálogo
+   viejo y cambia la selección al catálogo nuevo (y su conjunto de
+   productos "Todos los productos" o uno que crees con un filtro).
+
+El catálogo viejo de Shopify lo puedes dejar desactivado en Commerce
+Manager (⋯ → Desactivar) para que no vuelva a aparecer como opción.
+
+**Nota:** este feed es a nivel de producto (una foto principal + hasta 10
+adicionales por modelo), no por talla/color individual — suficiente para
+anuncios de imagen, colección y retargeting básico. Si más adelante
+quieres anuncios dinámicos por color/talla exacta, se puede ampliar a un
+feed por variante.
+
 ## Fotos de producto: encuadre a cuadrado, ajustable foto por foto
 
 Al subir fotos en `/admin/productos` no hace falta recortarlas antes: se
