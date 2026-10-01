@@ -13,6 +13,7 @@ import { getActiveCoupon, clearCoupon, redeemCouponCode } from '@/lib/coupon';
 import { useSiteSettings } from '@/lib/settings-context';
 import { generatePaymentReference, isWompiConfigured, redirectToWompiCheckout } from '@/lib/wompi';
 import { trackPixelEvent } from '@/lib/metaPixel';
+import { trackFunnelStep } from '@/lib/analytics';
 import type { PaymentMethod } from '@/lib/types';
 import LocationCapture from '@/components/product/LocationCapture';
 import PaymentBadges from '@/components/PaymentBadges';
@@ -91,6 +92,7 @@ export default function CheckoutPage() {
       currency: 'COP',
       num_items: items.reduce((sum, i) => sum + i.quantity, 0),
     });
+    trackFunnelStep('checkout');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted]);
 

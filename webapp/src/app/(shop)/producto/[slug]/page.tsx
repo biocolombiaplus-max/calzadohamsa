@@ -15,6 +15,7 @@ import ProductReviews from '@/components/product/ProductReviews';
 import RelatedProducts from '@/components/product/RelatedProducts';
 import HowItWorks from '@/components/HowItWorks';
 import { trackPixelEvent } from '@/lib/metaPixel';
+import { trackFunnelStep } from '@/lib/analytics';
 
 export default function ProductPage() {
   const params = useParams<{ slug: string }>();
@@ -59,6 +60,7 @@ export default function ProductPage() {
       value: product.price,
       currency: 'COP',
     });
+    trackFunnelStep('producto');
   }, [product]);
 
   if (product === null) return notFound();

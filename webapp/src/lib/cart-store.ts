@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { CartItem } from './types';
 import { trackPixelEvent } from './metaPixel';
+import { trackFunnelStep } from './analytics';
 
 interface CartState {
   items: CartItem[];
@@ -37,6 +38,7 @@ export const useCartStore = create<CartState>()(
           value: item.price * item.quantity,
           currency: 'COP',
         });
+        trackFunnelStep('carrito');
         set((state) => {
           const existing = state.items.find((i) => sameLine(i, item.productId, item.size, item.color));
           if (existing) {

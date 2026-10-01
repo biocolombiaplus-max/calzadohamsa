@@ -6,6 +6,7 @@ import { useParams, useSearchParams } from 'next/navigation';
 import { getOrderById } from '@/lib/orders';
 import { buildOrderWhatsAppMessage, formatPrice, whatsappLinkTo } from '@/lib/utils';
 import { trackPurchaseOnce } from '@/lib/metaPixel';
+import { trackFunnelStep } from '@/lib/analytics';
 import { useSiteSettings } from '@/lib/settings-context';
 import PostPurchaseUpsell from '@/components/product/PostPurchaseUpsell';
 import type { Order } from '@/lib/types';
@@ -30,7 +31,10 @@ export default function OrderConfirmationPage() {
   }, [params.id]);
 
   useEffect(() => {
-    if (order) trackPurchaseOnce(order);
+    if (order) {
+      trackPurchaseOnce(order);
+      trackFunnelStep('compra');
+    }
   }, [order]);
 
   // Cuando Wompi redirige de vuelta aquí, trae "?id=<transacción>" — se

@@ -61,5 +61,20 @@ service cloud.firestore {
     match /crmConfig/{docId} {
       allow read, write: if isAdmin();
     }
+
+    // Analítica propia del sitio (visitas y embudo de ventas en
+    // /admin): cualquier visitante anónimo puede crear/actualizar SU
+    // PROPIA sesión (necesario para medir sin que haya una cuenta de por
+    // medio, igual que el "create" público de pedidos), pero solo la
+    // administradora puede leer los datos — así nadie externo puede ver
+    // cuánto tráfico tiene la tienda. Se limita a los campos esperados
+    // para que no se pueda inyectar cualquier cosa en el documento.
+    match /analyticsSessions/{sessionId} {
+      allow read: if isAdmin();
+      allow create, update: if request.resource.data.keys().hasOnly([
+        'firstSeenAt', 'lastSeenAt', 'reachedProducto', 'reachedCarrito',
+        'reachedCheckout', 'reachedCompra', 'utmSource', 'utmMedium', 'utmCampaign'
+      ]);
+    }
   }
 }

@@ -582,6 +582,24 @@ anuncios de imagen, colección y retargeting básico. Si más adelante
 quieres anuncios dinámicos por color/talla exacta, se puede ampliar a un
 feed por variante.
 
+## Embudo de ventas en vivo (`/admin`)
+
+El Panel de control muestra un embudo propio, parecido al de Shopify:
+cuántas visitas entran a la tienda y en qué paso se quedan — **Visitas →
+Vio un producto → Agregó al carrito → Inició el pago → Compró** — con el
+porcentaje de caída entre cada paso y de dónde viene el tráfico (campaña
+de Meta Ads, orgánico, etc., tomado de los `utm_source`/`utm_campaign` del
+link). Tiene selector de período (Hoy / 7 días / 30 días) y se actualiza
+solo mientras lo tienes abierto, sin recargar la página.
+
+Funciona de forma independiente del Meta Pixel: cada visitante anónimo
+genera un documento de sesión en Firestore (`analyticsSessions`, de
+lectura privada — solo la administradora puede verlo) que se va marcando
+a medida que avanza, usando los mismos puntos del código donde ya se
+dispara el Pixel (ver `src/lib/analytics.ts`). No requiere ninguna
+variable de entorno ni cuenta externa — funciona apenas publicas este
+cambio.
+
 ## Fotos de producto: encuadre a cuadrado, ajustable foto por foto
 
 Al subir fotos en `/admin/productos` no hace falta recortarlas antes: se

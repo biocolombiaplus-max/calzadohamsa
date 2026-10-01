@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import '../styles/globals.css';
 import MetaPixel from '@/components/MetaPixel';
+import AnalyticsTracker from '@/components/AnalyticsTracker';
 
 const STORE_NAME = process.env.NEXT_PUBLIC_STORE_NAME || 'Hamsa Shoes';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://calzadohamsa.com';
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es">
       <body className="font-body">
         <MetaPixel />
+        <AnalyticsTracker />
         {children}
       </body>
     </html>
