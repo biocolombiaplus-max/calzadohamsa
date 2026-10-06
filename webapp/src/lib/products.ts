@@ -39,6 +39,7 @@ function toProduct(id: string, data: any): Product {
     active: data.active !== false,
     soldCount: data.soldCount ?? 0,
     reviewsCount: data.reviewsCount ?? 0,
+    reviews: data.reviews ?? [],
     createdAt: toMillis(data.createdAt),
     updatedAt: toMillis(data.updatedAt),
   };

@@ -5,13 +5,16 @@ import HowItWorks from '@/components/HowItWorks';
 import Benefits from '@/components/Benefits';
 import Testimonials from '@/components/Testimonials';
 import HomeCTA from '@/components/HomeCTA';
+import { getFeaturedProductsServer } from '@/lib/productsServer';
 
-export default function HomePage() {
+export default async function HomePage() {
+  const products = await getFeaturedProductsServer(8);
+
   return (
     <>
       <Hero />
       <TrustBar />
-      <FeaturedProducts />
+      <FeaturedProducts products={products} />
       <HowItWorks />
       <Benefits />
       <Testimonials />
