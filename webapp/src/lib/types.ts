@@ -224,12 +224,19 @@ export interface BenefitItem {
   icon: string;
   title: string;
   text: string;
+  // Foto opcional (ej. de alguien usando el producto) — si está puesta, se
+  // muestra como imagen real de fondo de la tarjeta en vez del icono, para
+  // un look más premium que el emoji solo.
+  image?: string;
 }
 
 export interface TestimonialItem {
   name: string;
   city: string;
   review: string;
+  // Foto opcional de la clienta — una reseña con cara real inspira mucha
+  // más confianza que solo texto, igual que en las tiendas grandes.
+  photo?: string;
 }
 
 export interface DepartmentRate {

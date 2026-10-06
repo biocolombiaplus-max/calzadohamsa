@@ -204,6 +204,63 @@ function ImageUploadField({
   );
 }
 
+// Miniatura compacta para usar DENTRO de una fila del ListEditor (sin la
+// etiqueta de "Field", que ahí se ve fuera de lugar) — un círculo o
+// cuadrado que muestra la foto puesta, o un botón "+ Foto" si no hay
+// ninguna todavía.
+function RowPhotoUpload({
+  value,
+  folder,
+  round,
+  onChange,
+}: {
+  value?: string;
+  folder: string;
+  round?: boolean;
+  onChange: (url: string) => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadProductImage(file, folder);
+      onChange(url);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'No se pudo subir la foto.');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  }
+
+  const shapeClass = round ? 'rounded-full' : 'rounded-lg';
+
+  return (
+    <div className="flex shrink-0 items-center gap-1.5">
+      <label
+        className={`relative flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center overflow-hidden border border-dashed border-border bg-cream-alt text-[9px] font-semibold text-muted hover:border-primary ${shapeClass}`}
+      >
+        {value ? (
+          <Image src={value} alt="" fill className="object-cover" />
+        ) : uploading ? (
+          '...'
+        ) : (
+          '+ Foto'
+        )}
+        <input type="file" accept="image/*" className="hidden" onChange={handleFile} disabled={uploading} />
+      </label>
+      {value && (
+        <button type="button" onClick={() => onChange('')} className="text-[10px] text-urgent" aria-label="Quitar foto">
+          ✕
+        </button>
+      )}
+    </div>
+  );
+}
+
 // Varias fotos que rotan solas en el hero — misma idea que "Fotos del
 // producto" (subir varias a la vez, quitar una por una), pero guardando
 // un arreglo de URLs en vez de una sola imagen.
@@ -874,12 +931,17 @@ export default function ConfiguracionPage() {
             className={inputClass}
           />
         </Field>
+        <p className="mb-2 text-xs text-muted">
+          Agrégale una foto real a cada beneficio (ej. alguien usando las sandalias) para que se vea mucho más premium —
+          si no le pones foto, se queda el icono de siempre.
+        </p>
         <ListEditor<BenefitItem>
           items={settings.benefits}
           onChange={(items) => update('benefits', items)}
           empty={{ icon: '⭐', title: '', text: '' }}
           renderRow={(item, onEdit) => (
             <>
+              <RowPhotoUpload value={item.image} folder="beneficios" onChange={(url) => onEdit({ ...item, image: url })} />
               <input
                 value={item.icon}
                 onChange={(e) => onEdit({ ...item, icon: e.target.value })}
@@ -920,12 +982,17 @@ export default function ConfiguracionPage() {
             />
           </Field>
         </div>
+        <p className="mb-2 text-xs text-muted">
+          Una foto real de la clienta (con su permiso) genera mucha más confianza que solo texto — si no le pones foto,
+          se queda con sus iniciales.
+        </p>
         <ListEditor<TestimonialItem>
           items={settings.testimonials}
           onChange={(items) => update('testimonials', items)}
           empty={{ name: '', city: '', review: '' }}
           renderRow={(item, onEdit) => (
             <>
+              <RowPhotoUpload value={item.photo} folder="testimonios" round onChange={(url) => onEdit({ ...item, photo: url })} />
               <input
                 value={item.name}
                 onChange={(e) => onEdit({ ...item, name: e.target.value })}
