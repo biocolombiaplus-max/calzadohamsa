@@ -86,6 +86,7 @@ export default function AdminOrdersPage() {
   const [labelErrors, setLabelErrors] = useState<Record<string, string>>({});
   const [reviewRequests, setReviewRequests] = useState<Record<string, ReviewRequest>>({});
   const [sendingReview, setSendingReview] = useState<string | null>(null);
+  const [copiedReviewId, setCopiedReviewId] = useState<string | null>(null);
 
   useEffect(() => {
     getAllOrders()
@@ -97,19 +98,43 @@ export default function AdminOrdersPage() {
     return subscribeToReviewRequests(setReviewRequests);
   }, []);
 
+  function buildReviewMessage(order: Order, link: string): string {
+    const firstName = order.customer.name.split(' ')[0];
+    return `Hola ${firstName}! Gracias por tu compra en ${storeName} 💛 Nos encantaría conocer tu opinión — déjanos tu reseña aquí (toma 1 minuto) y te regalamos un bono del 10% para tu próxima compra:\n\n${link}`;
+  }
+
   // Crea (o reenvía) el link de reseña + bono de esa clienta y abre
-  // WhatsApp con el mensaje ya listo para mandárselo.
+  // WhatsApp con el mensaje ya listo para mandárselo. La pestaña de
+  // WhatsApp se abre EN BLANCO ya mismo (todavía dentro del clic) y se le
+  // pone la URL real después — si se espera a que termine de guardar en la
+  // base de datos primero, el navegador bloquea la ventana por considerarla
+  // un pop-up, y el botón parece no hacer nada (el mismo truco que ya se
+  // usa al avisar un pedido por WhatsApp en el checkout).
   async function handleSendReview(order: Order) {
     setSendingReview(order.id);
+    const waWindow = window.open('', '_blank');
     try {
       await sendReviewRequest(order);
       const link = `${window.location.origin}/resena/${order.id}`;
-      const firstName = order.customer.name.split(' ')[0];
-      const message = `Hola ${firstName}! Gracias por tu compra en ${storeName} 💛 Nos encantaría conocer tu opinión — déjanos tu reseña aquí (toma 1 minuto) y te regalamos un bono del 10% para tu próxima compra:\n\n${link}`;
-      window.open(whatsappLinkTo(order.customer.phone, message), '_blank');
+      const url = whatsappLinkTo(order.customer.phone, buildReviewMessage(order, link));
+      if (waWindow) waWindow.location.href = url;
+      else window.open(url, '_blank');
+    } catch {
+      waWindow?.close();
     } finally {
       setSendingReview(null);
     }
+  }
+
+  // Respaldo por si el envío directo a WhatsApp falla por cualquier razón
+  // (red lenta, navegador raro, etc.) — copia el link para pegarlo donde
+  // sea: WhatsApp Web, SMS, Instagram...
+  function handleCopyReviewLink(orderId: string) {
+    const link = `${window.location.origin}/resena/${orderId}`;
+    navigator.clipboard?.writeText(link).then(() => {
+      setCopiedReviewId(orderId);
+      setTimeout(() => setCopiedReviewId((c) => (c === orderId ? null : c)), 2000);
+    });
   }
 
   async function handleStatusChange(id: string, status: OrderStatus) {
@@ -190,12 +215,14 @@ export default function AdminOrdersPage() {
               labelError={labelErrors[order.id]}
               reviewRequest={reviewRequests[order.id]}
               sendingReview={sendingReview === order.id}
+              reviewLinkCopied={copiedReviewId === order.id}
               onStatusChange={(status) => handleStatusChange(order.id, status)}
               onShippingSave={(carrier, trackingNumber) => handleShippingSave(order, carrier, trackingNumber)}
               onLabelUpload={(file) => handleLabelUpload(order, file)}
               onLabelRemove={() => handleLabelRemove(order)}
               onDelete={() => handleDeleteOrder(order)}
               onSendReview={() => handleSendReview(order)}
+              onCopyReviewLink={() => handleCopyReviewLink(order.id)}
             />
           ))
         )}
@@ -212,12 +239,14 @@ function OrderCard({
   labelError,
   reviewRequest,
   sendingReview,
+  reviewLinkCopied,
   onStatusChange,
   onShippingSave,
   onLabelUpload,
   onLabelRemove,
   onDelete,
   onSendReview,
+  onCopyReviewLink,
 }: {
   order: Order;
   storeName: string;
@@ -226,12 +255,14 @@ function OrderCard({
   labelError?: string;
   reviewRequest?: ReviewRequest;
   sendingReview: boolean;
+  reviewLinkCopied: boolean;
   onStatusChange: (status: OrderStatus) => void;
   onShippingSave: (carrier: Carrier | '', trackingNumber: string) => void;
   onLabelUpload: (file: File) => void;
   onLabelRemove: () => void;
   onDelete: () => void;
   onSendReview: () => void;
+  onCopyReviewLink: () => void;
 }) {
   const [carrier, setCarrier] = useState<Carrier | ''>(order.carrier ?? '');
   const [trackingNumber, setTrackingNumber] = useState(order.trackingNumber ?? '');
@@ -417,6 +448,9 @@ function OrderCard({
             <button type="button" onClick={onSendReview} disabled={sendingReview} className="text-xs font-semibold text-primary hover:underline">
               Reenviar
             </button>
+            <button type="button" onClick={onCopyReviewLink} className="text-xs font-semibold text-primary hover:underline">
+              {reviewLinkCopied ? '✓ Link copiado' : '📋 Copiar link'}
+            </button>
           </div>
         ) : (
           <div className="space-y-1.5">
@@ -432,6 +466,9 @@ function OrderCard({
               >
                 {bonusStatusLabel(reviewRequest)}
               </span>
+              <button type="button" onClick={onCopyReviewLink} className="text-xs font-semibold text-primary hover:underline">
+                {reviewLinkCopied ? '✓ Link copiado' : '📋 Copiar link'}
+              </button>
             </div>
             {reviewRequest.reviewText && <p className="text-xs italic text-muted">&ldquo;{reviewRequest.reviewText}&rdquo;</p>}
           </div>
