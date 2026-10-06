@@ -76,5 +76,31 @@ service cloud.firestore {
         'reachedCheckout', 'reachedCompra', 'utmSource', 'utmMedium', 'utmCampaign'
       ]);
     }
+
+    // Reseñas de clientas + bono de fidelización: la administradora crea el
+    // "pedido de reseña" para una clienta que ya compró (con su propio
+    // cupón del 10%), y la clienta entra sin iniciar sesión por un link
+    // privado (el ID del pedido, que nadie puede adivinar ni listar) para
+    // dejar su reseña y activar el bono. Solo puede cambiar los campos de
+    // su propia reseña — nunca el cupón, el teléfono o el nombre.
+    match /reviewRequests/{orderId} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['rating', 'reviewText', 'reviewPhotos', 'reviewSubmittedAt', 'couponExpiresAt']);
+    }
+
+    // Cupón del bono de reseña: copia pública mínima (sin nombre ni
+    // teléfono) para que el checkout —sin sesión de por medio— pueda
+    // validarlo, aplicarlo desde el link y marcarlo como usado al terminar
+    // la compra, sin poder tocar el porcentaje ni la fecha de vencimiento.
+    match /rewardCoupons/{code} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['usedAt', 'usedOrderId']);
+    }
   }
 }

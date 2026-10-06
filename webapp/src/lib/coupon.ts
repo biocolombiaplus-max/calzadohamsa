@@ -25,9 +25,12 @@ export function redeemCouponCode(rawCode: string): WonCoupon | null {
   return getActiveCoupon();
 }
 
-export function saveWonCoupon(code: string, percent: number): void {
+// "expiresAt" es opcional: por defecto el cupón dura las 24 horas de
+// siempre (ruleta / código escrito a mano), pero el bono de reseñas tiene
+// su propia fecha de vencimiento (15 días) que se le pasa aquí tal cual.
+export function saveWonCoupon(code: string, percent: number, expiresAt?: number): void {
   if (typeof window === 'undefined') return;
-  const coupon: WonCoupon = { code, percent, expiresAt: Date.now() + VALID_HOURS * 60 * 60 * 1000 };
+  const coupon: WonCoupon = { code, percent, expiresAt: expiresAt ?? Date.now() + VALID_HOURS * 60 * 60 * 1000 };
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(coupon));
   } catch {

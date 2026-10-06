@@ -10,6 +10,7 @@ import { getDepartamentos, getMunicipios } from '@/lib/colombia';
 import { getBundleShippingOverride, getShippingRate } from '@/lib/shipping';
 import { computeBundlePricing } from '@/lib/bundle';
 import { getActiveCoupon, clearCoupon, redeemCouponCode } from '@/lib/coupon';
+import { markRewardCouponUsed } from '@/lib/reviews';
 import { useSiteSettings } from '@/lib/settings-context';
 import { generatePaymentReference, isWompiConfigured, redirectToWompiCheckout } from '@/lib/wompi';
 import { trackPixelEvent } from '@/lib/metaPixel';
@@ -162,7 +163,10 @@ export default function CheckoutPage() {
           customer,
         });
         notifyOrderByPush({ orderNumber, total: wompiTotal, customerName: form.name });
-        if (coupon) clearCoupon();
+        if (coupon) {
+          markRewardCouponUsed(coupon.code, id);
+          clearCoupon();
+        }
         await redirectToWompiCheckout({
           amountInCents: Math.round(wompiTotal * 100),
           reference,
@@ -207,7 +211,10 @@ export default function CheckoutPage() {
         else window.open(waUrl, '_blank');
       }
 
-      if (coupon) clearCoupon();
+      if (coupon) {
+        markRewardCouponUsed(coupon.code, id);
+        clearCoupon();
+      }
       clear();
       router.push(`/pedido-confirmado/${id}`);
     } catch (err) {

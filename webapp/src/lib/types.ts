@@ -102,6 +102,50 @@ export interface Order {
 
 export type OrderInput = Omit<Order, 'id' | 'createdAt' | 'orderNumber'>;
 
+// ---- Reseñas de clientas + bono de fidelización ----
+// Después de un pedido, la administradora le manda a la clienta un link
+// único (sin necesidad de cuenta) donde deja su reseña con foto y recibe un
+// cupón de descuento personal, pensado para que vuelva a comprar — igual
+// que Temu/AliExpress. Un documento por pedido, con el mismo id.
+export interface ReviewRequestItem {
+  title: string;
+  size: string;
+  color: string;
+}
+
+export interface ReviewRequest {
+  id: string;
+  orderId: string;
+  orderNumber: string;
+  customerName: string;
+  customerPhone: string;
+  items: ReviewRequestItem[];
+  linkSentAt?: number | null;
+  rating?: number | null;
+  reviewText?: string;
+  reviewPhotos?: string[];
+  reviewSubmittedAt?: number | null;
+  couponCode: string;
+  couponPercent: number;
+  // Nulo hasta que la clienta deja la reseña — el bono se activa justo en
+  // ese momento, con los días de validez contados desde ahí.
+  couponExpiresAt?: number | null;
+  couponUsedAt?: number | null;
+  couponUsedOrderId?: string | null;
+  createdAt: number;
+}
+
+// Copia pública y mínima del cupón (sin nombre ni teléfono) para que el
+// checkout, sin sesión de por medio, pueda validarlo y aplicarlo solo con
+// el código que trae el link.
+export interface RewardCoupon {
+  code: string;
+  percent: number;
+  expiresAt: number | null;
+  usedAt: number | null;
+  usedOrderId?: string | null;
+}
+
 // ---- CRM / WhatsApp ----
 // Embudo de ventas estilo Kommo: cada clienta que escribe por WhatsApp
 // entra como "nuevo" y la administradora la va moviendo a mano por las

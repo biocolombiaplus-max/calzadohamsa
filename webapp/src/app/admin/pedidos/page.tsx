@@ -6,7 +6,8 @@ import Image from 'next/image';
 import { getAllOrders, updateOrderStatus, updateOrderShipping, updateOrderShippingLabel, deleteOrder } from '@/lib/orders';
 import { getSiteSettings } from '@/lib/settings';
 import { uploadShippingLabel } from '@/lib/storage';
-import { CARRIERS, type Order, type OrderStatus, type Carrier } from '@/lib/types';
+import { sendReviewRequest, subscribeToReviewRequests } from '@/lib/reviews';
+import { CARRIERS, type Order, type OrderStatus, type Carrier, type ReviewRequest } from '@/lib/types';
 import { formatPrice, whatsappLinkTo } from '@/lib/utils';
 
 const IMAGE_EXTENSION = /\.(jpe?g|png|webp|gif|heic)(\?|$)/i;
@@ -32,6 +33,23 @@ const STATUS_COLORS: Record<OrderStatus, string> = {
   entregado: 'bg-green-100 text-green-700',
   cancelado: 'bg-border text-muted',
 };
+
+function bonusStatusLabel(r: ReviewRequest): string {
+  if (r.couponUsedAt) return `🎟️ Bono usado`;
+  if (r.couponExpiresAt && r.couponExpiresAt < Date.now()) return '🎟️ Bono vencido';
+  if (r.couponExpiresAt) {
+    const date = new Date(r.couponExpiresAt).toLocaleDateString('es-CO', { day: 'numeric', month: 'short' });
+    return `🎟️ Bono activo hasta ${date}`;
+  }
+  return '';
+}
+
+function classNamesForBonus(r: ReviewRequest): string {
+  const base = 'rounded-full px-2.5 py-1 text-xs font-semibold';
+  if (r.couponUsedAt) return `${base} bg-cream-alt text-muted`;
+  if (r.couponExpiresAt && r.couponExpiresAt < Date.now()) return `${base} bg-urgent/10 text-urgent`;
+  return `${base} bg-primary-light/20 text-primary-hover`;
+}
 
 function buildStatusMessage(order: Order, storeName: string): string {
   const firstName = order.customer.name.split(' ')[0];
@@ -66,6 +84,8 @@ export default function AdminOrdersPage() {
   const [savingShipping, setSavingShipping] = useState<string | null>(null);
   const [uploadingLabel, setUploadingLabel] = useState<string | null>(null);
   const [labelErrors, setLabelErrors] = useState<Record<string, string>>({});
+  const [reviewRequests, setReviewRequests] = useState<Record<string, ReviewRequest>>({});
+  const [sendingReview, setSendingReview] = useState<string | null>(null);
 
   useEffect(() => {
     getAllOrders()
@@ -74,7 +94,23 @@ export default function AdminOrdersPage() {
     getSiteSettings()
       .then((s) => setStoreName(s.storeName))
       .catch(() => {});
+    return subscribeToReviewRequests(setReviewRequests);
   }, []);
+
+  // Crea (o reenvía) el link de reseña + bono de esa clienta y abre
+  // WhatsApp con el mensaje ya listo para mandárselo.
+  async function handleSendReview(order: Order) {
+    setSendingReview(order.id);
+    try {
+      await sendReviewRequest(order);
+      const link = `${window.location.origin}/resena/${order.id}`;
+      const firstName = order.customer.name.split(' ')[0];
+      const message = `Hola ${firstName}! Gracias por tu compra en ${storeName} 💛 Nos encantaría conocer tu opinión — déjanos tu reseña aquí (toma 1 minuto) y te regalamos un bono del 10% para tu próxima compra:\n\n${link}`;
+      window.open(whatsappLinkTo(order.customer.phone, message), '_blank');
+    } finally {
+      setSendingReview(null);
+    }
+  }
 
   async function handleStatusChange(id: string, status: OrderStatus) {
     await updateOrderStatus(id, status);
@@ -152,11 +188,14 @@ export default function AdminOrdersPage() {
               saving={savingShipping === order.id}
               uploadingLabel={uploadingLabel === order.id}
               labelError={labelErrors[order.id]}
+              reviewRequest={reviewRequests[order.id]}
+              sendingReview={sendingReview === order.id}
               onStatusChange={(status) => handleStatusChange(order.id, status)}
               onShippingSave={(carrier, trackingNumber) => handleShippingSave(order, carrier, trackingNumber)}
               onLabelUpload={(file) => handleLabelUpload(order, file)}
               onLabelRemove={() => handleLabelRemove(order)}
               onDelete={() => handleDeleteOrder(order)}
+              onSendReview={() => handleSendReview(order)}
             />
           ))
         )}
@@ -171,22 +210,28 @@ function OrderCard({
   saving,
   uploadingLabel,
   labelError,
+  reviewRequest,
+  sendingReview,
   onStatusChange,
   onShippingSave,
   onLabelUpload,
   onLabelRemove,
   onDelete,
+  onSendReview,
 }: {
   order: Order;
   storeName: string;
   saving: boolean;
   uploadingLabel: boolean;
   labelError?: string;
+  reviewRequest?: ReviewRequest;
+  sendingReview: boolean;
   onStatusChange: (status: OrderStatus) => void;
   onShippingSave: (carrier: Carrier | '', trackingNumber: string) => void;
   onLabelUpload: (file: File) => void;
   onLabelRemove: () => void;
   onDelete: () => void;
+  onSendReview: () => void;
 }) {
   const [carrier, setCarrier] = useState<Carrier | ''>(order.carrier ?? '');
   const [trackingNumber, setTrackingNumber] = useState(order.trackingNumber ?? '');
@@ -351,6 +396,46 @@ function OrderCard({
             <p className="mt-1 text-xs text-muted">Se incluye como link en el mensaje de WhatsApp al avisar &ldquo;Enviado&rdquo;.</p>
           )}
         </div>
+      </div>
+
+      <div className="mt-4 border-t border-border pt-4">
+        <p className="mb-2 text-xs font-bold uppercase text-muted">Reseña y bono de fidelización</p>
+        {!reviewRequest ? (
+          <button
+            type="button"
+            onClick={onSendReview}
+            disabled={sendingReview}
+            className="rounded-lg bg-primary-light/20 px-3.5 py-2 text-sm font-semibold text-primary-hover hover:bg-primary-light/30 disabled:opacity-60"
+          >
+            {sendingReview ? 'Enviando...' : '🎁 Enviar reseña y bono'}
+          </button>
+        ) : !reviewRequest.reviewSubmittedAt ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
+              📨 Link enviado · esperando reseña
+            </span>
+            <button type="button" onClick={onSendReview} disabled={sendingReview} className="text-xs font-semibold text-primary hover:underline">
+              Reenviar
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-1.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700">
+                ⭐ {reviewRequest.rating} · Reseña dejada
+              </span>
+              {!!reviewRequest.reviewPhotos?.length && (
+                <span className="text-xs text-muted">📷 {reviewRequest.reviewPhotos.length} foto(s)</span>
+              )}
+              <span
+                className={classNamesForBonus(reviewRequest)}
+              >
+                {bonusStatusLabel(reviewRequest)}
+              </span>
+            </div>
+            {reviewRequest.reviewText && <p className="text-xs italic text-muted">&ldquo;{reviewRequest.reviewText}&rdquo;</p>}
+          </div>
+        )}
       </div>
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
