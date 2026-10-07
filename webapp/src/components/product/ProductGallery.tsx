@@ -1,8 +1,8 @@
 'use client';
 
-import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { classNames, cloudinaryFill, cloudinaryOriginal } from '@/lib/utils';
+import SafeImage from '@/components/SafeImage';
 
 export default function ProductGallery({
   images,
@@ -34,7 +34,7 @@ export default function ProductGallery({
   return (
     <div>
       <div className="relative aspect-square overflow-hidden rounded-card bg-white shadow-soft">
-        <Image
+        <SafeImage
           src={
             noCropImages.includes(gallery[active])
               ? cloudinaryOriginal(gallery[active])
@@ -68,7 +68,7 @@ export default function ProductGallery({
                 active === i ? 'border-primary' : 'border-transparent',
               )}
             >
-              <Image
+              <SafeImage
                 src={noCropImages.includes(src) ? cloudinaryOriginal(src) : cloudinaryFill(src, 200)}
                 alt={`${title} ${i + 1}`}
                 fill

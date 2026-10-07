@@ -1,8 +1,8 @@
 'use client';
 
-import Image from 'next/image';
 import { useSiteSettings } from '@/lib/settings-context';
 import { cloudinaryFill } from '@/lib/utils';
+import SafeImage from '@/components/SafeImage';
 
 export default function Benefits() {
   const { benefitsHeading, benefits } = useSiteSettings();
@@ -16,7 +16,7 @@ export default function Benefits() {
             <div key={b.title} className="overflow-hidden rounded-card bg-white text-center shadow-soft">
               {b.image ? (
                 <div className="relative aspect-[4/3] w-full">
-                  <Image src={cloudinaryFill(b.image, 500)} alt={b.title} fill className="object-cover" />
+                  <SafeImage src={cloudinaryFill(b.image, 500)} alt={b.title} fill className="object-cover" fallback={b.icon} />
                 </div>
               ) : (
                 <div className="pt-6 text-3xl">{b.icon}</div>

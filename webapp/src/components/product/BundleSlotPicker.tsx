@@ -1,9 +1,9 @@
 'use client';
 
-import Image from 'next/image';
 import { useState } from 'react';
 import type { Product } from '@/lib/types';
 import { classNames, cloudinaryFill, formatPrice, resolveColorImage } from '@/lib/utils';
+import SafeImage from '@/components/SafeImage';
 
 export interface BundleSelection {
   product: Product;
@@ -50,7 +50,7 @@ export default function BundleSlotPicker({
               >
                 <div className="relative aspect-square overflow-hidden rounded-lg bg-cream-alt ring-1 ring-border transition-all group-hover:ring-2 group-hover:ring-primary">
                   {p.images[0] ? (
-                    <Image src={cloudinaryFill(p.images[0], 400)} alt={p.title} fill className="object-cover" />
+                    <SafeImage src={cloudinaryFill(p.images[0], 400)} alt={p.title} fill className="object-cover" />
                   ) : (
                     <div className="flex h-full items-center justify-center text-2xl">👡</div>
                   )}
@@ -78,7 +78,7 @@ export default function BundleSlotPicker({
                 const displayImage =
                   resolveColorImage(selection.product, selection.color) || selection.product.images[0];
                 return displayImage ? (
-                  <Image src={cloudinaryFill(displayImage, 500)} alt={selection.product.title} fill className="object-cover" />
+                  <SafeImage src={cloudinaryFill(displayImage, 500)} alt={selection.product.title} fill className="object-cover" />
                 ) : null;
               })()}
             </div>
@@ -145,7 +145,7 @@ export default function BundleSlotPicker({
                             selected ? 'border-primary' : 'border-border',
                           )}
                         >
-                          <Image src={cloudinaryFill(thumb, 80)} alt={c.name} fill sizes="32px" className="object-cover" />
+                          <SafeImage src={cloudinaryFill(thumb, 80)} alt={c.name} fill sizes="32px" className="object-cover" />
                         </span>
                       )}
                     </button>

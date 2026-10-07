@@ -1,7 +1,7 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
+import SafeImage from '@/components/SafeImage';
 import { useEffect, useState } from 'react';
 import { useCartStore } from '@/lib/cart-store';
 import { getRecoverableCart } from '@/lib/visitorsAdmin';
@@ -72,9 +72,7 @@ export default function CarritoPage() {
               className="flex gap-4 rounded-card bg-white p-4 shadow-soft"
             >
               <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-card bg-cream-alt">
-                {item.image && (
-                  <Image src={cloudinaryFill(item.image, 200)} alt={item.title} fill className="object-cover" />
-                )}
+                <SafeImage src={item.image ? cloudinaryFill(item.image, 200) : ''} alt={item.title} fill className="object-cover" />
               </div>
               <div className="flex flex-1 flex-col justify-between">
                 <div className="flex justify-between">

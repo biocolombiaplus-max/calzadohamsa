@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo, useState, type RefObject } from 'react';
 import type { Product } from '@/lib/types';
@@ -8,6 +7,7 @@ import { classNames, cloudinaryFill, formatPrice, resolveColorImage, whatsappLin
 import { useCartStore } from '@/lib/cart-store';
 import { useSiteSettings } from '@/lib/settings-context';
 import { isWompiConfigured } from '@/lib/wompi';
+import SafeImage from '@/components/SafeImage';
 import UrgencyTimer from './UrgencyTimer';
 import QuickBuyModal from './QuickBuyModal';
 
@@ -181,7 +181,7 @@ export default function BuyBox({
                         selected ? 'border-primary' : 'border-border',
                       )}
                     >
-                      <Image src={cloudinaryFill(thumb, 100)} alt={c.name} fill sizes="44px" className="object-cover" />
+                      <SafeImage src={cloudinaryFill(thumb, 100)} alt={c.name} fill sizes="44px" className="object-cover" />
                     </span>
                   )}
                 </button>
