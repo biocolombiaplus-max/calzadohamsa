@@ -11,6 +11,7 @@ import { getBundleShippingOverride, getShippingRate } from '@/lib/shipping';
 import { computeBundlePricing } from '@/lib/bundle';
 import { getActiveCoupon, clearCoupon, redeemCouponCode } from '@/lib/coupon';
 import { markRewardCouponUsed } from '@/lib/reviews';
+import { recordRecentSale } from '@/lib/recentSales';
 import { useSiteSettings } from '@/lib/settings-context';
 import { generatePaymentReference, isWompiConfigured, redirectToWompiCheckout } from '@/lib/wompi';
 import { trackPixelEvent } from '@/lib/metaPixel';
@@ -173,6 +174,7 @@ export default function CheckoutPage() {
         });
         notifyOrderByPush({ orderNumber, total: wompiTotal, customerName: form.name });
         trackVisitorPurchase(orderNumber);
+        recordRecentSale(customer, items);
         if (coupon) {
           markRewardCouponUsed(coupon.code, id);
           clearCoupon();
@@ -211,6 +213,7 @@ export default function CheckoutPage() {
       });
       notifyOrderByPush({ orderNumber, total, customerName: form.name });
       trackVisitorPurchase(orderNumber);
+      recordRecentSale(customer, items);
 
       if (method === 'contra_entrega') {
         const waUrl = whatsappLinkTo(

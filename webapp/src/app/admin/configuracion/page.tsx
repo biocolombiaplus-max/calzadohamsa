@@ -11,6 +11,7 @@ import type {
   TrustItem,
   BenefitItem,
   TestimonialItem,
+  FaqItem,
   DepartmentRate,
   ShippingException,
   BundleShippingException,
@@ -1014,6 +1015,43 @@ export default function ConfiguracionPage() {
             </>
           )}
         />
+      </Section>
+
+      <Section
+        title="Preguntas frecuentes"
+        description="Resuelve las dudas más comunes antes de que alguien se vaya sin comprar — aparece justo antes del llamado final."
+      >
+        <Field label="Título de la sección">
+          <input
+            value={settings.faqHeading}
+            onChange={(e) => update('faqHeading', e.target.value)}
+            className={inputClass}
+          />
+        </Field>
+        <div className="mt-3">
+          <ListEditor<FaqItem>
+            items={settings.faq}
+            onChange={(items) => update('faq', items)}
+            empty={{ question: '', answer: '' }}
+            renderRow={(item, onEdit) => (
+              <div className="flex-1 space-y-2">
+                <input
+                  value={item.question}
+                  onChange={(e) => onEdit({ ...item, question: e.target.value })}
+                  className={`${inputClass} font-semibold`}
+                  placeholder="Pregunta"
+                />
+                <textarea
+                  value={item.answer}
+                  onChange={(e) => onEdit({ ...item, answer: e.target.value })}
+                  className={inputClass}
+                  rows={2}
+                  placeholder="Respuesta"
+                />
+              </div>
+            )}
+          />
+        </div>
       </Section>
 
       <Section title="Llamado a la acción final (antes del footer)">

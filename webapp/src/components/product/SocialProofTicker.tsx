@@ -1,31 +1,54 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { subscribeToRecentSales } from '@/lib/recentSales';
+import type { RecentSale } from '@/lib/types';
 
-const NAMES = ['Valentina R.', 'Camila S.', 'Isabella T.', 'Mariana G.', 'Paula V.', 'Sofía A.'];
-const CITIES = ['Bogotá', 'Medellín', 'Cali', 'Cúcuta', 'Barranquilla', 'Bucaramanga'];
+function timeAgo(ms: number): string {
+  const minutes = Math.max(1, Math.round((Date.now() - ms) / 60000));
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours} h`;
+  return `${Math.round(hours / 24)} d`;
+}
 
-export default function SocialProofTicker({ productTitle }: { productTitle: string }) {
+// Aviso de prueba social — SIEMPRE con ventas reales de la tienda (nunca
+// nombres ni tiempos inventados): se alimenta de /lib/recentSales, que se
+// llena solo cada vez que se confirma un pedido de verdad. Si la tienda
+// todavía no tiene ventas, simplemente no se muestra nada — mejor no
+// mostrar nada que mostrar algo falso.
+export default function SocialProofTicker({ productTitle: _productTitle }: { productTitle: string }) {
+  const [sales, setSales] = useState<RecentSale[] | null>(null);
+  const [index, setIndex] = useState(0);
   const [visible, setVisible] = useState(false);
-  const [entry, setEntry] = useState({ name: NAMES[0], city: CITIES[0], time: '3 minutos' });
+
+  useEffect(() => subscribeToRecentSales(setSales), []);
 
   useEffect(() => {
-    function showRandom() {
-      const name = NAMES[Math.floor(Math.random() * NAMES.length)];
-      const city = CITIES[Math.floor(Math.random() * CITIES.length)];
-      const time = `${Math.floor(Math.random() * 20) + 1} minutos`;
-      setEntry({ name, city, time });
-      setVisible(true);
-      setTimeout(() => setVisible(false), 5000);
-    }
+    if (!sales || sales.length === 0) return;
+    let timeout: ReturnType<typeof setTimeout>;
+    let interval: ReturnType<typeof setInterval>;
 
-    const first = setTimeout(showRandom, 2000);
-    const interval = setInterval(showRandom, 14000);
+    const show = () => {
+      setVisible(true);
+      timeout = setTimeout(() => setVisible(false), 5000);
+    };
+
+    const first = setTimeout(show, 2000);
+    interval = setInterval(() => {
+      setIndex((i) => (i + 1) % sales.length);
+      show();
+    }, 14000);
+
     return () => {
       clearTimeout(first);
+      clearTimeout(timeout);
       clearInterval(interval);
     };
-  }, []);
+  }, [sales]);
+
+  if (!sales || sales.length === 0) return null;
+  const entry = sales[index % sales.length];
 
   return (
     <div
@@ -36,7 +59,8 @@ export default function SocialProofTicker({ productTitle }: { productTitle: stri
     >
       <span className="text-xl">🛍️</span>
       <p className="text-xs text-ink sm:text-sm">
-        <strong>{entry.name}</strong> de {entry.city} compró <strong>{productTitle}</strong> hace {entry.time}
+        <strong>{entry.firstName}</strong>
+        {entry.city && <> de {entry.city}</>} compró <strong>{entry.productTitle}</strong> hace {timeAgo(entry.createdAt)}
       </p>
     </div>
   );

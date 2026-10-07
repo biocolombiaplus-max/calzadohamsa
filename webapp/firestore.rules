@@ -83,6 +83,17 @@ service cloud.firestore {
       );
     }
 
+    // Ventas reales recientes (solo primer nombre + ciudad + qué compró)
+    // para el aviso "María compró hace 7 min" en la ficha de producto —
+    // lectura pública (es justamente lo que se muestra en la tienda), pero
+    // solo se puede crear un registro con esos 4 campos exactos, sin poder
+    // inyectar nada más ni modificar uno ya creado.
+    match /recentSales/{saleId} {
+      allow get, list: if true;
+      allow create: if isAdmin() || request.resource.data.keys().hasOnly(['firstName', 'city', 'productTitle', 'createdAt']);
+      allow update, delete: if isAdmin();
+    }
+
     // Reseñas de clientas + bono de fidelización: la administradora crea el
     // "pedido de reseña" para una clienta que ya compró (con su propio
     // cupón del 10%), y la clienta entra sin iniciar sesión por un link

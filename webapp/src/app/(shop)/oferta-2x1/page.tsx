@@ -6,7 +6,6 @@ import type { Product, CartItem } from '@/lib/types';
 import { formatPrice, resolveColorImage } from '@/lib/utils';
 import { useSiteSettings } from '@/lib/settings-context';
 import BundleSlotPicker, { type BundleSelection } from '@/components/product/BundleSlotPicker';
-import UrgencyTimer from '@/components/product/UrgencyTimer';
 import QuickBuyModal from '@/components/product/QuickBuyModal';
 import { isWompiConfigured } from '@/lib/wompi';
 
@@ -77,9 +76,6 @@ export default function Oferta2x1Page() {
             <span className="rounded-full bg-primary-light/20 px-3 py-1 font-bold text-primary">
               2 pares: {formatPrice(bundlePrice)} + envío GRATIS
             </span>
-          </div>
-          <div className="mx-auto mt-5 max-w-sm">
-            <UrgencyTimer initialMinutes={14} />
           </div>
         </div>
 

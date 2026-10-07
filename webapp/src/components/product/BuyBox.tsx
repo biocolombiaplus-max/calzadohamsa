@@ -8,7 +8,6 @@ import { useCartStore } from '@/lib/cart-store';
 import { useSiteSettings } from '@/lib/settings-context';
 import { isWompiConfigured } from '@/lib/wompi';
 import SafeImage from '@/components/SafeImage';
-import UrgencyTimer from './UrgencyTimer';
 import QuickBuyModal from './QuickBuyModal';
 
 export default function BuyBox({
@@ -72,8 +71,6 @@ export default function BuyBox({
 
   return (
     <div className="space-y-5">
-      <UrgencyTimer />
-
       <div>
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-3xl font-extrabold text-primary sm:text-4xl">{formatPrice(product.price)}</span>

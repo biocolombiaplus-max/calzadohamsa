@@ -103,6 +103,33 @@ export const DEFAULT_SETTINGS: SiteSettings = {
       review: 'Hermosas y muy cómodas para caminar todo el día. El servicio de WhatsApp es muy rápido.',
     },
   ],
+  faqHeading: 'Preguntas frecuentes',
+  faq: [
+    {
+      question: '¿Tengo que pagar algo antes de recibir mi pedido?',
+      answer:
+        'No. Puedes pagar contra entrega: nos pagas en efectivo directamente a la transportadora cuando tu pedido llega a tu puerta. También puedes pagar en línea con tarjeta, PSE o Nequi si prefieres un 5% de descuento adicional.',
+    },
+    {
+      question: '¿Cuánto tarda en llegar mi pedido?',
+      answer:
+        'Alistamos y despachamos tu pedido en 24-48 horas hábiles desde que lo confirmamos, y la transportadora entrega en 2-5 días hábiles según tu ciudad.',
+    },
+    {
+      question: '¿Qué pasa si la talla no me queda bien?',
+      answer:
+        'Tienes tu primer cambio de talla completamente gratis — nos escribes por WhatsApp y coordinamos el cambio sin costo adicional.',
+    },
+    {
+      question: '¿A qué ciudades hacen envíos?',
+      answer: 'Enviamos a todo Colombia. El costo de envío se calcula según tu departamento y municipio al finalizar la compra.',
+    },
+    {
+      question: '¿Cómo sé que es una tienda confiable?',
+      answer:
+        'Llevamos cientos de pedidos entregados y pagas solo cuando recibes tu pedido en tus manos, sin anticipos ni riesgos. Si algo llega mal o incompleto, te lo resolvemos sin preguntas.',
+    },
+  ],
   cta: {
     eyebrow: '¿Lista para lucir increíble?',
     heading: 'Tu sandalia perfecta te está esperando',
@@ -160,6 +187,7 @@ export function mergeWithDefaults(data: Partial<SiteSettings> | undefined): Site
     trustItems: data.trustItems?.length ? data.trustItems : DEFAULT_SETTINGS.trustItems,
     benefits: data.benefits?.length ? data.benefits : DEFAULT_SETTINGS.benefits,
     testimonials: data.testimonials?.length ? data.testimonials : DEFAULT_SETTINGS.testimonials,
+    faq: data.faq?.length ? data.faq : DEFAULT_SETTINGS.faq,
   };
 }
 

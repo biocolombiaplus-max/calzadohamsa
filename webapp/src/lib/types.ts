@@ -92,6 +92,17 @@ export interface Visitor {
   recoveryCount: number;
 }
 
+// Ventas reales recientes (solo primer nombre + ciudad + qué compró) para
+// el aviso tipo "María compró hace 7 min" en la ficha de producto — nunca
+// inventado, siempre de un pedido real.
+export interface RecentSale {
+  id: string;
+  firstName: string;
+  city: string;
+  productTitle: string;
+  createdAt: number;
+}
+
 export interface CartItem {
   productId: string;
   slug: string;
@@ -288,6 +299,11 @@ export interface TestimonialItem {
   photo?: string;
 }
 
+export interface FaqItem {
+  question: string;
+  answer: string;
+}
+
 export interface DepartmentRate {
   department: string;
   rate: number;
@@ -366,6 +382,8 @@ export interface SiteSettings {
   testimonialsHeading: string;
   testimonialsSubtext: string;
   testimonials: TestimonialItem[];
+  faqHeading: string;
+  faq: FaqItem[];
   cta: {
     eyebrow: string;
     heading: string;
