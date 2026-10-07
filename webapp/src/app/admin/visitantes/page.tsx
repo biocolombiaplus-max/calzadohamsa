@@ -46,6 +46,26 @@ function pageLabel(path: string): string {
 
 const isAbandoned = (v: Visitor) => v.cart.length > 0 && v.stage !== 'compra' && Date.now() - v.lastSeen > ABANDON_MS;
 
+// Miniatura con respaldo: si no hay foto guardada (producto sin fotos
+// todavía) o la foto falla al cargar, muestra un icono en vez de quedar en
+// blanco sin avisar.
+function Thumb({ src, alt, size }: { src: string; alt: string; size: number }) {
+  const [failed, setFailed] = useState(false);
+  if (!src || failed) {
+    return <span className="flex h-full w-full items-center justify-center text-xl text-muted">👡</span>;
+  }
+  return (
+    <Image
+      src={cloudinaryFill(src, size)}
+      alt={alt}
+      fill
+      sizes={`${size}px`}
+      className="object-cover"
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
 export default function VisitantesPage() {
   const [visitors, setVisitors] = useState<Visitor[] | null>(null);
   const [error, setError] = useState('');
@@ -217,7 +237,7 @@ export default function VisitantesPage() {
             {topProducts.map((p) => (
               <div key={p.title} className="text-center">
                 <span className="relative mx-auto block aspect-square w-full overflow-hidden rounded-xl bg-cream-alt">
-                  {p.image && <Image src={cloudinaryFill(p.image, 280)} alt={p.title} fill sizes="140px" className="object-cover" />}
+                  <Thumb src={p.image} alt={p.title} size={280} />
                 </span>
                 <p className="mt-1 truncate text-xs font-bold text-ink">{p.title}</p>
                 <p className="text-[11px] text-muted">{p.views} personas</p>
@@ -312,7 +332,7 @@ function VisitorCard({ v, settings }: { v: Visitor; settings: SiteSettings | nul
         <div className="mt-3 flex flex-wrap items-center gap-2">
           {(v.cart.length ? v.cart : v.products).slice(0, 5).map((p, i) => (
             <span key={i} className="relative h-12 w-12 overflow-hidden rounded-lg bg-cream-alt" title={p.title}>
-              {p.image && <Image src={cloudinaryFill(p.image, 96)} alt={p.title} fill sizes="48px" className="object-cover" />}
+              <Thumb src={p.image} alt={p.title} size={96} />
             </span>
           ))}
           <span className="text-xs text-muted">
