@@ -322,7 +322,7 @@ export default function CargaRapidaPage() {
                     selectedPool.has(url) ? 'border-primary' : 'border-border',
                   )}
                 >
-                  <Image src={cloudinaryFill(url, 160)} alt="" fill className="object-cover" />
+                  <Image src={cloudinaryFill(url, 160)} alt="" fill unoptimized className="object-cover" />
                   {selectedPool.has(url) && (
                     <span className="absolute inset-0 flex items-center justify-center bg-primary/40 text-lg font-bold text-white">
                       ✓

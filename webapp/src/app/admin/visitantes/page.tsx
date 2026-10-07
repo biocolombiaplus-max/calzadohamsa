@@ -59,6 +59,7 @@ function Thumb({ src, alt, size }: { src: string; alt: string; size: number }) {
       src={cloudinaryFill(src, size)}
       alt={alt}
       fill
+      unoptimized
       sizes={`${size}px`}
       className="object-cover"
       onError={() => setFailed(true)}

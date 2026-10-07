@@ -102,7 +102,7 @@ export default function Header() {
         <Link href="/" className="flex items-center justify-center">
           {logoUrl ? (
             <span className="relative block" style={{ height: logoHeight, width: logoBoxWidth }}>
-              <Image src={logoUrl} alt={storeName} fill priority className="object-contain" />
+              <Image src={logoUrl} alt={storeName} fill priority unoptimized className="object-contain" />
             </span>
           ) : (
             <span

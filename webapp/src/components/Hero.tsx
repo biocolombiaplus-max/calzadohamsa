@@ -111,6 +111,7 @@ export default function Hero() {
               src={src}
               alt={storeName}
               fill
+              unoptimized
               priority={i === 0}
               className={classNames(
                 'object-cover transition-opacity duration-1000 ease-in-out',

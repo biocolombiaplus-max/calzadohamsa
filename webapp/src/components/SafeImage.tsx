@@ -9,6 +9,20 @@ import { useState } from 'react';
 // nunca se vea quebrada, pase lo que pase con la foto original. Por
 // defecto un ícono de sandalia, o lo que se le pase en "fallback" (ej. las
 // iniciales de una clienta en un testimonio).
+//
+// Las fotos de Cloudinary ya llegan redimensionadas y optimizadas por la
+// propia URL (c_fill, q_auto, f_auto...) — si Next.js las vuelve a pasar
+// por SU PROPIO optimizador (lo hace por defecto), la foto se pide dos
+// veces, y la primera vez que se pide un tamaño nuevo (ej. una foto grande
+// que nadie había visto así) esa segunda vuelta a veces se cae por tiempo
+// de espera, aunque la misma foto en un tamaño ya visto (una miniatura)
+// cargue perfecto — exactamente el patrón de "la miniatura carga pero la
+// foto grande no". Por eso se le pide a Next que NO la vuelva a optimizar
+// cuando ya es una URL de Cloudinary: se sirve tal cual, una sola vez.
+function isCloudinaryUrl(src: ImageProps['src']): boolean {
+  return typeof src === 'string' && src.includes('res.cloudinary.com');
+}
+
 export default function SafeImage({ alt, className, fallback, ...props }: ImageProps & { fallback?: React.ReactNode }) {
   const [failed, setFailed] = useState(false);
 
@@ -20,5 +34,13 @@ export default function SafeImage({ alt, className, fallback, ...props }: ImageP
     );
   }
 
-  return <Image alt={alt} className={className} onError={() => setFailed(true)} {...props} />;
+  return (
+    <Image
+      alt={alt}
+      className={className}
+      unoptimized={isCloudinaryUrl(props.src)}
+      onError={() => setFailed(true)}
+      {...props}
+    />
+  );
 }

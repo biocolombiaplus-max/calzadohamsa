@@ -71,7 +71,7 @@ export default function AdminProductsPage() {
                   <td className="flex items-center gap-3 p-4">
                     <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-cream-alt">
                       {p.images[0] && (
-                        <Image src={cloudinaryFill(p.images[0], 100)} alt={p.title} fill className="object-cover" />
+                        <Image src={cloudinaryFill(p.images[0], 100)} alt={p.title} fill unoptimized className="object-cover" />
                       )}
                     </div>
                     <div>

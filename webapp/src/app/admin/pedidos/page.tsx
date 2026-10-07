@@ -380,7 +380,7 @@ function OrderCard({
                   rel="noopener noreferrer"
                   className="relative h-14 w-14 overflow-hidden rounded-lg border border-border bg-cream-alt"
                 >
-                  <Image src={order.shippingLabelUrl} alt="Guía de envío" fill className="object-cover" />
+                  <Image src={order.shippingLabelUrl} alt="Guía de envío" fill unoptimized className="object-cover" />
                 </a>
               ) : (
                 <a

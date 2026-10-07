@@ -68,6 +68,7 @@ export default function BulkUploadGroupCard({
                   src={isFull ? cloudinaryOriginal(url) : cloudinaryFill(url, 160)}
                   alt=""
                   fill
+                  unoptimized
                   className={isFull ? 'object-contain' : 'object-cover'}
                   style={isFull ? { transform: `scale(${scale / 100})` } : undefined}
                 />

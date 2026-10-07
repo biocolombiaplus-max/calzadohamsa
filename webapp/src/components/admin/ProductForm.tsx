@@ -262,6 +262,7 @@ export default function ProductForm({ product }: { product?: Product }) {
                       src={isFull ? cloudinaryOriginal(url) : cloudinaryFill(url, 200)}
                       alt=""
                       fill
+                      unoptimized
                       className={isFull ? 'object-contain' : 'object-cover'}
                       style={isFull ? { transform: `scale(${scale / 100})` } : undefined}
                     />
@@ -477,7 +478,7 @@ export default function ProductForm({ product }: { product?: Product }) {
                           c.image === url ? 'border-primary' : 'border-border'
                         }`}
                       >
-                        <Image src={cloudinaryFill(url, 150)} alt={`Foto ${i + 1}`} fill className="object-cover" />
+                        <Image src={cloudinaryFill(url, 150)} alt={`Foto ${i + 1}`} fill unoptimized className="object-cover" />
                       </button>
                     ))}
                   </div>

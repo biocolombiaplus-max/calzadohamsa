@@ -188,7 +188,7 @@ function ImageUploadField({
       <div className="flex items-center gap-3">
         {value && (
           <div className="relative h-16 w-16 overflow-hidden rounded-lg border border-border bg-cream-alt">
-            <Image src={value} alt="" fill className="object-cover" />
+            <Image src={value} alt="" fill unoptimized className="object-cover" />
           </div>
         )}
         <label className="cursor-pointer rounded-lg border border-border px-3 py-2 text-xs font-semibold text-ink hover:border-primary">
@@ -245,7 +245,7 @@ function RowPhotoUpload({
         className={`relative flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center overflow-hidden border border-dashed border-border bg-cream-alt text-[9px] font-semibold text-muted hover:border-primary ${shapeClass}`}
       >
         {value ? (
-          <Image src={value} alt="" fill className="object-cover" />
+          <Image src={value} alt="" fill unoptimized className="object-cover" />
         ) : uploading ? (
           '...'
         ) : (
@@ -312,7 +312,7 @@ function MultiImageUploadField({
       <div className="mb-2 flex flex-wrap gap-3">
         {values.map((url, i) => (
           <div key={url + i} className="relative h-20 w-20 overflow-hidden rounded-lg border border-border bg-cream-alt">
-            <Image src={url} alt="" fill className="object-cover" />
+            <Image src={url} alt="" fill unoptimized className="object-cover" />
             {i === 0 && (
               <span className="absolute bottom-0 left-0 right-0 bg-ink/70 py-0.5 text-center text-[9px] font-bold text-white">
                 Portada
