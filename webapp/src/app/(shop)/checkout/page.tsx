@@ -14,7 +14,7 @@ import { markRewardCouponUsed } from '@/lib/reviews';
 import { useSiteSettings } from '@/lib/settings-context';
 import { generatePaymentReference, isWompiConfigured, redirectToWompiCheckout } from '@/lib/wompi';
 import { trackPixelEvent } from '@/lib/metaPixel';
-import { trackFunnelStep } from '@/lib/analytics';
+import { trackVisitorCheckout, trackVisitorContact, trackVisitorPurchase } from '@/lib/visitor';
 import type { PaymentMethod } from '@/lib/types';
 import LocationCapture from '@/components/product/LocationCapture';
 import PaymentBadges from '@/components/PaymentBadges';
@@ -93,9 +93,18 @@ export default function CheckoutPage() {
       currency: 'COP',
       num_items: items.reduce((sum, i) => sum + i.quantity, 0),
     });
-    trackFunnelStep('checkout');
+    trackVisitorCheckout();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted]);
+
+  // Apenas escribe su nombre y celular (antes de terminar la compra), para
+  // poder ayudarla por WhatsApp si no termina — con 1.2s de espera para no
+  // mandar una petición con cada letra.
+  useEffect(() => {
+    if (!form.name.trim() && !form.phone.trim()) return;
+    const t = setTimeout(() => trackVisitorContact(form.name, form.phone), 1200);
+    return () => clearTimeout(t);
+  }, [form.name, form.phone]);
 
   if (!mounted || items.length === 0) return null;
 
@@ -163,6 +172,7 @@ export default function CheckoutPage() {
           customer,
         });
         notifyOrderByPush({ orderNumber, total: wompiTotal, customerName: form.name });
+        trackVisitorPurchase(orderNumber);
         if (coupon) {
           markRewardCouponUsed(coupon.code, id);
           clearCoupon();
@@ -200,6 +210,7 @@ export default function CheckoutPage() {
         customer,
       });
       notifyOrderByPush({ orderNumber, total, customerName: form.name });
+      trackVisitorPurchase(orderNumber);
 
       if (method === 'contra_entrega') {
         const waUrl = whatsappLinkTo(

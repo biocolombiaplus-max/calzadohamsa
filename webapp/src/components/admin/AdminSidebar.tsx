@@ -8,6 +8,7 @@ import { classNames } from '@/lib/utils';
 
 const LINKS = [
   { href: '/admin', label: '📊 Panel', exact: true },
+  { href: '/admin/visitantes', label: '👀 Visitantes' },
   { href: '/admin/productos', label: '👡 Productos' },
   { href: '/admin/pedidos', label: '📦 Pedidos' },
   { href: '/admin/crm', label: '💬 CRM' },

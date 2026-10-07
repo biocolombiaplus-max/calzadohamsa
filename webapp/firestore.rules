@@ -62,19 +62,25 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
-    // Analítica propia del sitio (visitas y embudo de ventas en
-    // /admin): cualquier visitante anónimo puede crear/actualizar SU
-    // PROPIA sesión (necesario para medir sin que haya una cuenta de por
-    // medio, igual que el "create" público de pedidos), pero solo la
-    // administradora puede leer los datos — así nadie externo puede ver
-    // cuánto tráfico tiene la tienda. Se limita a los campos esperados
-    // para que no se pueda inyectar cualquier cosa en el documento.
-    match /analyticsSessions/{sessionId} {
-      allow read: if isAdmin();
-      allow create, update: if request.resource.data.keys().hasOnly([
-        'firstSeenAt', 'lastSeenAt', 'reachedProducto', 'reachedCarrito',
-        'reachedCheckout', 'reachedCompra', 'utmSource', 'utmMedium', 'utmCampaign'
-      ]);
+    // Visitantes de la tienda (panel "Visitantes" en /admin, estilo
+    // Shopify): la tienda guarda la actividad de cada visitante sin que
+    // tenga que iniciar sesión (de dónde llega, qué ve, su carrito), y solo
+    // la administradora puede ver la lista completa — así nadie externo ve
+    // cuánto tráfico o qué clientas tiene la tienda. Leer UN registro por su
+    // id (secreto, nadie puede adivinarlo ni listarlos) es lo que permite
+    // recuperar el carrito desde el link que se le envía por WhatsApp.
+    match /visitors/{vid} {
+      allow get: if true;
+      allow list, delete: if isAdmin();
+      allow create, update: if isAdmin() || (
+        vid.matches('^[a-f0-9]{24}$')
+        && request.resource.data.keys().hasOnly(['firstSeen', 'visits', 'lastPath', 'landing', 'source', 'campaign', 'device',
+             'products', 'cart', 'cartValue', 'stage', 'stageAt', 'name', 'phone', 'orderNumber', 'city', 'region',
+             'lastSeen', 'pageviews', 'recoveryAt', 'recoveryCount'])
+        && request.resource.data.get('cart', []).size() <= 15
+        && request.resource.data.get('products', []).size() <= 6
+        && request.resource.data.get('stage', 'visita') in ['visita', 'producto', 'carrito', 'checkout', 'compra']
+      );
     }
 
     // Reseñas de clientas + bono de fidelización: la administradora crea el

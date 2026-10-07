@@ -582,23 +582,33 @@ anuncios de imagen, colección y retargeting básico. Si más adelante
 quieres anuncios dinámicos por color/talla exacta, se puede ampliar a un
 feed por variante.
 
-## Embudo de ventas en vivo (`/admin`)
+## Visitantes en vivo (`/admin/visitantes`)
 
-El Panel de control muestra un embudo propio, parecido al de Shopify:
-cuántas visitas entran a la tienda y en qué paso se quedan — **Visitas →
-Vio un producto → Agregó al carrito → Inició el pago → Compró** — con el
-porcentaje de caída entre cada paso y de dónde viene el tráfico (campaña
-de Meta Ads, orgánico, etc., tomado de los `utm_source`/`utm_campaign` del
-link). Tiene selector de período (Hoy / 7 días / 30 días) y se actualiza
-solo mientras lo tienes abierto, sin recargar la página.
+Panel propio de analítica, parecido al "En vivo" de Shopify: quién está
+navegando la tienda AHORA MISMO (con indicador en vivo que se actualiza
+solo), el embudo completo — **Visitantes → Vio una sandalia → Agregó al
+carrito → Inició el pago → Compró** — con el % de caída en cada paso, y de
+dónde viene cada visita y cada venta (Meta Ads, orgánico, Instagram,
+WhatsApp, etc., detectado por `utm_source`/`fbclid`/referido). También
+muestra las sandalias más vistas y tiene selector de período (Hoy / 7
+días).
 
-Funciona de forma independiente del Meta Pixel: cada visitante anónimo
-genera un documento de sesión en Firestore (`analyticsSessions`, de
-lectura privada — solo la administradora puede verlo) que se va marcando
-a medida que avanza, usando los mismos puntos del código donde ya se
-dispara el Pixel (ver `src/lib/analytics.ts`). No requiere ninguna
-variable de entorno ni cuenta externa — funciona apenas publicas este
-cambio.
+**Carritos abandonados + recuperación por WhatsApp**: si alguien agregó
+productos al carrito, escribió su nombre y celular en el checkout, pero no
+terminó la compra en 15 minutos, aparece en la pestaña "🛒 Carritos
+abandonados" con un botón **"💬 Recuperar por WhatsApp"** — genera un
+mensaje ya redactado con lo que dejó en el carrito y un link mágico
+(`/carrito?recuperar=ID`) que le reconstruye el carrito automáticamente al
+tocarlo, sin que tenga que volver a elegir talla y color.
+
+Funciona de forma independiente del Meta Pixel: cada visitante tiene un id
+anónimo guardado en su navegador, y su actividad (páginas vistas,
+productos, carrito, etapa) se envía a `/api/track`, que la guarda en
+Firestore (`visitors`, de lectura privada — solo la administradora puede
+ver la lista completa; un registro individual solo se puede leer sabiendo
+su id exacto, que es el que viaja en el link de recuperación). No requiere
+ninguna variable de entorno adicional ni cuenta externa — funciona apenas
+publicas este cambio y las reglas de Firestore.
 
 ## Fotos de producto: encuadre a cuadrado, ajustable foto por foto
 

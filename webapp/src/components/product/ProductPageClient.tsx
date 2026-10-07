@@ -13,7 +13,7 @@ import ProductReviews from '@/components/product/ProductReviews';
 import RelatedProducts from '@/components/product/RelatedProducts';
 import HowItWorks from '@/components/HowItWorks';
 import { trackPixelEvent } from '@/lib/metaPixel';
-import { trackFunnelStep } from '@/lib/analytics';
+import { trackVisitorProduct } from '@/lib/visitor';
 
 // El producto ya llega listo desde el servidor (ver page.tsx) — este
 // componente solo maneja la parte interactiva (galería, color elegido,
@@ -46,7 +46,7 @@ export default function ProductPageClient({ product }: { product: Product }) {
       value: product.price,
       currency: 'COP',
     });
-    trackFunnelStep('producto');
+    trackVisitorProduct(product);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product.id]);
 

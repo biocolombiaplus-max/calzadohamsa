@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useCartStore } from '@/lib/cart-store';
+import { getRecoverableCart } from '@/lib/visitorsAdmin';
 import { useSiteSettings } from '@/lib/settings-context';
 import { computeBundlePricing } from '@/lib/bundle';
 import { buildCartWhatsAppMessage, cloudinaryFill, formatPrice, whatsappLinkTo } from '@/lib/utils';
@@ -15,7 +16,7 @@ const DEPARTAMENTOS = getDepartamentos();
 
 export default function CarritoPage() {
   const [mounted, setMounted] = useState(false);
-  const { items, removeItem, updateQuantity } = useCartStore();
+  const { items, removeItem, updateQuantity, replaceItems } = useCartStore();
   const settings = useSiteSettings();
   const bundle = computeBundlePricing(items, settings.bundle2x1.price);
   const [department, setDepartment] = useState('');
@@ -27,6 +28,22 @@ export default function CarritoPage() {
   const oneAwayFromBundle = totalUnits > 0 && totalUnits % 2 === 1;
 
   useEffect(() => setMounted(true), []);
+
+  // Link de recuperación enviado por WhatsApp (/carrito?recuperar=ID):
+  // arma de nuevo el carrito que la clienta dejó.
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get('recuperar');
+    if (!id || !/^[a-f0-9]{24}$/.test(id)) return;
+    let cancelled = false;
+    getRecoverableCart(id)
+      .then((cart) => {
+        if (!cancelled && cart.length) replaceItems(cart);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [replaceItems]);
 
   if (!mounted) return null;
 

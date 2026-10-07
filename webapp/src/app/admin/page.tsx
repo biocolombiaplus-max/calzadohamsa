@@ -4,15 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getAllProducts } from '@/lib/products';
 import { getAllOrders } from '@/lib/orders';
-import { formatPrice, classNames } from '@/lib/utils';
-import { subscribeToFunnelSummary, type FunnelSummary } from '@/lib/analyticsAdmin';
-import AnalyticsFunnel from '@/components/admin/AnalyticsFunnel';
-
-const RANGE_OPTIONS = [
-  { label: 'Hoy', days: 1 },
-  { label: '7 días', days: 7 },
-  { label: '30 días', days: 30 },
-];
+import { formatPrice } from '@/lib/utils';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<{
@@ -22,8 +14,6 @@ export default function AdminDashboard() {
     pendingOrders: number;
     revenue: number;
   } | null>(null);
-  const [rangeDays, setRangeDays] = useState(7);
-  const [funnel, setFunnel] = useState<FunnelSummary | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -41,8 +31,6 @@ export default function AdminDashboard() {
       }
     })();
   }, []);
-
-  useEffect(() => subscribeToFunnelSummary(rangeDays, setFunnel), [rangeDays]);
 
   const cards = [
     { label: 'Productos activos', value: stats ? `${stats.activeProducts}/${stats.products}` : '—' },
@@ -74,41 +62,18 @@ export default function AdminDashboard() {
         </Link>
       </div>
 
-      <div className="mt-8 rounded-card bg-white p-5 shadow-soft">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="font-heading text-lg font-bold text-ink">Embudo de ventas</h2>
-            <p className="text-xs text-muted">
-              Quiénes entran a tu tienda y en qué paso se quedan — se actualiza solo, en vivo.
-            </p>
-          </div>
-          <div className="flex gap-1.5 rounded-full bg-cream-alt p-1">
-            {RANGE_OPTIONS.map((opt) => (
-              <button
-                key={opt.days}
-                type="button"
-                onClick={() => setRangeDays(opt.days)}
-                className={classNames(
-                  'rounded-full px-3 py-1.5 text-xs font-semibold transition-colors',
-                  rangeDays === opt.days ? 'bg-primary text-white' : 'text-muted hover:text-ink',
-                )}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {funnel === null ? (
-          <p className="py-6 text-center text-sm text-muted">Cargando...</p>
-        ) : funnel.totalVisits === 0 ? (
-          <p className="py-6 text-center text-sm text-muted">
-            Todavía no hay visitas registradas en este período.
+      <Link
+        href="/admin/visitantes"
+        className="mt-8 flex items-center justify-between gap-3 rounded-card bg-white p-5 shadow-soft transition-colors hover:bg-cream-alt/60"
+      >
+        <div>
+          <h2 className="font-heading text-lg font-bold text-ink">👀 Visitantes</h2>
+          <p className="text-xs text-muted">
+            Quiénes navegan ahora mismo, de dónde vienen (Meta Ads, orgánico...), carritos abandonados y todo el embudo de ventas en vivo.
           </p>
-        ) : (
-          <AnalyticsFunnel summary={funnel} />
-        )}
-      </div>
+        </div>
+        <span className="shrink-0 font-bold text-primary">Ver todo →</span>
+      </Link>
     </div>
   );
 }

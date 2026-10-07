@@ -43,6 +43,55 @@ export interface Product {
 
 export type ProductInput = Omit<Product, 'id' | 'createdAt' | 'updatedAt'>;
 
+// ———  Visitantes en vivo (analítica tipo Shopify) ———
+// Reemplaza el embudo simple anterior: sigue a cada visitante (de dónde
+// llega, qué ve, si llega al carrito/pago/compra) con su propio perfil, para
+// poder recuperar carritos abandonados por WhatsApp y ver de dónde vienen
+// las ventas de verdad (orgánico vs. Meta Ads).
+export type VisitorStage = 'visita' | 'producto' | 'carrito' | 'checkout' | 'compra';
+
+export interface VisitorProduct {
+  slug: string;
+  title: string;
+  image: string;
+}
+
+export interface VisitorCartItem {
+  productId: string;
+  slug: string;
+  title: string;
+  image: string;
+  size: string;
+  color: string;
+  quantity: number;
+  price: number;
+}
+
+export interface Visitor {
+  id: string;
+  firstSeen: number;
+  lastSeen: number;
+  visits: number;
+  pageviews: number;
+  lastPath: string;
+  landing: string;
+  source: string;
+  campaign: string;
+  device: string;
+  city: string;
+  region: string;
+  products: VisitorProduct[];
+  cart: VisitorCartItem[];
+  cartValue: number;
+  stage: VisitorStage;
+  stageAt: number;
+  name: string;
+  phone: string;
+  orderNumber: string;
+  recoveryAt?: number;
+  recoveryCount: number;
+}
+
 export interface CartItem {
   productId: string;
   slug: string;
