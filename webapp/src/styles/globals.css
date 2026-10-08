@@ -40,6 +40,18 @@ body {
   color: #fff;
 }
 
+/* Oculta la barra de scroll en galerías horizontales (capturas de
+   WhatsApp, fotos de entregas) sin perder el gesto de deslizar con el
+   dedo — se ve más limpio, como una tienda grande, en vez de una barra
+   de scroll de navegador de escritorio. */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 .btn-primary {
   @apply inline-flex items-center justify-center gap-2 rounded-card bg-primary px-6 py-3.5 font-semibold text-white shadow-lift transition-all hover:bg-primary-hover active:scale-[0.98];
 }

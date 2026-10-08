@@ -130,6 +130,17 @@ export const DEFAULT_SETTINGS: SiteSettings = {
         'Llevamos cientos de pedidos entregados y pagas solo cuando recibes tu pedido en tus manos, sin anticipos ni riesgos. Si algo llega mal o incompleto, te lo resolvemos sin preguntas.',
     },
   ],
+  chatProofs: {
+    enabled: true,
+    heading: 'Lo que nos escriben por WhatsApp',
+    subheading: 'Mensajes reales de clientas que ya recibieron sus sandalias',
+    photos: [],
+  },
+  realDeliveries: {
+    enabled: true,
+    heading: 'Pedidos reales, entregados en toda Colombia',
+    photos: [],
+  },
   cta: {
     eyebrow: '¿Lista para lucir increíble?',
     heading: 'Tu sandalia perfecta te está esperando',
@@ -188,6 +199,16 @@ export function mergeWithDefaults(data: Partial<SiteSettings> | undefined): Site
     benefits: data.benefits?.length ? data.benefits : DEFAULT_SETTINGS.benefits,
     testimonials: data.testimonials?.length ? data.testimonials : DEFAULT_SETTINGS.testimonials,
     faq: data.faq?.length ? data.faq : DEFAULT_SETTINGS.faq,
+    chatProofs: {
+      ...DEFAULT_SETTINGS.chatProofs,
+      ...data.chatProofs,
+      photos: Array.isArray(data.chatProofs?.photos) ? data.chatProofs.photos : [],
+    },
+    realDeliveries: {
+      ...DEFAULT_SETTINGS.realDeliveries,
+      ...data.realDeliveries,
+      photos: Array.isArray(data.realDeliveries?.photos) ? data.realDeliveries.photos : [],
+    },
   };
 }
 

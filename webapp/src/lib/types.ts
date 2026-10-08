@@ -384,6 +384,13 @@ export interface SiteSettings {
   testimonials: TestimonialItem[];
   faqHeading: string;
   faq: FaqItem[];
+  // Capturas de WhatsApp de clientas felices (prueba social) — se muestran
+  // dentro de un marco de celular, estilo tiendas grandes.
+  chatProofs: { enabled: boolean; heading: string; subheading: string; photos: string[] };
+  // Fotos reales de pedidos empacados/entregados que sube la administradora
+  // (prueba social). Distinto de las reseñas: esto es "mira, de verdad
+  // despachamos" más que "esto opinan de nosotros".
+  realDeliveries: { enabled: boolean; heading: string; photos: string[] };
   cta: {
     eyebrow: string;
     heading: string;

@@ -1054,6 +1054,76 @@ export default function ConfiguracionPage() {
         </div>
       </Section>
 
+      <Section
+        title="Entregas reales"
+        description="Fotos de pedidos empacados o ya entregados — galería horizontal con lightbox. Aparece en la página principal con al menos 1 foto."
+      >
+        <label className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
+          <input
+            type="checkbox"
+            checked={settings.realDeliveries.enabled}
+            onChange={(e) => update('realDeliveries', { ...settings.realDeliveries, enabled: e.target.checked })}
+          />
+          Mostrar esta sección en la página principal
+        </label>
+        <Field label="Título de la sección">
+          <input
+            value={settings.realDeliveries.heading}
+            onChange={(e) => update('realDeliveries', { ...settings.realDeliveries, heading: e.target.value })}
+            className={inputClass}
+          />
+        </Field>
+        <div className="mt-3">
+          <MultiImageUploadField
+            label="Fotos de entregas"
+            help="Fotos reales de paquetes empacados o entregados — entre más auténticas (no muy producidas), más confianza generan."
+            values={settings.realDeliveries.photos}
+            folder="entregas"
+            onChange={(urls) => update('realDeliveries', { ...settings.realDeliveries, photos: urls })}
+          />
+        </div>
+      </Section>
+
+      <Section
+        title="Capturas de WhatsApp"
+        description="Pantallazos reales de conversaciones de clientas felices, dentro de un marco de celular. Aparece con al menos 1 captura."
+      >
+        <label className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
+          <input
+            type="checkbox"
+            checked={settings.chatProofs.enabled}
+            onChange={(e) => update('chatProofs', { ...settings.chatProofs, enabled: e.target.checked })}
+          />
+          Mostrar esta sección en la página principal
+        </label>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Título de la sección">
+            <input
+              value={settings.chatProofs.heading}
+              onChange={(e) => update('chatProofs', { ...settings.chatProofs, heading: e.target.value })}
+              className={inputClass}
+            />
+          </Field>
+          <Field label="Subtítulo">
+            <input
+              value={settings.chatProofs.subheading}
+              onChange={(e) => update('chatProofs', { ...settings.chatProofs, subheading: e.target.value })}
+              className={inputClass}
+            />
+          </Field>
+        </div>
+        <p className="mb-2 mt-3 text-xs text-muted">
+          Tip: tapa o recorta el número de teléfono y la foto de perfil de la clienta antes de subir la captura, para
+          cuidar su privacidad.
+        </p>
+        <MultiImageUploadField
+          label="Capturas de WhatsApp"
+          values={settings.chatProofs.photos}
+          folder="whatsapp"
+          onChange={(urls) => update('chatProofs', { ...settings.chatProofs, photos: urls })}
+        />
+      </Section>
+
       <Section title="Llamado a la acción final (antes del footer)">
         <Field label="Eyebrow">
           <input

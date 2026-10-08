@@ -4,6 +4,8 @@ import FeaturedProducts from '@/components/FeaturedProducts';
 import HowItWorks from '@/components/HowItWorks';
 import Benefits from '@/components/Benefits';
 import Testimonials from '@/components/Testimonials';
+import RealDeliveries from '@/components/RealDeliveries';
+import ChatProofs from '@/components/ChatProofs';
 import FAQ from '@/components/FAQ';
 import HomeCTA from '@/components/HomeCTA';
 import { getFeaturedProductsServer } from '@/lib/productsServer';
@@ -19,6 +21,8 @@ export default async function HomePage() {
       <HowItWorks />
       <Benefits />
       <Testimonials />
+      <RealDeliveries />
+      <ChatProofs />
       <FAQ />
       <HomeCTA />
     </>
