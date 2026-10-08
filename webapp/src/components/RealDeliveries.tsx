@@ -13,7 +13,7 @@ export default function RealDeliveries() {
   if (!realDeliveries.enabled || photos.length === 0) return null;
 
   return (
-    <section className="bg-white py-14 sm:py-16">
+    <section className="bg-cream-alt py-14 sm:py-16">
       <div className="container-page">
         <p className="text-xs font-bold uppercase tracking-widest text-primary">Clientas reales · pedidos reales</p>
         <h2 className="mt-2 font-heading text-2xl font-bold text-ink sm:text-3xl">{realDeliveries.heading}</h2>
