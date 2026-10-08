@@ -1223,7 +1223,11 @@ export default function ConfiguracionPage() {
         </Field>
       </Section>
 
-      <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-white/95 p-4 backdrop-blur sm:pl-56">
+      {/* z-50: por encima del botón flotante de "Notificaciones activas"
+          (z-40) — antes quedaban en el mismo rincón inferior derecho y el
+          de notificaciones tapaba literalmente a "Guardar cambios", sin
+          que se notara por qué no reaccionaba al tocarlo. */}
+      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-white/95 p-4 backdrop-blur sm:pl-56">
         <div className="mx-auto flex max-w-4xl items-center justify-end gap-4">
           {saved && <span className="text-sm font-semibold text-primary">✓ Guardado</span>}
           <button onClick={handleSave} disabled={saving} className="btn-primary disabled:opacity-60">
