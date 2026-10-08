@@ -290,10 +290,16 @@ function MultiImageUploadField({
 
     setUploading(true);
     try {
+      // Se acumula en esta variable local (no en "values", que se queda
+      // congelado con el valor de cuando empezó la subida) para que subir
+      // varias fotos a la vez las vaya SUMANDO una por una, en vez de que
+      // cada una reemplace a la anterior y solo quede la última.
+      let current = values;
       for (const file of queued) {
         try {
           const url = await uploadProductImage(file, folder);
-          onChange([...values, url]);
+          current = [...current, url];
+          onChange(current);
         } catch (err) {
           setUploadError(err instanceof Error ? err.message : 'No se pudo subir la foto. Intenta de nuevo.');
         }
