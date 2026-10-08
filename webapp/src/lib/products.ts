@@ -12,9 +12,11 @@ import {
   limit as fbLimit,
   serverTimestamp,
   Timestamp,
+  arrayUnion,
+  increment,
 } from 'firebase/firestore';
 import { db } from './firebase';
-import type { Product, ProductInput } from './types';
+import type { Product, ProductInput, ProductReview } from './types';
 import { stripUndefined } from './utils';
 
 const COLLECTION = 'products';
@@ -110,4 +112,14 @@ export async function updateProduct(id: string, input: Partial<ProductInput>): P
 
 export async function deleteProduct(id: string): Promise<void> {
   await deleteDoc(doc(db, COLLECTION, id));
+}
+
+// Publica una reseña real de una clienta (con foto, si subió) directo en la
+// ficha pública del producto — se usa desde Pedidos, con un clic, en vez de
+// tener que volver a escribirla a mano en el editor del producto.
+export async function addProductReview(productId: string, review: ProductReview): Promise<void> {
+  await updateDoc(doc(db, COLLECTION, productId), {
+    reviews: arrayUnion(stripUndefined(review)),
+    reviewsCount: increment(1),
+  });
 }

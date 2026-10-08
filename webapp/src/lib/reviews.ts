@@ -3,6 +3,7 @@
 import { collection, doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { db } from './firebase';
 import { saveWonCoupon } from './coupon';
+import { addProductReview } from './products';
 import type { Order, ReviewRequest, ReviewRequestItem } from './types';
 
 const REQUESTS = 'reviewRequests';
@@ -33,6 +34,7 @@ function toReviewRequest(id: string, data: any): ReviewRequest {
     couponUsedAt: toMillis(data.couponUsedAt) ?? null,
     couponUsedOrderId: data.couponUsedOrderId ?? null,
     createdAt: toMillis(data.createdAt) ?? 0,
+    publishedAt: toMillis(data.publishedAt) ?? null,
   };
 }
 
@@ -190,4 +192,24 @@ export async function markRewardCouponUsed(code: string, orderId: string): Promi
   } catch {
     // Nunca debe afectar la compra real si esto falla.
   }
+}
+
+// Un clic desde Pedidos: lleva la reseña real (con foto, si subió) directo
+// a la ficha pública del producto que compró, y marca en reviewRequests que
+// ya se publicó — para no poder duplicarla sin querer.
+export async function publishReviewToProduct(order: Order, request: ReviewRequest): Promise<void> {
+  if (!db) throw new Error('Firestore no está disponible.');
+  const productId = order.items[0]?.productId;
+  if (!productId) throw new Error('Este pedido no tiene un producto para publicar.');
+  if (request.rating == null || !request.reviewText) throw new Error('Esta reseña todavía no tiene calificación o texto.');
+
+  await addProductReview(productId, {
+    name: request.customerName,
+    city: order.customer.city,
+    rating: request.rating,
+    text: request.reviewText,
+    photos: request.reviewPhotos,
+  });
+
+  await updateDoc(doc(db, REQUESTS, request.id), { publishedAt: serverTimestamp() });
 }

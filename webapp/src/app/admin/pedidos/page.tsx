@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { getAllOrders, updateOrderStatus, updateOrderShipping, updateOrderShippingLabel, deleteOrder } from '@/lib/orders';
 import { getSiteSettings } from '@/lib/settings';
 import { uploadShippingLabel } from '@/lib/storage';
-import { sendReviewRequest, subscribeToReviewRequests } from '@/lib/reviews';
+import { sendReviewRequest, subscribeToReviewRequests, publishReviewToProduct } from '@/lib/reviews';
 import { CARRIERS, type Order, type OrderStatus, type Carrier, type ReviewRequest } from '@/lib/types';
 import { formatPrice, whatsappLinkTo } from '@/lib/utils';
 
@@ -87,6 +87,8 @@ export default function AdminOrdersPage() {
   const [reviewRequests, setReviewRequests] = useState<Record<string, ReviewRequest>>({});
   const [sendingReview, setSendingReview] = useState<string | null>(null);
   const [copiedReviewId, setCopiedReviewId] = useState<string | null>(null);
+  const [publishingReview, setPublishingReview] = useState<string | null>(null);
+  const [publishError, setPublishError] = useState<Record<string, string>>({});
 
   useEffect(() => {
     getAllOrders()
@@ -135,6 +137,26 @@ export default function AdminOrdersPage() {
       setCopiedReviewId(orderId);
       setTimeout(() => setCopiedReviewId((c) => (c === orderId ? null : c)), 2000);
     });
+  }
+
+  // Lleva la reseña real (con foto si subió) directo a la ficha pública del
+  // producto que compró — un clic, en vez de tener que volver a escribirla
+  // a mano en el editor del producto.
+  async function handlePublishReview(order: Order) {
+    const request = reviewRequests[order.id];
+    if (!request) return;
+    setPublishingReview(order.id);
+    setPublishError((prev) => ({ ...prev, [order.id]: '' }));
+    try {
+      await publishReviewToProduct(order, request);
+    } catch (err) {
+      setPublishError((prev) => ({
+        ...prev,
+        [order.id]: err instanceof Error ? err.message : 'No se pudo publicar la reseña.',
+      }));
+    } finally {
+      setPublishingReview(null);
+    }
   }
 
   async function handleStatusChange(id: string, status: OrderStatus) {
@@ -216,6 +238,8 @@ export default function AdminOrdersPage() {
               reviewRequest={reviewRequests[order.id]}
               sendingReview={sendingReview === order.id}
               reviewLinkCopied={copiedReviewId === order.id}
+              publishingReview={publishingReview === order.id}
+              publishError={publishError[order.id]}
               onStatusChange={(status) => handleStatusChange(order.id, status)}
               onShippingSave={(carrier, trackingNumber) => handleShippingSave(order, carrier, trackingNumber)}
               onLabelUpload={(file) => handleLabelUpload(order, file)}
@@ -223,6 +247,7 @@ export default function AdminOrdersPage() {
               onDelete={() => handleDeleteOrder(order)}
               onSendReview={() => handleSendReview(order)}
               onCopyReviewLink={() => handleCopyReviewLink(order.id)}
+              onPublishReview={() => handlePublishReview(order)}
             />
           ))
         )}
@@ -240,6 +265,8 @@ function OrderCard({
   reviewRequest,
   sendingReview,
   reviewLinkCopied,
+  publishingReview,
+  publishError,
   onStatusChange,
   onShippingSave,
   onLabelUpload,
@@ -247,6 +274,7 @@ function OrderCard({
   onDelete,
   onSendReview,
   onCopyReviewLink,
+  onPublishReview,
 }: {
   order: Order;
   storeName: string;
@@ -256,6 +284,8 @@ function OrderCard({
   reviewRequest?: ReviewRequest;
   sendingReview: boolean;
   reviewLinkCopied: boolean;
+  publishingReview: boolean;
+  publishError?: string;
   onStatusChange: (status: OrderStatus) => void;
   onShippingSave: (carrier: Carrier | '', trackingNumber: string) => void;
   onLabelUpload: (file: File) => void;
@@ -263,6 +293,7 @@ function OrderCard({
   onDelete: () => void;
   onSendReview: () => void;
   onCopyReviewLink: () => void;
+  onPublishReview: () => void;
 }) {
   const [carrier, setCarrier] = useState<Carrier | ''>(order.carrier ?? '');
   const [trackingNumber, setTrackingNumber] = useState(order.trackingNumber ?? '');
@@ -471,6 +502,23 @@ function OrderCard({
               </button>
             </div>
             {reviewRequest.reviewText && <p className="text-xs italic text-muted">&ldquo;{reviewRequest.reviewText}&rdquo;</p>}
+            <div className="flex items-center gap-2">
+              {reviewRequest.publishedAt ? (
+                <span className="rounded-full bg-primary-light/20 px-2.5 py-1 text-xs font-semibold text-primary-hover">
+                  ✓ Publicada en el producto
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={onPublishReview}
+                  disabled={publishingReview}
+                  className="rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-white disabled:opacity-60"
+                >
+                  {publishingReview ? 'Publicando...' : '📤 Publicar en el producto'}
+                </button>
+              )}
+            </div>
+            {publishError && <p className="text-xs text-urgent">{publishError}</p>}
           </div>
         )}
       </div>

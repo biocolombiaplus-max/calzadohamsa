@@ -427,6 +427,21 @@ export default function CheckoutPage() {
 
           {error && <p className="rounded-lg bg-urgent/10 p-3 text-sm text-urgent">{error}</p>}
 
+          <div className="grid grid-cols-3 gap-2 rounded-card bg-cream-alt p-3 text-center text-[11px] font-semibold text-ink sm:text-xs">
+            <span className="flex flex-col items-center gap-1">
+              <span className="text-lg">🛡️</span>
+              Compra garantizada
+            </span>
+            <span className="flex flex-col items-center gap-1">
+              <span className="text-lg">↩️</span>
+              Cambio de talla gratis
+            </span>
+            <span className="flex flex-col items-center gap-1">
+              <span className="text-lg">💬</span>
+              Te respondemos rápido
+            </span>
+          </div>
+
           <div>
             <p className="mb-1.5 text-xs font-semibold text-muted">Aceptamos</p>
             <PaymentBadges />

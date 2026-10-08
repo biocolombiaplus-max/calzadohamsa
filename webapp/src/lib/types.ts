@@ -10,6 +10,9 @@ export interface ProductReview {
   rating: number;
   text: string;
   date?: string;
+  // Fotos reales que la clienta subió con su reseña (desde /resena) — las
+  // reseñas con foto generan mucha más confianza que solo texto.
+  photos?: string[];
 }
 
 export interface Product {
@@ -193,6 +196,9 @@ export interface ReviewRequest {
   couponUsedAt?: number | null;
   couponUsedOrderId?: string | null;
   createdAt: number;
+  // Cuándo la administradora publicó esta reseña en la ficha del producto
+  // (ver Pedidos → "Publicar en el producto") — nulo mientras no se publica.
+  publishedAt?: number | null;
 }
 
 // Copia pública y mínima del cupón (sin nombre ni teléfono) para que el
