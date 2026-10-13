@@ -14,6 +14,7 @@ import {
 } from 'firebase/firestore';
 import { db, auth } from './firebase';
 import type { CrmContact, CrmMessage, CrmStage, CrmConfig } from './types';
+import { DEFAULT_CRM_AI_AGENT } from './types';
 
 const CONTACTS = 'crmContacts';
 const MESSAGES = 'crmMessages';
@@ -36,6 +37,7 @@ function toContact(id: string, data: any): CrmContact {
     unreadCount: data.unreadCount ?? 0,
     nextFollowUpAt: toMillis(data.nextFollowUpAt) ?? null,
     createdAt: toMillis(data.createdAt) ?? 0,
+    aiPaused: !!data.aiPaused,
   };
 }
 
@@ -49,6 +51,7 @@ function toMessage(id: string, data: any): CrmMessage {
     waMessageId: data.waMessageId,
     templateName: data.templateName,
     createdAt: toMillis(data.createdAt) ?? 0,
+    automated: !!data.automated,
   };
 }
 
@@ -90,13 +93,25 @@ export async function markContactRead(contactId: string): Promise<void> {
   await updateDoc(doc(db, CONTACTS, contactId), { unreadCount: 0 });
 }
 
+// Pausa o reactiva el agente de IA para una clienta puntual — se pausa
+// solo automáticamente en cuanto la administradora le escribe a mano (ver
+// /api/whatsapp/send), pero también se puede reactivar a mano desde la
+// ficha de la clienta.
+export async function setContactAiPaused(contactId: string, paused: boolean): Promise<void> {
+  await updateDoc(doc(db, CONTACTS, contactId), { aiPaused: paused });
+}
+
 const CONFIG_DOC = 'crmConfig/main';
 
 export async function getCrmConfig(): Promise<CrmConfig> {
-  if (!db) return { quickReplies: [], templates: [] };
+  if (!db) return { quickReplies: [], templates: [], aiAgent: DEFAULT_CRM_AI_AGENT };
   const snap = await getDoc(doc(db, CONFIG_DOC));
   const data = snap.data();
-  return { quickReplies: data?.quickReplies ?? [], templates: data?.templates ?? [] };
+  return {
+    quickReplies: data?.quickReplies ?? [],
+    templates: data?.templates ?? [],
+    aiAgent: { ...DEFAULT_CRM_AI_AGENT, ...(data?.aiAgent ?? {}) },
+  };
 }
 
 export function subscribeToCrmConfig(onChange: (config: CrmConfig) => void): () => void {
@@ -105,7 +120,11 @@ export function subscribeToCrmConfig(onChange: (config: CrmConfig) => void): () 
     doc(db, CONFIG_DOC),
     (snap) => {
       const data = snap.data();
-      onChange({ quickReplies: data?.quickReplies ?? [], templates: data?.templates ?? [] });
+      onChange({
+        quickReplies: data?.quickReplies ?? [],
+        templates: data?.templates ?? [],
+        aiAgent: { ...DEFAULT_CRM_AI_AGENT, ...(data?.aiAgent ?? {}) },
+      });
     },
     () => {},
   );

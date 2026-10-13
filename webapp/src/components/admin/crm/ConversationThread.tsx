@@ -142,6 +142,11 @@ export default function ConversationThread({
                 m.direction === 'out' ? 'bg-primary text-white' : 'bg-white text-ink',
               )}
             >
+              {m.automated && (
+                <p className={classNames('mb-0.5 text-[10px] font-bold', m.direction === 'out' ? 'text-white/80' : 'text-muted')}>
+                  🤖 Agente
+                </p>
+              )}
               <p className="whitespace-pre-line">{m.text}</p>
               <p
                 className={classNames(

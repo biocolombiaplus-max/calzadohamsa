@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { CrmContact, CrmStage } from '@/lib/types';
 import { CRM_STAGES, CRM_STAGE_LABELS } from '@/lib/types';
-import { updateContactDetails, updateContactStage } from '@/lib/crm';
+import { updateContactDetails, updateContactStage, setContactAiPaused } from '@/lib/crm';
 import { whatsappLinkTo } from '@/lib/utils';
 
 export default function ContactDetailPanel({ contact }: { contact: CrmContact }) {
@@ -44,6 +44,19 @@ export default function ContactDetailPanel({ contact }: { contact: CrmContact })
 
   return (
     <div className="space-y-4 overflow-y-auto p-4">
+      <div className="flex items-center justify-between gap-2 rounded-lg bg-cream-alt/60 p-2.5">
+        <p className="text-xs font-semibold text-ink">
+          {contact.aiPaused ? '⏸️ Agente de IA pausado' : '🤖 Agente de IA activo'}
+        </p>
+        <button
+          type="button"
+          onClick={() => setContactAiPaused(contact.id, !contact.aiPaused)}
+          className="shrink-0 text-xs font-bold text-primary hover:underline"
+        >
+          {contact.aiPaused ? 'Reactivar' : 'Pausar'}
+        </button>
+      </div>
+
       <div>
         <p className="text-xs font-semibold text-muted">Teléfono</p>
         <div className="flex items-center justify-between gap-2">

@@ -500,6 +500,52 @@ Sin estas variables configuradas, `/admin/crm` se ve y funciona la
 interfaz (embudo, notas, etiquetas), pero no puede mandar ni recibir
 mensajes reales todavía — no rompe nada del resto de la tienda.
 
+### Agente con IA — contesta sola por WhatsApp (`/admin/crm → ⚙️ Configuración`)
+
+Con el CRM ya conectado, puedes activar un agente que **conteste
+automáticamente** a cada clienta nueva usando tu catálogo real, tus envíos
+y tus preguntas frecuentes (las mismas que configuras en
+`/admin/configuracion`) — más las instrucciones que tú le escribas en
+español (tono, qué nunca debe prometer, etc.).
+
+**Cómo funciona (ya programado, nada que tocar en el código):**
+- Contesta en segundos a cualquier clienta que escriba por primera vez o
+  reabra una conversación.
+- Usa **solo** la información real de tu tienda — tiene instrucción
+  explícita de nunca inventar precios, tallas, plazos ni descuentos.
+- En cuanto **tú** le escribes a mano a una clienta desde la Bandeja, el
+  agente se pausa solo para esa conversación — nunca va a contestar al
+  mismo tiempo que tú. Puedes pausarlo o reactivarlo a mano en cualquier
+  momento desde la ficha de la clienta (botón "Pausar"/"Reactivar").
+- Si la clienta pide hablar con una persona, se queja de un pedido o
+  menciona una palabra como "reclamo" o "estafa", el agente se calla y se
+  pausa automáticamente para que la atiendas tú — nunca intenta resolver
+  un reclamo por su cuenta.
+- Cada mensaje que contestó el agente aparece marcado con **🤖 Agente** en
+  la conversación, para que siempre sepas qué contestó él y qué
+  contestaste tú.
+
+**Cómo activarlo:**
+1. Ve a [console.anthropic.com](https://console.anthropic.com) → crea una
+   cuenta → **Settings → API Keys → Create Key**. Copia esa clave (empieza
+   con `sk-ant-...`).
+2. Agrega un método de pago en **Settings → Billing** (cobra solo por lo
+   que se usa — con el modelo que usa este agente, miles de respuestas
+   cuestan unos pocos dólares; revisa precios vigentes en
+   [anthropic.com/pricing](https://anthropic.com/pricing)).
+3. En **Vercel → Project Settings → Environment Variables**, agrega
+   `ANTHROPIC_API_KEY` con esa clave, y vuelve a desplegar.
+4. Entra a `/admin/crm → ⚙️ Configuración` — debe aparecer en verde "API
+   Key de IA para el agente automático".
+5. En la sección **"🤖 Agente con IA"**, escribe tus instrucciones (tono,
+   qué nunca debe hacer) y toca **"Activado"**.
+6. Pruébalo: escríbele al número de la tienda desde otro celular como si
+   fueras una clienta nueva — debe responderte en segundos.
+
+Mientras no agregues `ANTHROPIC_API_KEY`, puedes dejarlo activado sin
+problema: simplemente no contestará nada hasta que la agregues, y la
+Bandeja sigue funcionando normal para que respondas tú a mano.
+
 ## Meta Pixel — medir y optimizar campañas de Meta Ads
 
 El sitio ya tiene todo el código listo para medir quién ve un producto,

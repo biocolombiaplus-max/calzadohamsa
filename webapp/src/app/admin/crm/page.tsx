@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { CrmConfig, CrmContact, CrmMessage } from '@/lib/types';
+import { DEFAULT_CRM_AI_AGENT } from '@/lib/types';
 import { subscribeToContacts, subscribeToMessages, subscribeToCrmConfig, markContactRead } from '@/lib/crm';
 import { classNames } from '@/lib/utils';
 import ContactList from '@/components/admin/crm/ContactList';
@@ -23,7 +24,7 @@ export default function CrmPage() {
   const [contacts, setContacts] = useState<CrmContact[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [messages, setMessages] = useState<CrmMessage[]>([]);
-  const [config, setConfig] = useState<CrmConfig>({ quickReplies: [], templates: [] });
+  const [config, setConfig] = useState<CrmConfig>({ quickReplies: [], templates: [], aiAgent: DEFAULT_CRM_AI_AGENT });
   const [showDetailMobile, setShowDetailMobile] = useState(false);
 
   useEffect(() => subscribeToContacts(setContacts), []);

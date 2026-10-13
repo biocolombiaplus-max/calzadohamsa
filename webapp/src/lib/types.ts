@@ -241,6 +241,11 @@ export interface CrmContact {
   unreadCount: number;
   nextFollowUpAt?: number | null;
   createdAt: number;
+  // true en cuanto la administradora le responde manualmente desde el CRM
+  // (o ella misma lo pausa) — mientras esté así, el agente de IA deja de
+  // contestar por esta clienta para no hablar "encima" de ella. Se
+  // reactiva con un botón en la ficha de la clienta.
+  aiPaused?: boolean;
 }
 
 export type CrmMessageDirection = 'in' | 'out';
@@ -255,6 +260,9 @@ export interface CrmMessage {
   waMessageId?: string;
   templateName?: string;
   createdAt: number;
+  // true cuando este mensaje saliente lo escribió el agente de IA, no la
+  // administradora — para mostrar el sellito "🤖" en la conversación.
+  automated?: boolean;
 }
 
 export interface CrmQuickReply {
@@ -275,10 +283,27 @@ export interface CrmTemplate {
   variableCount: number;
 }
 
+// Agente de ventas con IA: contesta sola a cada clienta nueva por
+// WhatsApp usando la información real de la tienda (productos, envíos,
+// preguntas frecuentes) más estas instrucciones en español que escribe la
+// administradora. Se apaga automáticamente para una clienta en cuanto la
+// administradora le escribe a mano (ver CrmContact.aiPaused).
+export interface CrmAiAgentConfig {
+  enabled: boolean;
+  instructions: string;
+}
+
 export interface CrmConfig {
   quickReplies: CrmQuickReply[];
   templates: CrmTemplate[];
+  aiAgent: CrmAiAgentConfig;
 }
+
+export const DEFAULT_CRM_AI_AGENT: CrmAiAgentConfig = {
+  enabled: false,
+  instructions:
+    'Eres la asesora de ventas de la tienda. Sé cálida, breve (máximo 3-4 líneas) y resuelve dudas sobre tallas, precios, colores y envíos usando SOLO la información que se te da. Si no sabes algo, dile a la clienta que ya le confirmas y no inventes datos. Cierra siempre invitando a ver el catálogo o a dar su talla.',
+};
 
 export interface TrustItem {
   icon: string;

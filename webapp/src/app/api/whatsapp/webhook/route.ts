@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
 import { FieldValue } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
-import { verifyMetaSignature } from '@/lib/whatsapp';
+import { verifyMetaSignature, sendWhatsAppText } from '@/lib/whatsapp';
+import { generateAgentReply } from '@/lib/aiAgent';
+import { getSiteSettingsServer } from '@/lib/settingsServer';
+import { DEFAULT_CRM_AI_AGENT } from '@/lib/types';
 
 // Webhook oficial de Meta (WhatsApp Business Platform / Cloud API). Meta
 // llama aquí dos formas distintas:
@@ -95,6 +98,63 @@ async function upsertContactAndMessage(phone: string, name: string | undefined, 
   });
 }
 
+// Después de guardar un mensaje de texto entrante, deja que el agente de
+// IA conteste solo — si está activado en /admin/crm → Configuración y
+// nadie lo pausó para esta clienta (la administradora le escribió a mano,
+// o el mensaje pedía hablar con una persona). Cualquier fallo aquí (sin
+// API key, Meta caído, etc.) se traga el error: el mensaje real de la
+// clienta ya quedó guardado en la Bandeja de todas formas.
+async function maybeAutoReply(phone: string, incomingText: string) {
+  try {
+    const contactRef = adminDb.collection('crmContacts').doc(phone);
+    const contactSnap = await contactRef.get();
+    if (!contactSnap.exists || contactSnap.data()?.aiPaused) return;
+
+    const configSnap = await adminDb.doc('crmConfig/main').get();
+    const agentConfig = { ...DEFAULT_CRM_AI_AGENT, ...(configSnap.data()?.aiAgent ?? {}) };
+    if (!agentConfig.enabled) return;
+
+    const historySnap = await adminDb
+      .collection('crmMessages')
+      .where('contactId', '==', phone)
+      .orderBy('createdAt', 'desc')
+      .limit(12)
+      .get();
+    const history = historySnap.docs
+      .map((d) => ({ direction: d.data().direction as 'in' | 'out', text: d.data().text as string }))
+      .reverse();
+
+    const settings = await getSiteSettingsServer();
+    const { text, needsHuman } = await generateAgentReply(settings, agentConfig, history);
+
+    if (needsHuman) {
+      await contactRef.update({ aiPaused: true });
+      return;
+    }
+    if (!text) return;
+
+    const result = await sendWhatsAppText(phone, text);
+    if (!result.success) {
+      console.error('[whatsapp webhook] El agente generó respuesta pero no se pudo enviar.', result.error);
+      return;
+    }
+
+    const now = Date.now();
+    await adminDb.collection('crmMessages').add({
+      contactId: phone,
+      direction: 'out',
+      text,
+      status: 'sent',
+      waMessageId: result.waMessageId,
+      automated: true,
+      createdAt: now,
+    });
+    await contactRef.update({ lastMessageAt: now, lastMessagePreview: text });
+  } catch (error) {
+    console.error('[whatsapp webhook] Error en el agente de IA.', error);
+  }
+}
+
 async function applyStatusUpdate(status: MetaStatus) {
   const mapped = STATUS_MAP[status.status];
   if (!mapped) return;
@@ -130,6 +190,9 @@ export async function POST(request: Request) {
         const profileName: string | undefined = value.contacts?.[0]?.profile?.name;
         for (const message of (value.messages ?? []) as MetaMessage[]) {
           await upsertContactAndMessage(message.from, profileName, message);
+          if (message.type === 'text' && message.text?.body) {
+            await maybeAutoReply(message.from, message.text.body);
+          }
         }
         for (const status of (value.statuses ?? []) as MetaStatus[]) {
           await applyStatusUpdate(status);

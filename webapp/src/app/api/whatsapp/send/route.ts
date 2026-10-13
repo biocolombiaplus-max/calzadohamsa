@@ -98,7 +98,9 @@ export async function POST(request: Request) {
     ...(templateName ? { templateName } : {}),
     createdAt: now,
   });
-  await contactRef.update({ lastMessageAt: now, lastMessagePreview: text, unreadCount: 0 });
+  // En cuanto la administradora le escribe a mano, se pausa el agente de IA
+  // para esta clienta — así nunca contestan los dos a la vez.
+  await contactRef.update({ lastMessageAt: now, lastMessagePreview: text, unreadCount: 0, aiPaused: true });
 
   return NextResponse.json({ sent: true });
 }

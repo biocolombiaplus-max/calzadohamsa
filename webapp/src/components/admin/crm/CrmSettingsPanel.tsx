@@ -9,6 +9,7 @@ interface Status {
   adminSdkConfigured: boolean;
   verifyTokenConfigured: boolean;
   appSecretConfigured: boolean;
+  aiConfigured: boolean;
 }
 
 function StatusRow({ ok, label }: { ok: boolean; label: string }) {
@@ -24,6 +25,9 @@ export default function CrmSettingsPanel({ config }: { config: CrmConfig }) {
   const [status, setStatus] = useState<Status | null>(null);
   const [quickReplies, setQuickReplies] = useState<CrmQuickReply[]>(config.quickReplies);
   const [templates, setTemplates] = useState<CrmTemplate[]>(config.templates);
+  const [aiEnabled, setAiEnabled] = useState(config.aiAgent.enabled);
+  const [aiInstructions, setAiInstructions] = useState(config.aiAgent.instructions);
+  const [aiSaved, setAiSaved] = useState(false);
   const [qrLabel, setQrLabel] = useState('');
   const [qrText, setQrText] = useState('');
   const [tName, setTName] = useState('');
@@ -42,12 +46,32 @@ export default function CrmSettingsPanel({ config }: { config: CrmConfig }) {
   useEffect(() => {
     setQuickReplies(config.quickReplies);
     setTemplates(config.templates);
+    setAiEnabled(config.aiAgent.enabled);
+    setAiInstructions(config.aiAgent.instructions);
   }, [config]);
 
   async function persist(next: { quickReplies: CrmQuickReply[]; templates: CrmTemplate[] }) {
     setSaving(true);
-    await saveCrmConfig(next);
+    await saveCrmConfig({ ...next, aiAgent: { enabled: aiEnabled, instructions: aiInstructions } });
     setSaving(false);
+  }
+
+  async function persistAiAgent(next: { enabled: boolean; instructions: string }) {
+    setSaving(true);
+    await saveCrmConfig({ quickReplies, templates, aiAgent: next });
+    setSaving(false);
+    setAiSaved(true);
+    setTimeout(() => setAiSaved(false), 1500);
+  }
+
+  function handleToggleAi() {
+    const next = !aiEnabled;
+    setAiEnabled(next);
+    persistAiAgent({ enabled: next, instructions: aiInstructions });
+  }
+
+  function handleSaveAiInstructions() {
+    persistAiAgent({ enabled: aiEnabled, instructions: aiInstructions });
   }
 
   function addQuickReply() {
@@ -100,6 +124,7 @@ export default function CrmSettingsPanel({ config }: { config: CrmConfig }) {
             <StatusRow ok={status.whatsappConfigured} label="Token y número de WhatsApp (WHATSAPP_ACCESS_TOKEN / WHATSAPP_PHONE_NUMBER_ID)" />
             <StatusRow ok={status.verifyTokenConfigured} label="Token de verificación del webhook (WHATSAPP_VERIFY_TOKEN)" />
             <StatusRow ok={status.appSecretConfigured} label="App Secret para validar los mensajes de Meta (WHATSAPP_APP_SECRET)" />
+            <StatusRow ok={status.aiConfigured} label="API Key de IA para el agente automático (ANTHROPIC_API_KEY)" />
           </ul>
         ) : (
           <p className="text-xs text-muted">Verificando...</p>
@@ -108,6 +133,41 @@ export default function CrmSettingsPanel({ config }: { config: CrmConfig }) {
           Sigue los pasos de <strong>README.md → &ldquo;CRM de WhatsApp&rdquo;</strong> para configurar estas
           variables en Vercel — sin ellas el CRM se ve, pero no puede mandar ni recibir mensajes reales todavía.
         </p>
+      </div>
+
+      <div className="rounded-card bg-white p-4 shadow-soft">
+        <div className="mb-1 flex items-center justify-between gap-2">
+          <h3 className="font-heading text-sm font-bold text-ink">🤖 Agente con IA</h3>
+          <button
+            type="button"
+            onClick={handleToggleAi}
+            className={
+              aiEnabled
+                ? 'shrink-0 rounded-full bg-primary px-3 py-1 text-xs font-bold text-white'
+                : 'shrink-0 rounded-full bg-cream-alt px-3 py-1 text-xs font-bold text-muted'
+            }
+          >
+            {aiEnabled ? 'Activado' : 'Apagado'}
+          </button>
+        </div>
+        <p className="mb-3 text-xs text-muted">
+          Contesta sola a cada clienta nueva por WhatsApp, usando tu catálogo real, tus envíos y tus preguntas
+          frecuentes. En cuanto tú le escribes a mano a una clienta, el agente se pausa solo para esa conversación
+          — nunca contestan los dos a la vez. Si {status && !status.aiConfigured ? 'falta la ' : 'tienes la '}
+          <code className="font-mono">ANTHROPIC_API_KEY</code> arriba en rojo, actívalo pero no contestará hasta que
+          la agregues en Vercel (ver README.md → &ldquo;Agente con IA&rdquo;).
+        </p>
+        <label className="mb-1 block text-xs font-semibold text-muted">Instrucciones para el agente (en español)</label>
+        <textarea
+          value={aiInstructions}
+          onChange={(e) => setAiInstructions(e.target.value)}
+          rows={5}
+          placeholder="Ej: Sé cálida y breve. Si preguntan por una talla agotada, ofrece avisar cuando llegue. Nunca des descuentos sin que yo lo autorice."
+          className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
+        />
+        <button type="button" onClick={handleSaveAiInstructions} className="btn-secondary mt-2 px-4 py-2 text-sm">
+          {aiSaved ? '✓ Guardado' : 'Guardar instrucciones'}
+        </button>
       </div>
 
       <div className="rounded-card bg-white p-4 shadow-soft">
