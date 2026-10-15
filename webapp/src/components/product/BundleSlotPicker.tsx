@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Product } from '@/lib/types';
 import { classNames, cloudinaryFill, formatPrice, resolveColorImage } from '@/lib/utils';
 import SafeImage from '@/components/SafeImage';
@@ -23,6 +23,18 @@ export default function BundleSlotPicker({
   onChange: (selection: BundleSelection | null) => void;
 }) {
   const [pickingProduct, setPickingProduct] = useState(!selection);
+
+  // Si esta casilla arranca vacía y la selección llega después (ej: el
+  // primer par ya elegido en la ficha de producto, que tarda un instante
+  // en leerse de la URL), hay que cerrar la lista de elegir automáticamente
+  // la PRIMERA vez que eso pasa — si no, se queda pegada mostrando la lista
+  // para siempre y la clienta tiene que volver a elegir a mano algo que ya
+  // había elegido. No interfiere con "Cambiar modelo" después.
+  const hadSelection = useRef(!!selection);
+  useEffect(() => {
+    if (!hadSelection.current && selection) setPickingProduct(false);
+    hadSelection.current = !!selection;
+  }, [selection]);
 
   function selectProduct(product: Product) {
     onChange({
