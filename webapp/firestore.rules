@@ -76,7 +76,7 @@ service cloud.firestore {
         vid.matches('^[a-f0-9]{24}$')
         && request.resource.data.keys().hasOnly(['firstSeen', 'visits', 'lastPath', 'landing', 'source', 'campaign', 'device',
              'products', 'cart', 'cartValue', 'stage', 'stageAt', 'name', 'phone', 'orderNumber', 'city', 'region',
-             'lastSeen', 'pageviews', 'recoveryAt', 'recoveryCount'])
+             'lastSeen', 'pageviews', 'recoveryAt', 'recoveryCount', 'waOrder'])
         && request.resource.data.get('cart', []).size() <= 15
         && request.resource.data.get('products', []).size() <= 6
         && request.resource.data.get('stage', 'visita') in ['visita', 'producto', 'carrito', 'checkout', 'compra']

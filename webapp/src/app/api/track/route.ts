@@ -30,6 +30,19 @@ function cleanProducts(v: unknown) {
   return v.slice(0, 6).map((p) => ({ slug: str(p?.slug, 120), title: str(p?.title, 120), image: str(p?.image, 300) }));
 }
 
+function cleanWaOrder(v: unknown): Record<string, unknown> | null {
+  if (!v || typeof v !== 'object') return null;
+  const o = v as Record<string, unknown>;
+  if (!str(o.title, 120)) return null;
+  return {
+    title: str(o.title, 120),
+    image: str(o.image, 300),
+    size: str(o.size, 20),
+    color: str(o.color, 60),
+    at: num(o.at) || Date.now(),
+  };
+}
+
 function cleanCart(v: unknown) {
   if (!Array.isArray(v)) return [];
   return v.slice(0, 15).map((i) => ({
@@ -75,6 +88,7 @@ export async function POST(req: Request) {
     name: str(d.name, 80),
     phone: str(d.phone, 20),
     orderNumber: str(d.orderNumber, 40),
+    waOrder: cleanWaOrder(d.waOrder),
   };
   const city = header(req, 'x-vercel-ip-city');
   if (city) {

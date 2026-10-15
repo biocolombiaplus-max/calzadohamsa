@@ -50,6 +50,16 @@ export function slugify(text: string): string {
 
 const WA_COUNTRY = process.env.NEXT_PUBLIC_WHATSAPP_COUNTRY_CODE || '57';
 
+// URL completa de la ficha de un producto — al incluirla dentro de un
+// mensaje de WhatsApp, la app genera sola una vista previa con la foto y el
+// nombre del producto (igual que al compartir cualquier link), sin
+// necesidad de adjuntar un archivo real: WhatsApp no deja adjuntar fotos
+// desde un link wa.me, pero sí arma esta tarjeta automáticamente.
+export function absoluteProductUrl(slug: string): string {
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://calzadohamsa.com').replace(/\/$/, '');
+  return `${siteUrl}/producto/${slug}`;
+}
+
 /**
  * Construye un enlace wa.me válido a partir de un número escrito de cualquier
  * forma (con espacios, guiones, +, ceros iniciales, con o sin el código de
@@ -65,10 +75,16 @@ export function whatsappLinkTo(phone: string, message: string, countryCode?: str
 
 // Mensaje de WhatsApp con el detalle del carrito — pensado para clientas que
 // prefieren terminar la compra hablando con alguien en vez de llenar el
-// formulario del checkout, en lugar de simplemente perderlas.
-export function buildCartWhatsAppMessage(items: { title: string; size: string; color: string; quantity: number }[]): string {
+// formulario del checkout, en lugar de simplemente perderlas. Incluye el
+// link del primer producto para que WhatsApp arme una vista previa con foto
+// (con varios productos solo se previsualiza el primero — es una limitación
+// de WhatsApp, no se puede elegir cuál).
+export function buildCartWhatsAppMessage(
+  items: { title: string; slug?: string; size: string; color: string; quantity: number }[],
+): string {
   const lines = items.map((i) => `- ${i.title} (talla ${i.size}, ${i.color}) x${i.quantity}`).join('\n');
-  return `Hola! Quiero terminar mi compra:\n\n${lines}\n\n¿Me ayudan a confirmar el pedido?`;
+  const link = items[0]?.slug ? `\n${absoluteProductUrl(items[0].slug)}` : '';
+  return `Hola! Quiero terminar mi compra:\n\n${lines}\n\n¿Me ayudan a confirmar el pedido?${link}`;
 }
 
 // Mensaje de WhatsApp con el resumen completo de un pedido YA CONFIRMADO —
@@ -77,7 +93,7 @@ export function buildCartWhatsAppMessage(items: { title: string; size: string; c
 // confirmación. Formato tipo factura, profesional, listo para enviar tal cual.
 export function buildOrderWhatsAppMessage(order: {
   orderNumber: string;
-  items: { title: string; size: string; color: string; quantity: number; price: number }[];
+  items: { title: string; slug?: string; size: string; color: string; quantity: number; price: number }[];
   subtotal: number;
   shipping: number;
   total: number;
@@ -112,7 +128,9 @@ ${order.customer.address}, ${order.customer.city}, ${order.customer.department}$
     order.customer.locationUrl ? `\n📍 Ubicación: ${order.customer.locationUrl}` : ''
   }
 
-¿Me confirman que quedó todo listo? ¡Gracias! 😊`;
+¿Me confirman que quedó todo listo? ¡Gracias! 😊${
+    order.items[0]?.slug ? `\n${absoluteProductUrl(order.items[0].slug)}` : ''
+  }`;
 }
 
 export function generateOrderNumber(): string {

@@ -32,6 +32,7 @@ function toVisitor(id: string, d: any): Visitor {
     orderNumber: d.orderNumber ?? '',
     recoveryAt: ms(d.recoveryAt) || undefined,
     recoveryCount: d.recoveryCount ?? 0,
+    waOrder: d.waOrder ?? null,
   };
 }
 

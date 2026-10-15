@@ -6,6 +6,7 @@ import { useCartStore } from '@/lib/cart-store';
 import { useSiteSettings } from '@/lib/settings-context';
 import { computeBundlePricing } from '@/lib/bundle';
 import { buildCartWhatsAppMessage, cloudinaryFill, formatPrice, whatsappLinkTo } from '@/lib/utils';
+import { trackVisitorCheckout } from '@/lib/visitor';
 import BundleUpsellBanner from '@/components/BundleUpsellBanner';
 import SafeImage from '@/components/SafeImage';
 
@@ -126,6 +127,7 @@ export default function CartDrawer() {
               href={whatsappLinkTo(settings.whatsappNumber, buildCartWhatsAppMessage(items), settings.whatsappCountryCode)}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => trackVisitorCheckout()}
               className="mt-2 block text-center text-xs font-semibold text-whatsapp hover:underline"
             >
               💬 O termina tu compra por WhatsApp

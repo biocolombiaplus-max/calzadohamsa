@@ -29,6 +29,7 @@ interface Profile {
   name: string;
   phone: string;
   orderNumber: string;
+  waOrder: { title: string; image: string; size: string; color: string; at: number } | null;
 }
 
 function storage(): Storage | null {
@@ -71,6 +72,7 @@ function loadProfile(): Profile {
     name: '',
     phone: '',
     orderNumber: '',
+    waOrder: null,
   };
   try {
     return { ...empty, ...JSON.parse(storage()?.getItem(PROFILE_KEY) ?? '{}') };
@@ -217,6 +219,20 @@ export function trackVisitorCart(items: CartItem[]) {
 
 export function trackVisitorCheckout() {
   update((p) => raise(p, 'checkout'), { immediate: true });
+}
+
+// Se llama al tocar "Pedir por WhatsApp" en la ficha de producto — deja
+// registrado qué quiso pedir, para que la administradora pueda relacionar
+// el mensaje que le acaba de llegar por WhatsApp con este visitante exacto
+// en /admin/visitantes (foto, talla y color incluidos).
+export function trackVisitorWhatsAppOrder(item: { title: string; image: string; size: string; color: string }) {
+  update(
+    (p) => {
+      p.waOrder = { title: item.title.slice(0, 120), image: item.image, size: item.size, color: item.color, at: Date.now() };
+      raise(p, 'checkout');
+    },
+    { immediate: true },
+  );
 }
 
 // Nombre y celular apenas los escribe en el checkout: así se puede ayudar

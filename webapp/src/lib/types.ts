@@ -93,6 +93,10 @@ export interface Visitor {
   orderNumber: string;
   recoveryAt?: number;
   recoveryCount: number;
+  // Último pedido que intentó hacer por el botón "Pedir por WhatsApp" de la
+  // ficha de producto — para que la administradora pueda relacionar el
+  // mensaje que le llega por WhatsApp con el visitante exacto que lo mandó.
+  waOrder?: { title: string; image: string; size: string; color: string; at: number } | null;
 }
 
 // Ventas reales recientes (solo primer nombre + ciudad + qué compró) para

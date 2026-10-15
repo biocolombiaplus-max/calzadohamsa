@@ -348,6 +348,19 @@ function VisitorCard({ v, settings }: { v: Visitor; settings: SiteSettings | nul
         </div>
       )}
 
+      {v.waOrder && (
+        <div className="mt-3 flex items-center gap-2 rounded-lg bg-whatsapp/10 px-3 py-2">
+          <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-cream-alt">
+            <Thumb src={v.waOrder.image} alt={v.waOrder.title} size={80} />
+          </span>
+          <p className="text-xs font-semibold text-whatsapp">
+            💬 Pidió por WhatsApp: {v.waOrder.title}
+            {v.waOrder.size && ` · Talla ${v.waOrder.size}`}
+            {v.waOrder.color && ` · ${v.waOrder.color}`} · {ago(v.waOrder.at)}
+          </p>
+        </div>
+      )}
+
       {abandoned && (
         <div className="mt-3 flex flex-wrap items-center gap-2">
           {v.phone ? (

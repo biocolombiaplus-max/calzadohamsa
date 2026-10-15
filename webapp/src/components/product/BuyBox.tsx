@@ -3,10 +3,11 @@
 import Link from 'next/link';
 import { useMemo, useState, type RefObject } from 'react';
 import type { Product } from '@/lib/types';
-import { classNames, cloudinaryFill, formatPrice, resolveColorImage, whatsappLinkTo } from '@/lib/utils';
+import { absoluteProductUrl, classNames, cloudinaryFill, formatPrice, resolveColorImage, whatsappLinkTo } from '@/lib/utils';
 import { useCartStore } from '@/lib/cart-store';
 import { useSiteSettings } from '@/lib/settings-context';
 import { isWompiConfigured } from '@/lib/wompi';
+import { trackVisitorWhatsAppOrder } from '@/lib/visitor';
 import SafeImage from '@/components/SafeImage';
 import QuickBuyModal from './QuickBuyModal';
 
@@ -65,9 +66,22 @@ export default function BuyBox({
     setQuickBuyMode('wompi');
   }
 
+  // El link de la ficha va al final del mensaje: cuando la clienta lo manda,
+  // WhatsApp arma solo una vista previa con la foto del producto — no se
+  // puede adjuntar un archivo real desde un link wa.me, pero esto logra el
+  // mismo efecto de "llega con foto" sin necesitar la API de Meta.
   const waMessage = `Hola, quiero pedir: ${product.title}${size ? ` (talla ${size})` : ''}${
     color ? ` color ${color}` : ''
-  }`;
+  }\n${absoluteProductUrl(product.slug)}`;
+
+  function handleWhatsAppClick() {
+    trackVisitorWhatsAppOrder({
+      title: product.title,
+      image: resolveColorImage(product, color) || product.images[0] || '',
+      size,
+      color,
+    });
+  }
 
   return (
     <div className="space-y-5">
@@ -229,6 +243,7 @@ export default function BuyBox({
           href={whatsappLinkTo(whatsappNumber, waMessage, whatsappCountryCode)}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={handleWhatsAppClick}
           className="btn-whatsapp w-full"
         >
           💬 Pedir por WhatsApp
