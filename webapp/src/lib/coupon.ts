@@ -7,9 +7,8 @@ export interface WonCoupon {
   expiresAt: number;
 }
 
-// Códigos válidos — los mismos que reparte la ruleta de descuentos
-// (SpinWheel), pero también se pueden escribir a mano en el checkout (por
-// ejemplo si la clienta lo recibió por WhatsApp o redes sociales).
+// Códigos válidos que se pueden escribir a mano en el checkout — por
+// ejemplo si la clienta lo recibió por WhatsApp o redes sociales.
 export const COUPON_CODES: Record<string, number> = {
   HAMSA5: 5,
 };
@@ -26,8 +25,8 @@ export function redeemCouponCode(rawCode: string): WonCoupon | null {
 }
 
 // "expiresAt" es opcional: por defecto el cupón dura las 24 horas de
-// siempre (ruleta / código escrito a mano), pero el bono de reseñas tiene
-// su propia fecha de vencimiento (15 días) que se le pasa aquí tal cual.
+// siempre (código escrito a mano), pero el bono de reseñas tiene su propia
+// fecha de vencimiento (15 días) que se le pasa aquí tal cual.
 export function saveWonCoupon(code: string, percent: number, expiresAt?: number): void {
   if (typeof window === 'undefined') return;
   const coupon: WonCoupon = { code, percent, expiresAt: expiresAt ?? Date.now() + VALID_HOURS * 60 * 60 * 1000 };

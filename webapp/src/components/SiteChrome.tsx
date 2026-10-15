@@ -6,7 +6,6 @@ import AnnouncementBar from './AnnouncementBar';
 import CartDrawer from './CartDrawer';
 import FloatingWhatsApp from './FloatingWhatsApp';
 import FloatingBadge from './FloatingBadge';
-import SpinWheel from './SpinWheel';
 import { SettingsProvider } from '@/lib/settings-context';
 import type { SiteSettings } from '@/lib/types';
 
@@ -26,7 +25,6 @@ export default function SiteChrome({
       <CartDrawer />
       <FloatingWhatsApp />
       <FloatingBadge />
-      <SpinWheel />
     </SettingsProvider>
   );
 }

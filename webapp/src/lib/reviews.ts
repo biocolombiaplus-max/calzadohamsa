@@ -164,7 +164,7 @@ interface ApplyResult {
 
 // Se llama al entrar por el link con "?cupon=CODIGO" — valida el código
 // contra la copia pública y, si sirve, lo deja guardado como el cupón
-// activo (mismo mecanismo que la ruleta) para que el checkout lo aplique solo.
+// activo para que el checkout lo aplique solo.
 export async function applyRewardCoupon(code: string): Promise<ApplyResult> {
   if (!db || !code) return { ok: false, reason: 'not_found' };
   const snap = await getDoc(doc(db, COUPONS, code));
@@ -180,8 +180,8 @@ export async function applyRewardCoupon(code: string): Promise<ApplyResult> {
 
 // Se llama justo después de crear un pedido en el checkout — si el cupón
 // usado es uno de bono de reseña, lo marca como gastado para que no se
-// pueda volver a aplicar. Si el código no existe ahí (ej. un cupón normal
-// de la ruleta), simplemente no hace nada.
+// pueda volver a aplicar. Si el código no existe ahí (ej. un cupón escrito
+// a mano que no es de bono de reseña), simplemente no hace nada.
 export async function markRewardCouponUsed(code: string, orderId: string): Promise<void> {
   if (!db || !code) return;
   try {

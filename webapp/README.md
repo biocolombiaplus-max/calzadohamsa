@@ -6,11 +6,11 @@ producto, lista para desplegar en Vercel desde este mismo repositorio de
 GitHub. Ningún servicio usado aquí requiere tarjeta de crédito.
 
 Incluye:
-- Página de inicio, catálogo, ficha de producto (con timer de urgencia, prueba
-  social en vivo, guía de tallas, productos relacionados), carrito, checkout
-  rápido (pago contra entrega / transferencia) y confirmación de pedido con
-  botón directo a WhatsApp.
-- Ruleta de descuento (exit intent), botón flotante de WhatsApp, badge de oferta.
+- Página de inicio, catálogo, ficha de producto (con prueba social real,
+  guía de tallas, productos relacionados), carrito, checkout rápido (pago
+  contra entrega / transferencia) y confirmación de pedido con botón directo
+  a WhatsApp.
+- Botón flotante de WhatsApp, badge de oferta.
 - **Panel administrativo** en `/admin` para agregar/editar/eliminar productos
   (con subida de fotos) y gestionar pedidos, sin tocar código.
 - **Configuración del sitio** en `/admin/configuracion`: edita en vivo el
