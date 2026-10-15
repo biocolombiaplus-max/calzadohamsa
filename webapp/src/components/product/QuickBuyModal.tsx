@@ -351,7 +351,7 @@ export default function QuickBuyModal({
               + <strong className="text-primary">envío GRATIS</strong> (ahorras {formatPrice(upsellShipping)} más).
             </p>
             <Link
-              href="/oferta-2x1"
+              href={`/oferta-2x1?slug=${encodeURIComponent(items[0].slug)}&size=${encodeURIComponent(items[0].size)}&color=${encodeURIComponent(items[0].color)}`}
               onClick={onClose}
               className="flex items-center justify-center gap-2 rounded-lg bg-ink px-4 py-2.5 text-sm font-bold text-white shadow-soft transition-transform hover:scale-[1.02] active:scale-[0.98]"
             >

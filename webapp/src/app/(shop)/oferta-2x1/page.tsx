@@ -35,6 +35,22 @@ export default function Oferta2x1Page() {
       .catch(() => setProducts([]));
   }, []);
 
+  // Si llega desde "Elegir mi segundo par" (ver QuickBuyModal), el primer
+  // par ya elegido en la ficha de producto viene en la URL — así no toca
+  // volver a seleccionarlo desde cero, solo falta el segundo par.
+  useEffect(() => {
+    if (!products || products.length === 0) return;
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get('slug');
+    if (!slug) return;
+    const product = products.find((p) => p.slug === slug);
+    if (!product) return;
+    const size = params.get('size') || product.sizes[0] || '';
+    const color = params.get('color') || product.colors[0]?.name || '';
+    setSlot1({ product, size, color });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [products]);
+
   const bothSelected = !!slot1 && !!slot2;
   const bundlePrice = settings.bundle2x1.price;
   const referencePrice = slot1?.product.price ?? products?.[0]?.price ?? Math.round(bundlePrice / 2 + 10000);
