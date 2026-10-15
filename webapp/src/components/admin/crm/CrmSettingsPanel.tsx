@@ -124,7 +124,7 @@ export default function CrmSettingsPanel({ config }: { config: CrmConfig }) {
             <StatusRow ok={status.whatsappConfigured} label="Token y número de WhatsApp (WHATSAPP_ACCESS_TOKEN / WHATSAPP_PHONE_NUMBER_ID)" />
             <StatusRow ok={status.verifyTokenConfigured} label="Token de verificación del webhook (WHATSAPP_VERIFY_TOKEN)" />
             <StatusRow ok={status.appSecretConfigured} label="App Secret para validar los mensajes de Meta (WHATSAPP_APP_SECRET)" />
-            <StatusRow ok={status.aiConfigured} label="API Key de IA para el agente automático (ANTHROPIC_API_KEY)" />
+            <StatusRow ok={status.aiConfigured} label="API Key de Gemini para el agente automático (GEMINI_API_KEY)" />
           </ul>
         ) : (
           <p className="text-xs text-muted">Verificando...</p>
@@ -154,7 +154,7 @@ export default function CrmSettingsPanel({ config }: { config: CrmConfig }) {
           Contesta sola a cada clienta nueva por WhatsApp, usando tu catálogo real, tus envíos y tus preguntas
           frecuentes. En cuanto tú le escribes a mano a una clienta, el agente se pausa solo para esa conversación
           — nunca contestan los dos a la vez. Si {status && !status.aiConfigured ? 'falta la ' : 'tienes la '}
-          <code className="font-mono">ANTHROPIC_API_KEY</code> arriba en rojo, actívalo pero no contestará hasta que
+          <code className="font-mono">GEMINI_API_KEY</code> arriba en rojo, actívalo pero no contestará hasta que
           la agregues en Vercel (ver README.md → &ldquo;Agente con IA&rdquo;).
         </p>
         <label className="mb-1 block text-xs font-semibold text-muted">Instrucciones para el agente (en español)</label>

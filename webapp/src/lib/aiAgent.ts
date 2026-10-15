@@ -2,17 +2,17 @@ import { adminDb } from '@/lib/firebase-admin';
 import type { CrmAiAgentConfig, SiteSettings } from '@/lib/types';
 
 // Agente de ventas con IA del CRM de WhatsApp — SOLO de servidor (usa la
-// API Key de Anthropic, que nunca debe llegar al navegador). Se invoca
-// desde el webhook de Meta cada vez que llega un mensaje nuevo de una
-// clienta y el agente está activado. Usa el modelo más económico y rápido
-// (Haiku) porque es un mensaje corto de atención al cliente, no una tarea
-// compleja.
+// API Key de Gemini, que nunca debe llegar al navegador). Se invoca desde
+// el webhook de Meta cada vez que llega un mensaje nuevo de una clienta y
+// el agente está activado. Usa el modelo "flash" (rápido y con nivel
+// gratuito generoso en Google AI Studio) porque es un mensaje corto de
+// atención al cliente, no una tarea compleja.
 
-const MODEL = 'claude-haiku-5-5';
+const MODEL = 'gemini-2.5-flash';
 const MAX_HISTORY_MESSAGES = 12;
 
 export function isAiAgentConfigured(): boolean {
-  return !!process.env.ANTHROPIC_API_KEY;
+  return !!process.env.GEMINI_API_KEY;
 }
 
 function formatCOP(value: number): string {
@@ -124,7 +124,7 @@ export async function generateAgentReply(
   agentConfig: CrmAiAgentConfig,
   history: HistoryMessage[],
 ): Promise<AgentResult> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || !agentConfig.enabled) return { text: null, needsHuman: false };
 
   const lastInbound = [...history].reverse().find((m) => m.direction === 'in');
@@ -136,44 +136,40 @@ export async function generateAgentReply(
   const system = buildSystemPrompt(storeContext, agentConfig.instructions);
 
   const trimmed = history.slice(-MAX_HISTORY_MESSAGES);
-  const messages = trimmed.map((m) => ({
-    role: m.direction === 'in' ? ('user' as const) : ('assistant' as const),
-    content: m.text,
+  // Gemini usa "model" en vez de "assistant", y exige que la conversación
+  // empiece con un turno "user".
+  const contents = trimmed.map((m) => ({
+    role: m.direction === 'in' ? ('user' as const) : ('model' as const),
+    parts: [{ text: m.text }],
   }));
-  if (messages.length === 0 || messages[0].role !== 'user') {
-    // La API de Anthropic exige que la conversación empiece con "user".
-    while (messages.length && messages[0].role !== 'user') messages.shift();
-  }
-  if (messages.length === 0) return { text: null, needsHuman: false };
+  while (contents.length && contents[0].role !== 'user') contents.shift();
+  if (contents.length === 0) return { text: null, needsHuman: false };
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: system }] },
+          contents,
+          generationConfig: { maxOutputTokens: 300 },
+        }),
       },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 300,
-        system,
-        messages,
-      }),
-    });
+    );
     if (!res.ok) {
-      console.error('[aiAgent] Anthropic respondió', res.status, await res.text().catch(() => ''));
+      console.error('[aiAgent] Gemini respondió', res.status, await res.text().catch(() => ''));
       return { text: null, needsHuman: false };
     }
     const data = await res.json();
-    const text = (data?.content ?? [])
-      .filter((block: any) => block.type === 'text')
-      .map((block: any) => block.text)
+    const text = ((data?.candidates?.[0]?.content?.parts ?? []) as { text?: string }[])
+      .map((part) => part.text ?? '')
       .join('\n')
       .trim();
     return { text: text || null, needsHuman: false };
   } catch (error) {
-    console.error('[aiAgent] Error llamando a la API de Anthropic.', error);
+    console.error('[aiAgent] Error llamando a la API de Gemini.', error);
     return { text: null, needsHuman: false };
   }
 }

@@ -10,6 +10,6 @@ export async function GET() {
     adminSdkConfigured: !!process.env.FIREBASE_ADMIN_PROJECT_ID && !!process.env.FIREBASE_ADMIN_PRIVATE_KEY,
     verifyTokenConfigured: !!process.env.WHATSAPP_VERIFY_TOKEN,
     appSecretConfigured: !!process.env.WHATSAPP_APP_SECRET,
-    aiConfigured: !!process.env.ANTHROPIC_API_KEY,
+    aiConfigured: !!process.env.GEMINI_API_KEY,
   });
 }

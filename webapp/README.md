@@ -525,26 +525,29 @@ español (tono, qué nunca debe prometer, etc.).
   la conversación, para que siempre sepas qué contestó él y qué
   contestaste tú.
 
-**Cómo activarlo:**
-1. Ve a [console.anthropic.com](https://console.anthropic.com) → crea una
-   cuenta → **Settings → API Keys → Create Key**. Copia esa clave (empieza
-   con `sk-ant-...`).
-2. Agrega un método de pago en **Settings → Billing** (cobra solo por lo
-   que se usa — con el modelo que usa este agente, miles de respuestas
-   cuestan unos pocos dólares; revisa precios vigentes en
-   [anthropic.com/pricing](https://anthropic.com/pricing)).
-3. En **Vercel → Project Settings → Environment Variables**, agrega
-   `ANTHROPIC_API_KEY` con esa clave, y vuelve a desplegar.
-4. Entra a `/admin/crm → ⚙️ Configuración` — debe aparecer en verde "API
-   Key de IA para el agente automático".
-5. En la sección **"🤖 Agente con IA"**, escribe tus instrucciones (tono,
+**Cómo activarlo (usa tu cuenta de Google, la misma de Gmail):**
+1. Ve a [aistudio.google.com/apikey](https://aistudio.google.com/apikey) →
+   inicia sesión con tu cuenta de Google → **Create API key** → **Create
+   key in new project** (o elige un proyecto si ya tienes uno). Copia esa
+   clave (empieza con `AIza...`).
+2. En **Vercel → Project Settings → Environment Variables**, agrega
+   `GEMINI_API_KEY` con esa clave, y vuelve a desplegar.
+3. Entra a `/admin/crm → ⚙️ Configuración` — debe aparecer en verde "API
+   Key de Gemini para el agente automático".
+4. En la sección **"🤖 Agente con IA"**, escribe tus instrucciones (tono,
    qué nunca debe hacer) y toca **"Activado"**.
-6. Pruébalo: escríbele al número de la tienda desde otro celular como si
+5. Pruébalo: escríbele al número de la tienda desde otro celular como si
    fueras una clienta nueva — debe responderte en segundos.
 
-Mientras no agregues `ANTHROPIC_API_KEY`, puedes dejarlo activado sin
-problema: simplemente no contestará nada hasta que la agregues, y la
-Bandeja sigue funcionando normal para que respondas tú a mano.
+Google AI Studio tiene un **nivel gratuito** generoso para el modelo que
+usa este agente (`gemini-2.5-flash`) — para una tienda normal no deberías
+pagar nada; si algún día el volumen de mensajes es muy alto, Google pide
+activar facturación en el mismo proyecto de
+[aistudio.google.com](https://aistudio.google.com) (revisa los límites y
+precios vigentes ahí, en "Pricing"). Mientras no agregues `GEMINI_API_KEY`,
+puedes dejarlo activado sin problema: simplemente no contestará nada hasta
+que la agregues, y la Bandeja sigue funcionando normal para que respondas
+tú a mano.
 
 ## Meta Pixel — medir y optimizar campañas de Meta Ads
 
