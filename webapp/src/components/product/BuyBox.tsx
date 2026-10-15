@@ -63,7 +63,7 @@ export default function BuyBox({
   // mismo efecto de "llega con foto" sin necesitar la API de Meta.
   const waMessage = `Hola, quiero pedir: ${product.title}${size ? ` (talla ${size})` : ''}${
     color ? ` color ${color}` : ''
-  }\n${absoluteProductUrl(product.slug)}`;
+  }\n${absoluteProductUrl(product.slug, color)}`;
 
   function handleWhatsAppClick() {
     trackVisitorWhatsAppOrder({

@@ -54,10 +54,14 @@ const WA_COUNTRY = process.env.NEXT_PUBLIC_WHATSAPP_COUNTRY_CODE || '57';
 // mensaje de WhatsApp, la app genera sola una vista previa con la foto y el
 // nombre del producto (igual que al compartir cualquier link), sin
 // necesidad de adjuntar un archivo real: WhatsApp no deja adjuntar fotos
-// desde un link wa.me, pero sí arma esta tarjeta automáticamente.
-export function absoluteProductUrl(slug: string): string {
+// desde un link wa.me, pero sí arma esta tarjeta automáticamente. Si se
+// pasa un color, la ficha arma la vista previa con la foto de ESE color en
+// vez de siempre la primera foto del producto (ver generateMetadata en
+// producto/[slug]/page.tsx).
+export function absoluteProductUrl(slug: string, color?: string): string {
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://calzadohamsa.com').replace(/\/$/, '');
-  return `${siteUrl}/producto/${slug}`;
+  const query = color ? `?color=${encodeURIComponent(color)}` : '';
+  return `${siteUrl}/producto/${slug}${query}`;
 }
 
 /**
@@ -83,7 +87,7 @@ export function buildCartWhatsAppMessage(
   items: { title: string; slug?: string; size: string; color: string; quantity: number }[],
 ): string {
   const lines = items.map((i) => `- ${i.title} (talla ${i.size}, ${i.color}) x${i.quantity}`).join('\n');
-  const link = items[0]?.slug ? `\n${absoluteProductUrl(items[0].slug)}` : '';
+  const link = items[0]?.slug ? `\n${absoluteProductUrl(items[0].slug, items[0].color)}` : '';
   return `Hola! Quiero terminar mi compra:\n\n${lines}\n\n¿Me ayudan a confirmar el pedido?${link}`;
 }
 
@@ -129,7 +133,7 @@ ${order.customer.address}, ${order.customer.city}, ${order.customer.department}$
   }
 
 ¿Me confirman que quedó todo listo? ¡Gracias! 😊${
-    order.items[0]?.slug ? `\n${absoluteProductUrl(order.items[0].slug)}` : ''
+    order.items[0]?.slug ? `\n${absoluteProductUrl(order.items[0].slug, order.items[0].color)}` : ''
   }`;
 }
 
