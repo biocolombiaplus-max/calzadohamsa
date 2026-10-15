@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useMemo, useState, type RefObject } from 'react';
 import type { Product } from '@/lib/types';
 import { absoluteProductUrl, classNames, cloudinaryFill, formatPrice, resolveColorImage, whatsappLinkTo } from '@/lib/utils';
-import { useCartStore } from '@/lib/cart-store';
 import { useSiteSettings } from '@/lib/settings-context';
 import { isWompiConfigured } from '@/lib/wompi';
 import { trackVisitorWhatsAppOrder } from '@/lib/visitor';
@@ -21,7 +20,6 @@ export default function BuyBox({
   ctaRef?: RefObject<HTMLDivElement>;
 }) {
   const { whatsappCountryCode, whatsappNumber, trustItems, bundle2x1 } = useSiteSettings();
-  const addItem = useCartStore((s) => s.addItem);
   const [size, setSize] = useState(product.sizes[0] ?? '');
   const [color, setColor] = useState(product.colors[0]?.name ?? '');
 
@@ -30,7 +28,6 @@ export default function BuyBox({
     onColorChange?.(colorName);
   }
   const [quantity, setQuantity] = useState(1);
-  const [added, setAdded] = useState(false);
   const [quickBuyMode, setQuickBuyMode] = useState<'cod' | 'wompi' | null>(null);
 
   const hasDiscount = !!product.compareAtPrice && product.compareAtPrice > product.price;
@@ -50,12 +47,6 @@ export default function BuyBox({
       color,
       quantity,
     };
-  }
-
-  function handleAddToCart() {
-    addItem(buildItem());
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
   }
 
   function handleBuyNow() {
@@ -235,9 +226,6 @@ export default function BuyBox({
         )}
         <button onClick={handleBuyNow} className={isWompiConfigured() ? 'btn-secondary w-full text-base' : 'btn-primary w-full text-base shadow-lift'}>
           💵 Comprar ya — Pago contra entrega
-        </button>
-        <button onClick={handleAddToCart} className="btn-secondary w-full">
-          {added ? '✓ Agregado al carrito' : '🛒 Agregar al carrito'}
         </button>
         <a
           href={whatsappLinkTo(whatsappNumber, waMessage, whatsappCountryCode)}
