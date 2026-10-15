@@ -43,6 +43,9 @@ export default function QuickBuyModal({
   const [coupon, setCoupon] = useState(() => getActiveCoupon());
   const [couponInput, setCouponInput] = useState('');
   const [couponError, setCouponError] = useState('');
+  // El campo de cupón empieza escondido — casi ninguna clienta tiene uno, así
+  // que mostrarlo siempre vacío solo ensucia el resumen de compra.
+  const [showCouponField, setShowCouponField] = useState(false);
 
   const municipios = useMemo(() => getMunicipios(form.department), [form.department]);
 
@@ -286,29 +289,42 @@ export default function QuickBuyModal({
           )}
           {totalOverride === undefined && !coupon && (
             <div className="border-t border-border pt-2">
-              <div className="flex gap-2">
-                <input
-                  value={couponInput}
-                  onChange={(e) => setCouponInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleApplyCoupon();
-                    }
-                  }}
-                  placeholder="¿Tienes un cupón?"
-                  className="flex-1 rounded-lg border border-border px-3 py-1.5 text-xs focus:border-primary focus:outline-none"
-                />
+              {showCouponField ? (
+                <>
+                  <div className="flex gap-2">
+                    <input
+                      autoFocus
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleApplyCoupon();
+                        }
+                      }}
+                      placeholder="Código de descuento"
+                      className="flex-1 rounded-lg border border-border px-3 py-1.5 text-xs focus:border-primary focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyCoupon}
+                      disabled={!couponInput.trim()}
+                      className="btn-secondary px-3 py-1.5 text-xs disabled:opacity-50"
+                    >
+                      Aplicar
+                    </button>
+                  </div>
+                  {couponError && <p className="mt-1 text-xs text-urgent">{couponError}</p>}
+                </>
+              ) : (
                 <button
                   type="button"
-                  onClick={handleApplyCoupon}
-                  disabled={!couponInput.trim()}
-                  className="btn-secondary px-3 py-1.5 text-xs disabled:opacity-50"
+                  onClick={() => setShowCouponField(true)}
+                  className="text-xs font-semibold text-muted underline hover:text-primary"
                 >
-                  Aplicar
+                  ¿Tienes un código de descuento?
                 </button>
-              </div>
-              {couponError && <p className="mt-1 text-xs text-urgent">{couponError}</p>}
+              )}
             </div>
           )}
           <div className="flex items-center justify-between border-t border-border pt-2 text-sm text-muted">
@@ -348,7 +364,8 @@ export default function QuickBuyModal({
                   — ahorras <strong className="text-primary">{formatPrice(upsellPriceSavings)}</strong>
                 </>
               )}{' '}
-              + <strong className="text-primary">envío GRATIS</strong> (ahorras {formatPrice(upsellShipping)} más).
+              + <strong className="text-primary">envío GRATIS</strong>
+              {upsellShipping > 0 && <> (ahorras {formatPrice(upsellShipping)} más)</>}.
             </p>
             <Link
               href={`/oferta-2x1?slug=${encodeURIComponent(items[0].slug)}&size=${encodeURIComponent(items[0].size)}&color=${encodeURIComponent(items[0].color)}`}
