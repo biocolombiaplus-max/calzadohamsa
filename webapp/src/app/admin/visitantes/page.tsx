@@ -356,7 +356,8 @@ function VisitorCard({ v, settings }: { v: Visitor; settings: SiteSettings | nul
           <p className="text-xs font-semibold text-whatsapp">
             💬 Pidió por WhatsApp: {v.waOrder.title}
             {v.waOrder.size && ` · Talla ${v.waOrder.size}`}
-            {v.waOrder.color && ` · ${v.waOrder.color}`} · {ago(v.waOrder.at)}
+            {v.waOrder.color && ` · ${v.waOrder.color}`}
+            {v.waOrder.phone && ` · ${v.waOrder.phone}`} · {ago(v.waOrder.at)}
           </p>
         </div>
       )}

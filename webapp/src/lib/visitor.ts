@@ -29,7 +29,7 @@ interface Profile {
   name: string;
   phone: string;
   orderNumber: string;
-  waOrder: { title: string; image: string; size: string; color: string; at: number } | null;
+  waOrder: { title: string; image: string; size: string; color: string; phone?: string; at: number } | null;
 }
 
 function storage(): Storage | null {
@@ -221,14 +221,37 @@ export function trackVisitorCheckout() {
   update((p) => raise(p, 'checkout'), { immediate: true });
 }
 
-// Se llama al tocar "Pedir por WhatsApp" en la ficha de producto — deja
-// registrado qué quiso pedir, para que la administradora pueda relacionar
-// el mensaje que le acaba de llegar por WhatsApp con este visitante exacto
-// en /admin/visitantes (foto, talla y color incluidos).
-export function trackVisitorWhatsAppOrder(item: { title: string; image: string; size: string; color: string }) {
+// Se llama al confirmar el número en el cuadro de "Pedir por WhatsApp" —
+// deja registrado qué quiso pedir y a qué número, para que la
+// administradora pueda relacionar el mensaje que le acaba de llegar por
+// WhatsApp con este visitante exacto en /admin/visitantes, y para poder
+// recuperarlo después (remarketing / carritos abandonados) aunque no
+// termine la compra.
+export function trackVisitorWhatsAppOrder(item: { title: string; image: string; size: string; color: string; phone: string }) {
   update(
     (p) => {
-      p.waOrder = { title: item.title.slice(0, 120), image: item.image, size: item.size, color: item.color, at: Date.now() };
+      p.waOrder = {
+        title: item.title.slice(0, 120),
+        image: item.image,
+        size: item.size,
+        color: item.color,
+        phone: item.phone,
+        at: Date.now(),
+      };
+      p.phone = item.phone.replace(/[^\d+]/g, '').slice(0, 20);
+      raise(p, 'checkout');
+    },
+    { immediate: true },
+  );
+}
+
+// Se llama al confirmar el número en "O termina tu compra por WhatsApp"
+// desde el carrito — mismo propósito que arriba, pero sin un único
+// producto (el carrito ya se ve completo en el perfil del visitante).
+export function trackVisitorWhatsAppPhone(phone: string) {
+  update(
+    (p) => {
+      p.phone = phone.replace(/[^\d+]/g, '').slice(0, 20);
       raise(p, 'checkout');
     },
     { immediate: true },

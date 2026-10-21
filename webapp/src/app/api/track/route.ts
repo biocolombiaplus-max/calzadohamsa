@@ -50,6 +50,7 @@ function cleanWaOrder(v: unknown): Record<string, unknown> | null {
     image: str(o.image, 300),
     size: str(o.size, 20),
     color: str(o.color, 60),
+    phone: str(o.phone, 20),
     at: num(o.at) || Date.now(),
   };
 }

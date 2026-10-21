@@ -9,6 +9,7 @@ import { isWompiConfigured } from '@/lib/wompi';
 import { trackVisitorWhatsAppOrder } from '@/lib/visitor';
 import SafeImage from '@/components/SafeImage';
 import QuickBuyModal from './QuickBuyModal';
+import WhatsAppPhoneModal from './WhatsAppPhoneModal';
 
 export default function BuyBox({
   product,
@@ -29,6 +30,7 @@ export default function BuyBox({
   }
   const [quantity, setQuantity] = useState(1);
   const [quickBuyMode, setQuickBuyMode] = useState<'cod' | 'wompi' | null>(null);
+  const [showPhoneModal, setShowPhoneModal] = useState(false);
 
   const hasDiscount = !!product.compareAtPrice && product.compareAtPrice > product.price;
   const discountPercent = hasDiscount
@@ -65,13 +67,16 @@ export default function BuyBox({
     color ? ` color ${color}` : ''
   }\n${absoluteProductUrl(product.slug, color)}`;
 
-  function handleWhatsAppClick() {
+  function handlePhoneSubmit(phone: string) {
     trackVisitorWhatsAppOrder({
       title: product.title,
       image: resolveColorImage(product, color) || product.images[0] || '',
       size,
       color,
+      phone,
     });
+    setShowPhoneModal(false);
+    window.open(whatsappLinkTo(whatsappNumber, waMessage, whatsappCountryCode), '_blank');
   }
 
   return (
@@ -208,15 +213,9 @@ export default function BuyBox({
         <button onClick={handleBuyNow} className={isWompiConfigured() ? 'btn-secondary w-full text-sm' : 'btn-primary w-full text-sm'}>
           Comprar ya — Pago contra entrega
         </button>
-        <a
-          href={whatsappLinkTo(whatsappNumber, waMessage, whatsappCountryCode)}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={handleWhatsAppClick}
-          className="btn-whatsapp w-full"
-        >
+        <button type="button" onClick={() => setShowPhoneModal(true)} className="btn-whatsapp w-full">
           Pedir por WhatsApp
-        </a>
+        </button>
         <p className="text-center text-xs text-muted">Respuesta inmediata · Sin tarjeta, sin anticipo</p>
       </div>
 
@@ -244,6 +243,14 @@ export default function BuyBox({
           mode={quickBuyMode}
           title={quickBuyMode === 'wompi' ? '⚡ Confirma tu pago en línea' : undefined}
           onClose={() => setQuickBuyMode(null)}
+        />
+      )}
+
+      {showPhoneModal && (
+        <WhatsAppPhoneModal
+          countryCode={whatsappCountryCode}
+          onSubmit={handlePhoneSubmit}
+          onClose={() => setShowPhoneModal(false)}
         />
       )}
     </div>

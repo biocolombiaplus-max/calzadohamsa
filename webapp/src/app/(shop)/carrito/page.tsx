@@ -8,15 +8,17 @@ import { getRecoverableCart } from '@/lib/visitorsAdmin';
 import { useSiteSettings } from '@/lib/settings-context';
 import { computeBundlePricing } from '@/lib/bundle';
 import { buildCartWhatsAppMessage, cloudinaryFill, formatPrice, whatsappLinkTo } from '@/lib/utils';
-import { trackVisitorCheckout } from '@/lib/visitor';
+import { trackVisitorWhatsAppPhone } from '@/lib/visitor';
 import { getDepartamentos, getMunicipios } from '@/lib/colombia';
 import { getShippingRate } from '@/lib/shipping';
 import BundleUpsellBanner from '@/components/BundleUpsellBanner';
+import WhatsAppPhoneModal from '@/components/product/WhatsAppPhoneModal';
 
 const DEPARTAMENTOS = getDepartamentos();
 
 export default function CarritoPage() {
   const [mounted, setMounted] = useState(false);
+  const [showPhoneModal, setShowPhoneModal] = useState(false);
   const { items, removeItem, updateQuantity, replaceItems } = useCartStore();
   const settings = useSiteSettings();
   const bundle = computeBundlePricing(items, settings.bundle2x1.price);
@@ -184,20 +186,30 @@ export default function CarritoPage() {
           <Link href="/checkout" className="btn-primary mt-5 w-full">
             Finalizar compra →
           </Link>
-          <a
-            href={whatsappLinkTo(settings.whatsappNumber, buildCartWhatsAppMessage(items), settings.whatsappCountryCode)}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => trackVisitorCheckout()}
-            className="mt-2 block text-center text-xs font-semibold text-whatsapp hover:underline"
+          <button
+            type="button"
+            onClick={() => setShowPhoneModal(true)}
+            className="mt-2 block w-full text-center text-xs font-semibold text-whatsapp hover:underline"
           >
             💬 O termina tu compra por WhatsApp
-          </a>
+          </button>
           <Link href="/catalogo" className="mt-3 block text-center text-sm text-muted hover:text-primary">
             Seguir comprando
           </Link>
         </div>
       </div>
+
+      {showPhoneModal && (
+        <WhatsAppPhoneModal
+          countryCode={settings.whatsappCountryCode}
+          onClose={() => setShowPhoneModal(false)}
+          onSubmit={(phone) => {
+            trackVisitorWhatsAppPhone(phone);
+            setShowPhoneModal(false);
+            window.open(whatsappLinkTo(settings.whatsappNumber, buildCartWhatsAppMessage(items), settings.whatsappCountryCode), '_blank');
+          }}
+        />
+      )}
     </div>
   );
 }
