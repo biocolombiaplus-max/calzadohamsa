@@ -1,8 +1,19 @@
 import { NextResponse } from 'next/server';
+import { FieldValue } from 'firebase-admin/firestore';
+import { adminDb } from '@/lib/firebase-admin';
 
 // Recibe la actividad de cada visitante (páginas, sandalias vistas, carrito,
 // pago) y la guarda en Firestore (colección "visitors") con la ciudad que
 // detecta Vercel. Es lo que alimenta el panel "Visitantes" en /admin.
+//
+// Escribe con el SDK de administrador (si está configurado — ver
+// FIREBASE_ADMIN_* en el README) porque eso SE SALTA las reglas de
+// seguridad de Firestore: así, cada vez que se agregue un campo nuevo acá,
+// no hace falta que la administradora vuelva a pegar las reglas en Firebase
+// a mano para que el seguimiento de visitantes siga funcionando — ya pasó
+// una vez que se le olvidó y el panel se quedó en ceros silenciosamente.
+// Si no hay cuenta de servicio configurada, cae de respaldo a la API REST
+// pública (sujeta a las reglas), que es como funcionaba antes.
 
 const STAGES = ['visita', 'producto', 'carrito', 'checkout', 'compra'];
 
@@ -94,6 +105,18 @@ export async function POST(req: Request) {
   if (city) {
     fields.city = city;
     fields.region = header(req, 'x-vercel-ip-country-region');
+  }
+
+  if (adminDb) {
+    try {
+      const update: Record<string, unknown> = { ...fields, lastSeen: FieldValue.serverTimestamp() };
+      if (body.pageview) update.pageviews = FieldValue.increment(1);
+      await adminDb.collection('visitors').doc(vid).set(update, { merge: true });
+      return NextResponse.json({ ok: true });
+    } catch (error) {
+      console.error('track: Admin SDK', error);
+      return NextResponse.json({ ok: false }, { status: 202 });
+    }
   }
 
   const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
