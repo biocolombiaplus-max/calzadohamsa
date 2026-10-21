@@ -23,8 +23,8 @@ export default function FeaturedProducts({ products }: { products: Product[] }) 
           emptyMessage="Aún no hay productos publicados. Ingresa tus primeras sandalias desde el panel administrativo."
         />
 
-        <div className="mt-8 text-center">
-          <Link href="/catalogo" className="btn-secondary">
+        <div className="mt-12 border-t border-border pt-10 text-center">
+          <Link href="/catalogo" className="btn-primary px-10 py-4 text-base">
             Ver catálogo completo
           </Link>
         </div>
