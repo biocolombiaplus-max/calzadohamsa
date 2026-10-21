@@ -41,7 +41,7 @@ export default function Hero() {
   const activeIndex = useRotatingIndex(images.length);
 
   return (
-    <section className="bg-cream">
+    <section className="bg-white">
       <div className="container-page grid items-center gap-10 py-10 sm:py-16 lg:grid-cols-2">
         <div className="text-center lg:text-left">
           <span className="mb-4 inline-block rounded-full bg-primary-light/30 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-primary-hover">

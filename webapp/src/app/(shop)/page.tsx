@@ -10,19 +10,21 @@ import FAQ from '@/components/FAQ';
 import HomeCTA from '@/components/HomeCTA';
 import { getFeaturedProductsServer } from '@/lib/productsServer';
 
-// Orden pensado como el de una marca grande: primero el producto (es lo
-// que la trajo desde el anuncio), LUEGO la prueba de que es real —fotos de
-// entregas, reseñas, capturas de WhatsApp— justo ahí, antes de que la duda
-// la haga irse. Después se explica el proceso, se refuerza el valor, se
-// resuelven las últimas dudas (FAQ) y se cierra con el llamado final.
+// Estilo catálogo de moda (Mussi, Michael Kors): lo primero que se ve son
+// los diseños, no una foto grande de marca — por eso el Hero (la foto de
+// estilo de vida) se movió más abajo, después de los productos, en vez de
+// ser el primer bloque. TrustBar es solo una línea delgada de confianza,
+// no bloquea la vista de los productos. Luego sigue la prueba de que la
+// tienda es real (entregas, reseñas, capturas de WhatsApp), el proceso,
+// el valor, las dudas (FAQ) y el llamado final.
 export default async function HomePage() {
   const products = await getFeaturedProductsServer(8);
 
   return (
     <>
-      <Hero />
       <TrustBar />
       <FeaturedProducts products={products} />
+      <Hero />
       <RealDeliveries />
       <Testimonials />
       <ChatProofs />
