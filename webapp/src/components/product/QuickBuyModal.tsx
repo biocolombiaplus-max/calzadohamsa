@@ -20,7 +20,7 @@ export default function QuickBuyModal({
   items,
   totalOverride,
   discountLabel,
-  title = '💵 Compra contra entrega',
+  title = 'Compra contra entrega',
   mode = 'cod',
   freeShipping = false,
   onClose,
@@ -350,10 +350,9 @@ export default function QuickBuyModal({
         </div>
 
         {showBundleUpsell && (
-          <div className="mb-4 overflow-hidden rounded-card border-2 border-urgent/30 bg-gradient-to-br from-urgent/10 via-primary-light/10 to-primary/10 p-4">
-            <p className="mb-1.5 text-sm font-extrabold leading-snug text-ink">
-              🎁 ¡Agrega <span className="text-urgent">otro par</span> y llévate los 2 por{' '}
-              {formatPrice(settings.bundle2x1.price)}!
+          <div className="mb-4 border border-border p-4">
+            <p className="mb-1.5 text-sm font-bold leading-snug text-ink">
+              Agrega otro par y llévate los 2 por {formatPrice(settings.bundle2x1.price)}
             </p>
             <p className="mb-3 text-xs leading-relaxed text-ink/70">
               En vez de pagar cada par por separado, los 2 quedan en{' '}
@@ -370,9 +369,9 @@ export default function QuickBuyModal({
             <Link
               href={`/oferta-2x1?slug=${encodeURIComponent(items[0].slug)}&size=${encodeURIComponent(items[0].size)}&color=${encodeURIComponent(items[0].color)}`}
               onClick={onClose}
-              className="flex items-center justify-center gap-2 rounded-lg bg-ink px-4 py-2.5 text-sm font-bold text-white shadow-soft transition-transform hover:scale-[1.02] active:scale-[0.98]"
+              className="btn-primary w-full text-sm"
             >
-              ✨ Elegir mi segundo par →
+              Elegir mi segundo par →
             </Link>
           </div>
         )}
@@ -462,19 +461,15 @@ export default function QuickBuyModal({
 
           {error && <p className="rounded-lg bg-urgent/10 p-3 text-sm text-urgent">{error}</p>}
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className={mode === 'wompi' ? 'w-full rounded-card bg-gradient-to-r from-urgent to-primary px-6 py-3.5 text-base font-bold text-white shadow-lift disabled:opacity-60' : 'btn-primary w-full text-base disabled:opacity-60'}
-          >
+          <button type="submit" disabled={submitting} className="btn-primary w-full text-sm disabled:opacity-60">
             {submitting
               ? 'Procesando...'
               : mode === 'wompi'
-                ? `⚡ Pagar ahora — ${formatPrice(total)}`
+                ? `Pagar ahora — ${formatPrice(total)}`
                 : `Confirmar pedido — ${formatPrice(total)}`}
           </button>
           <p className="text-center text-xs text-muted">
-            {mode === 'wompi' ? '🔒 Pago 100% seguro procesado por Wompi' : '🔒 Tus datos están seguros. Sin tarjeta, sin anticipo.'}
+            {mode === 'wompi' ? 'Pago 100% seguro procesado por Wompi' : 'Tus datos están seguros. Sin tarjeta, sin anticipo.'}
           </p>
         </form>
       </div>

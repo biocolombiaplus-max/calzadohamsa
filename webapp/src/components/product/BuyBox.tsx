@@ -75,24 +75,22 @@ export default function BuyBox({
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div>
         <div className="flex flex-wrap items-center gap-3">
-          <span className="text-3xl font-extrabold text-primary sm:text-4xl">{formatPrice(product.price)}</span>
+          <span className="text-3xl font-bold text-ink sm:text-4xl">{formatPrice(product.price)}</span>
           {hasDiscount && (
             <>
               <span className="text-lg text-muted line-through">{formatPrice(product.compareAtPrice as number)}</span>
-              <span className="rounded-full bg-urgent px-2.5 py-1 text-xs font-extrabold text-white">
-                -{discountPercent}%
-              </span>
+              <span className="bg-urgent px-2 py-1 text-xs font-bold text-white">-{discountPercent}%</span>
             </>
           )}
         </div>
         {(!!product.reviewsCount || !!product.soldCount) && (
           <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
             {!!product.reviewsCount && (
-              <a href="#resenas" className="flex items-center gap-1 text-primary hover:underline">
-                ★★★★★ <span className="text-ink">{product.reviewsCount} reseñas</span>
+              <a href="#resenas" className="flex items-center gap-1 hover:text-ink">
+                ★★★★★ <span>{product.reviewsCount} reseñas</span>
               </a>
             )}
             {!!product.reviewsCount && !!product.soldCount && <span className="hidden sm:inline">·</span>}
@@ -101,35 +99,25 @@ export default function BuyBox({
         )}
       </div>
 
-      <div className="relative overflow-hidden rounded-card border-2 border-whatsapp/40 bg-gradient-to-r from-whatsapp/15 to-whatsapp/5 px-4 py-3">
-        <span className="absolute -top-1 right-3 rounded-b-md bg-whatsapp px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-white">
-          Solo hoy
-        </span>
-        <p className="flex items-center gap-2 text-sm font-extrabold text-whatsapp sm:text-base">
-          <span className="h-2 w-2 shrink-0 animate-pulseSoft rounded-full bg-whatsapp" />
-          🚚 Envío GRATIS en tu pedido
-        </p>
-        <p className="mt-0.5 text-xs text-ink/70">Aprovecha antes de que se acabe la promoción de hoy.</p>
-      </div>
+      <p className="border-y border-border py-3 text-xs font-semibold uppercase tracking-wide text-ink">
+        Envío gratis · Pago contra entrega
+      </p>
 
       {product.stock > 0 && product.stock <= 15 && (
         <div>
-          <p className="mb-1.5 text-xs font-semibold text-urgent">
-            ⚡ ¡Alta demanda! Quedan {product.stock} unidades — asegura la tuya
-          </p>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-border">
-            <div className="h-full rounded-full bg-urgent" style={{ width: `${100 - stockPct}%` }} />
+          <p className="mb-1.5 text-xs font-semibold text-urgent">Quedan {product.stock} unidades en esta talla</p>
+          <div className="h-1 w-full overflow-hidden bg-border">
+            <div className="h-full bg-urgent" style={{ width: `${100 - stockPct}%` }} />
           </div>
         </div>
       )}
 
       <Link
         href="/oferta-2x1"
-        className="flex items-center justify-between gap-2 rounded-card bg-gradient-to-r from-urgent/10 to-primary/10 px-4 py-3 text-xs font-semibold text-ink transition-colors hover:from-urgent/15 hover:to-primary/15 sm:text-sm"
+        className="flex items-center justify-between gap-2 border border-border px-4 py-3 text-xs font-semibold text-ink transition-colors hover:border-ink sm:text-sm"
       >
         <span>
-          🔥 Lleva <strong>2 pares</strong> por{' '}
-          <strong className="text-primary">{formatPrice(bundle2x1.price)}</strong> + envío gratis
+          Lleva 2 pares por <strong>{formatPrice(bundle2x1.price)}</strong> + envío gratis
         </span>
         <span className="shrink-0 font-bold text-primary">Ver oferta →</span>
       </Link>
@@ -143,8 +131,8 @@ export default function BuyBox({
                 key={s}
                 onClick={() => setSize(s)}
                 className={classNames(
-                  'flex h-11 min-w-[44px] items-center justify-center rounded-lg border-2 px-3 text-sm font-semibold transition-colors',
-                  size === s ? 'border-primary bg-primary text-white' : 'border-border bg-white text-ink hover:border-primary',
+                  'flex h-11 min-w-[44px] items-center justify-center border px-3 text-sm font-semibold transition-colors',
+                  size === s ? 'border-ink bg-ink text-cream' : 'border-border bg-white text-ink hover:border-ink',
                 )}
               >
                 {s}
@@ -170,17 +158,14 @@ export default function BuyBox({
                   className="flex flex-col items-center gap-1.5"
                 >
                   <span
-                    className={classNames(
-                      'block h-9 w-9 rounded-full border-2 transition-transform',
-                      selected ? 'scale-110 border-primary' : 'border-border',
-                    )}
+                    className={classNames('block h-8 w-8 rounded-full border transition-colors', selected ? 'border-ink' : 'border-border')}
                     style={{ backgroundColor: c.hex }}
                   />
                   {thumb && (
                     <span
                       className={classNames(
-                        'relative block h-11 w-11 overflow-hidden rounded-lg border-2 transition-colors',
-                        selected ? 'border-primary' : 'border-border',
+                        'relative block h-11 w-11 overflow-hidden border transition-colors',
+                        selected ? 'border-ink' : 'border-border',
                       )}
                     >
                       <SafeImage src={cloudinaryFill(thumb, 100)} alt={c.name} fill sizes="44px" className="object-cover" />
@@ -195,7 +180,7 @@ export default function BuyBox({
 
       <div className="flex items-center gap-4">
         <p className="text-sm font-semibold text-ink">Cantidad</p>
-        <div className="flex items-center rounded-lg border border-border">
+        <div className="flex items-center border border-border">
           <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="h-10 w-10 text-lg">
             −
           </button>
@@ -208,24 +193,20 @@ export default function BuyBox({
 
       <div ref={ctaRef} className="space-y-3">
         {isWompiConfigured() && (
-          <div>
-            <button
-              onClick={handleBuyWompi}
-              className="relative w-full overflow-hidden rounded-card bg-gradient-to-r from-urgent to-primary px-6 py-4 text-base font-bold text-white shadow-lift transition-transform hover:scale-[1.02] active:scale-[0.98]"
-            >
-              <span className="pointer-events-none absolute inset-0 animate-shimmer bg-[length:200%_100%] bg-gradient-to-r from-transparent via-white/35 to-transparent" />
-              <span className="absolute -top-1 right-3 rounded-b-md bg-ink px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-white">
-                Recomendado
-              </span>
-              <span className="relative block">⚡ Pagar en línea — Ahorra 5%</span>
-              <span className="relative block text-sm font-semibold opacity-90">
+          <div className="relative">
+            <span className="absolute -top-2.5 left-4 bg-cream px-1.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+              Recomendado
+            </span>
+            <button onClick={handleBuyWompi} className="btn-primary w-full flex-col gap-0.5 py-4 text-sm">
+              <span>Pagar en línea — Ahorra 5%</span>
+              <span className="block text-[11px] font-semibold normal-case tracking-normal text-cream/80">
                 {formatPrice(Math.round(product.price * quantity * 0.95))} con tarjeta, PSE o Nequi
               </span>
             </button>
           </div>
         )}
-        <button onClick={handleBuyNow} className={isWompiConfigured() ? 'btn-secondary w-full text-base' : 'btn-primary w-full text-base shadow-lift'}>
-          💵 Comprar ya — Pago contra entrega
+        <button onClick={handleBuyNow} className={isWompiConfigured() ? 'btn-secondary w-full text-sm' : 'btn-primary w-full text-sm'}>
+          Comprar ya — Pago contra entrega
         </button>
         <a
           href={whatsappLinkTo(whatsappNumber, waMessage, whatsappCountryCode)}
@@ -234,7 +215,7 @@ export default function BuyBox({
           onClick={handleWhatsAppClick}
           className="btn-whatsapp w-full"
         >
-          💬 Pedir por WhatsApp
+          Pedir por WhatsApp
         </a>
         <p className="text-center text-xs text-muted">Respuesta inmediata · Sin tarjeta, sin anticipo</p>
       </div>
@@ -250,8 +231,8 @@ export default function BuyBox({
         </div>
       )}
 
-      <div className="rounded-card border border-border bg-cream-alt p-4">
-        <p className="text-sm font-bold text-ink">🛡️ Compra 100% garantizada</p>
+      <div className="border border-border p-4">
+        <p className="text-sm font-bold text-ink">Compra 100% garantizada</p>
         <p className="mt-1 text-xs text-muted">
           Si tu pedido no llega o no es el correcto, te lo resolvemos sin preguntas.
         </p>

@@ -69,28 +69,19 @@ export default function Hero() {
             {[hero.badge1, hero.badge2, hero.badge3].map((badge, i) => (
               <span
                 key={i}
-                className="flex animate-glow items-center justify-center rounded-full bg-white px-2 py-2.5 text-center text-[11px] font-bold leading-tight text-ink shadow-soft ring-1 ring-primary/10 transition-transform hover:-translate-y-0.5 sm:px-3 sm:text-xs"
-                style={{ animationDelay: `${i * 0.5}s` }}
+                className="flex items-center justify-center border border-border bg-white px-2 py-2.5 text-center text-[11px] font-bold leading-tight text-ink sm:px-3 sm:text-xs"
               >
                 {badge}
               </span>
             ))}
           </div>
 
-          <div className="mt-7 flex flex-wrap justify-center gap-4 lg:justify-start">
-            <Link
-              href={hero.button1Url}
-              className="btn-primary relative animate-glow overflow-hidden"
-            >
-              <span className="pointer-events-none absolute inset-0 animate-shimmer bg-[length:200%_100%] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-              <span className="relative">{hero.button1Text}</span>
+          <div className="mt-7 flex flex-wrap justify-center gap-3 lg:justify-start">
+            <Link href={hero.button1Url} className="btn-primary">
+              {hero.button1Text}
             </Link>
-            <Link
-              href={hero.button2Url}
-              className="relative inline-flex animate-pulseSoft items-center justify-center gap-2 overflow-hidden rounded-card bg-gradient-to-br from-urgent to-primary px-6 py-3.5 font-semibold text-white shadow-lift ring-2 ring-urgent/30 transition-transform hover:scale-105 active:scale-[0.98]"
-            >
-              <span className="pointer-events-none absolute inset-0 animate-shimmer bg-[length:200%_100%] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
-              <span className="relative">{hero.button2Text}</span>
+            <Link href={hero.button2Url} className="btn-secondary">
+              {hero.button2Text}
             </Link>
           </div>
 

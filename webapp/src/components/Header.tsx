@@ -94,7 +94,7 @@ export default function Header() {
               </div>
             )}
             <Link href="/oferta-2x1" className="text-primary transition-colors hover:text-primary-hover">
-              🔥 Oferta 2×1
+              Oferta 2×1
             </Link>
           </nav>
         </div>
@@ -168,7 +168,7 @@ export default function Header() {
               onClick={() => setMobileOpen(false)}
               className="mt-2 rounded-lg px-3 py-2.5 text-primary transition-colors hover:bg-white"
             >
-              🔥 Oferta 2×1
+              Oferta 2×1
             </Link>
           </nav>
         </div>

@@ -29,20 +29,18 @@ export default function ProductCard({ product, priority = false }: { product: Pr
           style={isFull ? { transform: `scale(${scale / 100})` } : undefined}
         />
         {hasDiscount && (
-          <span className="absolute left-3 top-3 rounded-full bg-urgent px-2.5 py-1 text-xs font-bold text-white">
-            -{discountPct}%
-          </span>
+          <span className="absolute left-3 top-3 bg-urgent px-2 py-1 text-xs font-bold text-white">-{discountPct}%</span>
         )}
         {product.stock > 0 && product.stock <= 5 && (
-          <span className="absolute bottom-3 left-3 rounded-full bg-ink/80 px-2.5 py-1 text-[11px] font-semibold text-white">
-            ¡Últimas {product.stock}!
+          <span className="absolute bottom-3 left-3 bg-ink/85 px-2 py-1 text-[11px] font-semibold text-cream">
+            Últimas {product.stock}
           </span>
         )}
       </div>
       <div className="mt-3">
         <h3 className="truncate text-sm font-semibold text-ink">{product.title}</h3>
         <div className="mt-1 flex items-center gap-2">
-          <span className="font-bold text-primary">{formatPrice(product.price)}</span>
+          <span className="font-bold text-ink">{formatPrice(product.price)}</span>
           {hasDiscount && (
             <span className="text-xs text-muted line-through">{formatPrice(product.compareAtPrice as number)}</span>
           )}

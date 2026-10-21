@@ -25,11 +25,16 @@ const config: Config = {
         body: ['var(--font-body)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
-        card: '14px',
+        // Antes 14px (muy redondeado, "app de celular"). Las tiendas de
+        // moda premium (Mussi, Michael Kors) usan esquinas casi rectas —
+        // se ve más editorial/sofisticado que "burbujeante".
+        card: '4px',
       },
       boxShadow: {
         soft: '0 4px 24px rgba(28, 18, 8, 0.08)',
-        lift: '0 12px 32px rgba(169, 103, 58, 0.25)',
+        // Antes un resplandor de color (naranja/terracota) — se veía
+        // llamativo/barato. Ahora una sombra neutra, sutil, tipo revista.
+        lift: '0 10px 28px rgba(28, 18, 8, 0.12)',
       },
       keyframes: {
         marquee: {

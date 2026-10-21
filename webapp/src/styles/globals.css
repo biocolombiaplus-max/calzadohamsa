@@ -52,16 +52,20 @@ body {
   display: none;
 }
 
+/* Botones estilo tienda de moda premium (Mussi, Michael Kors): sólidos,
+   en negro/tinta en vez de degradados de color, mayúsculas con tracking
+   amplio, sin brillos ni animaciones — la elegancia viene de la
+   tipografía y el espacio, no del movimiento. */
 .btn-primary {
-  @apply inline-flex items-center justify-center gap-2 rounded-card bg-primary px-6 py-3.5 font-semibold text-white shadow-lift transition-all hover:bg-primary-hover active:scale-[0.98];
+  @apply inline-flex items-center justify-center gap-2 rounded-card bg-ink px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-cream shadow-soft transition-all hover:bg-ink/85 active:scale-[0.98];
 }
 
 .btn-secondary {
-  @apply inline-flex items-center justify-center gap-2 rounded-card border-2 border-primary px-6 py-3.5 font-semibold text-primary transition-all hover:bg-primary hover:text-white active:scale-[0.98];
+  @apply inline-flex items-center justify-center gap-2 rounded-card border border-ink px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-ink transition-all hover:bg-ink hover:text-cream active:scale-[0.98];
 }
 
 .btn-whatsapp {
-  @apply inline-flex items-center justify-center gap-2 rounded-card bg-whatsapp px-6 py-3.5 font-semibold text-white shadow-soft transition-all hover:brightness-95 active:scale-[0.98];
+  @apply inline-flex items-center justify-center gap-2 rounded-card bg-whatsapp px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-white shadow-soft transition-all hover:brightness-95 active:scale-[0.98];
 }
 
 .container-page {
