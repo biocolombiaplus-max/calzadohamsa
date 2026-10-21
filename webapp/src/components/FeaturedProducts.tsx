@@ -6,13 +6,15 @@ export default function FeaturedProducts({ products }: { products: Product[] }) 
   return (
     <section className="bg-cream py-14">
       <div className="container-page">
-        <div className="mb-8 flex items-end justify-between">
+        <div className="mb-8 flex flex-col items-center gap-4 text-center sm:flex-row sm:items-end sm:justify-between sm:text-left">
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-primary">Las favoritas del momento</p>
             <h2 className="font-heading text-2xl font-bold text-ink sm:text-3xl">Las más deseadas</h2>
           </div>
-          <Link href="/catalogo" className="hidden text-sm font-semibold text-primary hover:underline sm:inline">
-            Ver todo el catálogo →
+          {/* Botón grande y directo — la entrada más clara al catálogo
+              completo, sin tener que adivinar dónde tocar. */}
+          <Link href="/catalogo" className="btn-primary w-full sm:w-auto">
+            Ver catálogo completo
           </Link>
         </div>
 
@@ -21,9 +23,9 @@ export default function FeaturedProducts({ products }: { products: Product[] }) 
           emptyMessage="Aún no hay productos publicados. Ingresa tus primeras sandalias desde el panel administrativo."
         />
 
-        <div className="mt-8 text-center sm:hidden">
+        <div className="mt-8 text-center">
           <Link href="/catalogo" className="btn-secondary">
-            Ver todo el catálogo →
+            Ver catálogo completo
           </Link>
         </div>
       </div>
