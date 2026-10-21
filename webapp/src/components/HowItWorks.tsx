@@ -1,6 +1,6 @@
 const STEPS = [
   { icon: '👡', title: 'Elige tu modelo', text: 'Explora nuestra colección y elige el modelo y talla perfecta para ti' },
-  { icon: '🛒', title: 'Haz tu pedido', text: 'Agrega al carrito o escríbenos por WhatsApp. Sin tarjeta requerida' },
+  { icon: '🛒', title: 'Haz tu pedido', text: 'Compra directo en la página o escríbenos por WhatsApp. Sin tarjeta requerida' },
   { icon: '📦', title: 'Recibe en casa', text: 'Enviamos a toda Colombia en 2-5 días. Paga cuando llega a tu puerta' },
   { icon: '💛', title: 'Lúcelas con amor', text: '¡Disfruta tus sandalias! Cambio de talla gratis si necesitas' },
 ];

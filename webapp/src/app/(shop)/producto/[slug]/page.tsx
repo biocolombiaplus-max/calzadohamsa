@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getProductBySlugServer } from '@/lib/productsServer';
+import { getProductBySlugServer, getRelatedProductsServer } from '@/lib/productsServer';
 import { cloudinaryFill, formatPrice, resolveColorImage } from '@/lib/utils';
 import ProductPageClient from '@/components/product/ProductPageClient';
 
@@ -36,6 +36,7 @@ export async function generateMetadata({
 export default async function ProductPage({ params }: { params: { slug: string } }) {
   const product = await getProductBySlugServer(params.slug);
   if (!product) notFound();
+  const relatedProducts = await getRelatedProductsServer(product.id, product.collection);
 
-  return <ProductPageClient product={product} />;
+  return <ProductPageClient product={product} relatedProducts={relatedProducts} />;
 }

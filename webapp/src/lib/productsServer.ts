@@ -123,3 +123,11 @@ export async function getProductBySlugServer(slug: string): Promise<Product | nu
   const products = await fetchAllProducts();
   return products.find((p) => p.slug === slug) ?? null;
 }
+
+// Para "Completa tu look" en la ficha de producto — igual que el resto del
+// catálogo, se trae en el servidor para que nunca se quede cargando en una
+// conexión lenta.
+export async function getRelatedProductsServer(currentId: string, collection: string, max = 4): Promise<Product[]> {
+  const active = await getActiveProductsServer();
+  return active.filter((p) => p.id !== currentId && p.collection === collection).slice(0, max);
+}

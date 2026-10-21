@@ -18,7 +18,7 @@ import { trackVisitorProduct } from '@/lib/visitor';
 // El producto ya llega listo desde el servidor (ver page.tsx) — este
 // componente solo maneja la parte interactiva (galería, color elegido,
 // barra fija de compra), sin ningún viaje de red ni estado de "cargando".
-export default function ProductPageClient({ product }: { product: Product }) {
+export default function ProductPageClient({ product, relatedProducts }: { product: Product; relatedProducts: Product[] }) {
   const [colorImage, setColorImage] = useState<string | undefined>(() =>
     product.colors[0] ? resolveColorImage(product, product.colors[0].name) : undefined,
   );
@@ -122,7 +122,7 @@ export default function ProductPageClient({ product }: { product: Product }) {
       </div>
 
       <HowItWorks />
-      <RelatedProducts productId={product.id} collection={product.collection} />
+      <RelatedProducts products={relatedProducts} />
 
       {/* Barra fija de compra en móvil — solo aparece cuando el botón real
           de compra del BuyBox no está a la vista, para no duplicar el CTA */}

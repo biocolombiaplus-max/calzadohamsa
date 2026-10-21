@@ -375,13 +375,11 @@ export default function CheckoutPage() {
               {isWompiConfigured() && (
                 <label
                   className={classNames(
-                    'relative flex cursor-pointer items-center gap-3 overflow-hidden rounded-lg border-2 p-4 transition-colors',
-                    paymentMethod === 'wompi'
-                      ? 'border-primary bg-gradient-to-r from-urgent/10 to-primary/10'
-                      : 'border-urgent/40 bg-gradient-to-r from-urgent/5 to-primary/5',
+                    'relative flex cursor-pointer items-center gap-3 border p-4 transition-colors',
+                    paymentMethod === 'wompi' ? 'border-ink bg-cream-alt' : 'border-border',
                   )}
                 >
-                  <span className="absolute -top-1 right-3 rounded-b-md bg-ink px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-white">
+                  <span className="absolute -top-2.5 right-4 bg-cream px-1.5 text-[10px] font-bold uppercase tracking-wide text-primary">
                     Recomendado
                   </span>
                   <input
@@ -392,13 +390,13 @@ export default function CheckoutPage() {
                   />
                   <span>
                     <span className="block text-sm font-bold text-ink">
-                      ⚡ Pagar en línea <span className="text-primary">— 5% de descuento adicional</span>
+                      Pagar en línea <span className="text-primary">— 5% de descuento adicional</span>
                     </span>
                     <span className="block text-xs text-muted">Tarjeta, PSE o Nequi, procesado por Wompi</span>
                   </span>
                 </label>
               )}
-              <label className="flex items-center gap-3 rounded-lg border border-border p-4 has-[:checked]:border-primary has-[:checked]:bg-primary-light/10">
+              <label className="flex items-center gap-3 border border-border p-4 has-[:checked]:border-ink has-[:checked]:bg-cream-alt">
                 <input
                   type="radio"
                   name="payment"
@@ -406,11 +404,11 @@ export default function CheckoutPage() {
                   onChange={() => setPaymentMethod('contra_entrega')}
                 />
                 <span>
-                  <span className="block text-sm font-bold text-ink">💵 Pago contra entrega</span>
+                  <span className="block text-sm font-bold text-ink">Pago contra entrega</span>
                   <span className="block text-xs text-muted">Paga en efectivo cuando recibas tu pedido</span>
                 </span>
               </label>
-              <label className="flex items-center gap-3 rounded-lg border border-border p-4 has-[:checked]:border-primary has-[:checked]:bg-primary-light/10">
+              <label className="flex items-center gap-3 border border-border p-4 has-[:checked]:border-ink has-[:checked]:bg-cream-alt">
                 <input
                   type="radio"
                   name="payment"
@@ -418,7 +416,7 @@ export default function CheckoutPage() {
                   onChange={() => setPaymentMethod('transferencia')}
                 />
                 <span>
-                  <span className="block text-sm font-bold text-ink">🏦 Transferencia bancaria</span>
+                  <span className="block text-sm font-bold text-ink">Transferencia bancaria</span>
                   <span className="block text-xs text-muted">Te enviamos los datos por WhatsApp al confirmar</span>
                 </span>
               </label>
@@ -447,25 +445,15 @@ export default function CheckoutPage() {
             <PaymentBadges />
           </div>
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className={
-              paymentMethod === 'wompi'
-                ? 'w-full rounded-card bg-gradient-to-r from-urgent to-primary px-6 py-3.5 text-base font-bold text-white shadow-lift disabled:opacity-60'
-                : 'btn-primary w-full text-base disabled:opacity-60'
-            }
-          >
+          <button type="submit" disabled={submitting} className="btn-primary w-full text-sm disabled:opacity-60">
             {submitting
               ? 'Procesando...'
               : paymentMethod === 'wompi'
-                ? `⚡ Pagar ahora — ${formatPrice(wompiTotal)}`
+                ? `Pagar ahora — ${formatPrice(wompiTotal)}`
                 : `Confirmar pedido — ${formatPrice(total)}`}
           </button>
           <p className="text-center text-xs text-muted">
-            {paymentMethod === 'wompi'
-              ? '🔒 Pago 100% seguro procesado por Wompi'
-              : '🔒 Tus datos están seguros y protegidos'}
+            {paymentMethod === 'wompi' ? 'Pago 100% seguro procesado por Wompi' : 'Tus datos están seguros y protegidos'}
           </p>
         </form>
 
