@@ -50,6 +50,19 @@ export function slugify(text: string): string {
 
 const WA_COUNTRY = process.env.NEXT_PUBLIC_WHATSAPP_COUNTRY_CODE || '57';
 
+// Frase fija que se agrega a TODOS los mensajes que salen de un botón de
+// WhatsApp de la tienda — así, al verla en el chat, queda claro que esa
+// clienta llegó desde la página web (no de una referencia personal, de
+// Instagram directo, etc.). El webhook de Meta (api/whatsapp/webhook)
+// busca esta misma frase textual en el primer mensaje para etiquetar al
+// contacto como "🌐 Web" solo en el CRM — nunca se cambia sin actualizar
+// también esa búsqueda.
+export const WEB_ORIGIN_TAG = 'Vengo desde tu página web';
+
+export function withWebOrigin(message: string): string {
+  return `${message}\n\n🌐 ${WEB_ORIGIN_TAG}`;
+}
+
 // URL completa de la ficha de un producto — al incluirla dentro de un
 // mensaje de WhatsApp, la app genera sola una vista previa con la foto y el
 // nombre del producto (igual que al compartir cualquier link), sin
@@ -88,7 +101,7 @@ export function buildCartWhatsAppMessage(
 ): string {
   const lines = items.map((i) => `- ${i.title} (talla ${i.size}, ${i.color}) x${i.quantity}`).join('\n');
   const link = items[0]?.slug ? `\n${absoluteProductUrl(items[0].slug, items[0].color)}` : '';
-  return `Hola! Quiero terminar mi compra:\n\n${lines}\n\n¿Me ayudan a confirmar el pedido?${link}`;
+  return withWebOrigin(`Hola! Quiero terminar mi compra:\n\n${lines}\n\n¿Me ayudan a confirmar el pedido?${link}`);
 }
 
 // Mensaje de WhatsApp con el resumen completo de un pedido YA CONFIRMADO —
@@ -114,7 +127,7 @@ export function buildOrderWhatsAppMessage(order: {
         ? '⚡ Pagado en línea'
         : '🏦 Transferencia bancaria';
 
-  return `✅ *Pedido confirmado* — ${order.orderNumber}
+  return withWebOrigin(`✅ *Pedido confirmado* — ${order.orderNumber}
 
 📦 *Productos:*
 ${itemsList}
@@ -134,7 +147,7 @@ ${order.customer.address}, ${order.customer.city}, ${order.customer.department}$
 
 ¿Me confirman que quedó todo listo? ¡Gracias! 😊${
     order.items[0]?.slug ? `\n${absoluteProductUrl(order.items[0].slug, order.items[0].color)}` : ''
-  }`;
+  }`);
 }
 
 export function generateOrderNumber(): string {

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useSiteSettings } from '@/lib/settings-context';
-import { whatsappLinkTo } from '@/lib/utils';
+import { whatsappLinkTo, withWebOrigin } from '@/lib/utils';
 
 export default function HomeCTA() {
   const { cta, storeName, whatsappCountryCode, whatsappNumber } = useSiteSettings();
@@ -25,7 +25,7 @@ export default function HomeCTA() {
             {cta.buttonText}
           </Link>
           <a
-            href={whatsappLinkTo(whatsappNumber, `Hola, quiero comprar en ${storeName}`, whatsappCountryCode)}
+            href={whatsappLinkTo(whatsappNumber, withWebOrigin(`Hola, quiero comprar en ${storeName}`), whatsappCountryCode)}
             target="_blank"
             rel="noopener noreferrer"
             className="btn-whatsapp"

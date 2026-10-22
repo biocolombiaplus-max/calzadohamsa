@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useSiteSettings } from '@/lib/settings-context';
-import { whatsappLinkTo } from '@/lib/utils';
+import { whatsappLinkTo, withWebOrigin } from '@/lib/utils';
 import PaymentBadges from '@/components/PaymentBadges';
 
 const SOCIALS: { key: 'instagram' | 'facebook' | 'tiktok'; label: string; icon: string }[] = [
@@ -69,7 +69,7 @@ export default function Footer() {
           <h4 className="mb-3 text-sm font-bold uppercase tracking-wide text-primary-light">Contacto</h4>
           <p className="mb-4 text-sm text-cream/80">{footer.contactText}</p>
           <a
-            href={whatsappLinkTo(whatsappNumber, `Hola, quiero información sobre ${storeName}`, whatsappCountryCode)}
+            href={whatsappLinkTo(whatsappNumber, withWebOrigin(`Hola, quiero información sobre ${storeName}`), whatsappCountryCode)}
             target="_blank"
             rel="noopener noreferrer"
             className="btn-whatsapp"

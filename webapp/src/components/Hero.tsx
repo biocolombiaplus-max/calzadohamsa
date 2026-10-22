@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useSiteSettings } from '@/lib/settings-context';
-import { classNames, whatsappLinkTo } from '@/lib/utils';
+import { classNames, whatsappLinkTo, withWebOrigin } from '@/lib/utils';
 
 const ROTATE_MS = 4500;
 
@@ -86,7 +86,7 @@ export default function Hero() {
           </div>
 
           <a
-            href={whatsappLinkTo(whatsappNumber, `Hola, quiero ver el catálogo de ${storeName}`, whatsappCountryCode)}
+            href={whatsappLinkTo(whatsappNumber, withWebOrigin(`Hola, quiero ver el catálogo de ${storeName}`), whatsappCountryCode)}
             target="_blank"
             rel="noopener noreferrer"
             className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-whatsapp"

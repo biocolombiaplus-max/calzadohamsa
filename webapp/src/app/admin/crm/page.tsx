@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { CrmConfig, CrmContact, CrmMessage } from '@/lib/types';
-import { DEFAULT_CRM_AI_AGENT } from '@/lib/types';
+import { DEFAULT_CRM_AI_AGENT, CRM_WEB_TAG } from '@/lib/types';
 import { subscribeToContacts, subscribeToMessages, subscribeToCrmConfig, markContactRead } from '@/lib/crm';
 import { classNames } from '@/lib/utils';
 import ContactList from '@/components/admin/crm/ContactList';
@@ -47,6 +47,8 @@ export default function CrmPage() {
   }
 
   const totalUnread = contacts.reduce((sum, c) => sum + c.unreadCount, 0);
+  const fromWeb = useMemo(() => contacts.filter((c) => c.tags?.includes(CRM_WEB_TAG)), [contacts]);
+  const fromWebSold = fromWeb.filter((c) => c.stage === 'cliente').length;
 
   return (
     <div className="flex h-[calc(100vh-7rem)] min-h-[500px] flex-col sm:h-[calc(100vh-4rem)]">
@@ -55,6 +57,20 @@ export default function CrmPage() {
           CRM {totalUnread > 0 && <span className="text-sm font-normal text-primary">({totalUnread} sin leer)</span>}
         </h1>
       </div>
+
+      {fromWeb.length > 0 && (
+        <p className="mb-3 rounded-lg bg-cream-alt px-3 py-2 text-xs font-semibold text-ink">
+          {CRM_WEB_TAG} {fromWeb.length} {fromWeb.length === 1 ? 'contacto llegó' : 'contactos llegaron'} desde la página web
+          {' · '}
+          <span className="text-whatsapp">
+            ✅ {fromWebSold} {fromWebSold === 1 ? 'se convirtió' : 'se convirtieron'} en clienta
+          </span>
+          {' — '}
+          <span className="text-muted">
+            marca una conversación como clienta moviéndola a &ldquo;✅ Cliente&rdquo; en la ficha o en el Embudo.
+          </span>
+        </p>
+      )}
 
       <div className="mb-3 flex gap-2 overflow-x-auto">
         {TABS.map((t) => (

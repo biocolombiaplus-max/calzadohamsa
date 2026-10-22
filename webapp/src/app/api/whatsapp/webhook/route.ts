@@ -4,7 +4,8 @@ import { adminDb } from '@/lib/firebase-admin';
 import { verifyMetaSignature, sendWhatsAppText } from '@/lib/whatsapp';
 import { generateAgentReply } from '@/lib/aiAgent';
 import { getSiteSettingsServer } from '@/lib/settingsServer';
-import { DEFAULT_CRM_AI_AGENT } from '@/lib/types';
+import { DEFAULT_CRM_AI_AGENT, CRM_WEB_TAG } from '@/lib/types';
+import { WEB_ORIGIN_TAG } from '@/lib/utils';
 
 // Webhook oficial de Meta (WhatsApp Business Platform / Cloud API). Meta
 // llama aquí dos formas distintas:
@@ -61,6 +62,7 @@ const STATUS_MAP: Record<string, 'sent' | 'delivered' | 'read' | 'failed'> = {
 async function upsertContactAndMessage(phone: string, name: string | undefined, message: MetaMessage) {
   const text = message.text?.body ?? TYPE_LABELS[message.type] ?? `[${message.type}]`;
   const now = Number(message.timestamp) ? Number(message.timestamp) * 1000 : Date.now();
+  const fromWeb = text.includes(WEB_ORIGIN_TAG);
 
   const contactRef = adminDb.collection('crmContacts').doc(phone);
   const contactSnap = await contactRef.get();
@@ -71,7 +73,7 @@ async function upsertContactAndMessage(phone: string, name: string | undefined, 
       name: name || phone,
       stage: 'nuevo',
       notes: '',
-      tags: [],
+      tags: fromWeb ? [CRM_WEB_TAG] : [],
       lastMessageAt: now,
       lastMessagePreview: text,
       lastInboundAt: now,
@@ -80,12 +82,14 @@ async function upsertContactAndMessage(phone: string, name: string | undefined, 
       createdAt: now,
     });
   } else {
+    const existingTags: string[] = contactSnap.data()?.tags ?? [];
     await contactRef.update({
       ...(name ? { name } : {}),
       lastMessageAt: now,
       lastMessagePreview: text,
       lastInboundAt: now,
       unreadCount: FieldValue.increment(1),
+      ...(fromWeb && !existingTags.includes(CRM_WEB_TAG) ? { tags: FieldValue.arrayUnion(CRM_WEB_TAG) } : {}),
     });
   }
 

@@ -220,6 +220,12 @@ export interface RewardCoupon {
 // Embudo de ventas estilo Kommo: cada clienta que escribe por WhatsApp
 // entra como "nuevo" y la administradora la va moviendo a mano por las
 // etapas según avanza la conversación real.
+// Etiqueta que se le pone sola a un contacto del CRM cuando llega desde un
+// botón de WhatsApp de la tienda (ver WEB_ORIGIN_TAG en lib/utils.ts y el
+// webhook de Meta) — para distinguir, en /admin/crm, quién llegó desde la
+// página web de quién escribió por su cuenta.
+export const CRM_WEB_TAG = '🌐 Web';
+
 export const CRM_STAGES = ['nuevo', 'interesado', 'negociando', 'cliente', 'perdido'] as const;
 export type CrmStage = (typeof CRM_STAGES)[number];
 

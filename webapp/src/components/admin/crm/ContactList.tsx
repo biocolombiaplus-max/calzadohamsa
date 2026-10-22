@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import type { CrmContact } from '@/lib/types';
-import { CRM_STAGE_LABELS } from '@/lib/types';
+import { CRM_STAGE_LABELS, CRM_WEB_TAG } from '@/lib/types';
 import { classNames, formatRelativeTime } from '@/lib/utils';
 
 const STAGE_DOT: Record<string, string> = {
@@ -59,7 +59,10 @@ export default function ContactList({
             <span className={classNames('mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full', STAGE_DOT[c.stage])} />
             <span className="min-w-0 flex-1">
               <span className="flex items-center justify-between gap-2">
-                <span className="truncate text-sm font-semibold text-ink">{c.name}</span>
+                <span className="flex min-w-0 items-center gap-1">
+                  {c.tags?.includes(CRM_WEB_TAG) && <span title="Llegó desde la página web">🌐</span>}
+                  <span className="truncate text-sm font-semibold text-ink">{c.name}</span>
+                </span>
                 <span className="shrink-0 text-[11px] text-muted">{formatRelativeTime(c.lastMessageAt)}</span>
               </span>
               <span className="mt-0.5 flex items-center justify-between gap-2">

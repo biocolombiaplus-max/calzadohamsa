@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { useSiteSettings } from '@/lib/settings-context';
-import { whatsappLinkTo } from '@/lib/utils';
+import { whatsappLinkTo, withWebOrigin } from '@/lib/utils';
 
 export default function FloatingWhatsApp() {
   const { whatsappCountryCode, whatsappNumber, storeName } = useSiteSettings();
@@ -16,7 +16,7 @@ export default function FloatingWhatsApp() {
       <a
         href={whatsappLinkTo(
           whatsappNumber,
-          `Hola, quiero información sobre ${storeName}`,
+          withWebOrigin(`Hola, quiero información sobre ${storeName}`),
           whatsappCountryCode,
         )}
         target="_blank"

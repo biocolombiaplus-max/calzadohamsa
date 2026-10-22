@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useMemo, useState, type RefObject } from 'react';
 import type { Product } from '@/lib/types';
-import { absoluteProductUrl, classNames, cloudinaryFill, formatPrice, resolveColorImage, whatsappLinkTo } from '@/lib/utils';
+import { absoluteProductUrl, classNames, cloudinaryFill, formatPrice, resolveColorImage, whatsappLinkTo, withWebOrigin } from '@/lib/utils';
 import { useSiteSettings } from '@/lib/settings-context';
 import { isWompiConfigured } from '@/lib/wompi';
 import { trackVisitorWhatsAppOrder } from '@/lib/visitor';
@@ -63,9 +63,11 @@ export default function BuyBox({
   // WhatsApp arma solo una vista previa con la foto del producto — no se
   // puede adjuntar un archivo real desde un link wa.me, pero esto logra el
   // mismo efecto de "llega con foto" sin necesitar la API de Meta.
-  const waMessage = `Hola, quiero pedir: ${product.title}${size ? ` (talla ${size})` : ''}${
-    color ? ` color ${color}` : ''
-  }\n${absoluteProductUrl(product.slug, color)}`;
+  const waMessage = withWebOrigin(
+    `Hola, quiero pedir: ${product.title}${size ? ` (talla ${size})` : ''}${
+      color ? ` color ${color}` : ''
+    }\n${absoluteProductUrl(product.slug, color)}`,
+  );
 
   function handlePhoneSubmit(phone: string) {
     trackVisitorWhatsAppOrder({
