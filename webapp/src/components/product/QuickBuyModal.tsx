@@ -10,7 +10,9 @@ import { computeBundlePricing } from '@/lib/bundle';
 import { getActiveCoupon, clearCoupon, redeemCouponCode } from '@/lib/coupon';
 import { useSiteSettings } from '@/lib/settings-context';
 import { buildOrderWhatsAppMessage, classNames, formatPrice, whatsappLinkTo } from '@/lib/utils';
-import { generatePaymentReference, redirectToWompiCheckout } from '@/lib/wompi';
+import { generatePaymentReference, getWompiSignature, wompiCheckoutUrl } from '@/lib/wompi';
+import { trackVisitorCheckout, trackVisitorContact, trackVisitorPurchase } from '@/lib/visitor';
+import { recordRecentSale } from '@/lib/recentSales';
 import type { CartItem } from '@/lib/types';
 import LocationCapture from './LocationCapture';
 
@@ -65,6 +67,21 @@ export default function QuickBuyModal({
     if (!attemptedSubmit || !hasErrors) return;
     document.querySelector('.border-urgent')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, [attemptedSubmit, hasErrors]);
+
+  // Abrir este modal YA es haber llegado al pago (igual que entrar a
+  // /checkout) — antes no quedaba registrado en el embudo de Visitantes,
+  // así que las compras hechas por "Comprar ya" no se veían reflejadas ahí.
+  useEffect(() => {
+    trackVisitorCheckout();
+  }, []);
+
+  // Nombre y celular, apenas los escribe — así se puede ayudar por
+  // WhatsApp a quien abandona el formulario sin terminar.
+  useEffect(() => {
+    if (!form.name.trim() && !form.phone.trim()) return;
+    const t = setTimeout(() => trackVisitorContact(form.name, form.phone), 1200);
+    return () => clearTimeout(t);
+  }, [form.name, form.phone]);
 
   function fieldClass(field: keyof typeof fieldErrors, extra = '') {
     return classNames(
@@ -152,6 +169,13 @@ export default function QuickBuyModal({
     try {
       if (mode === 'wompi') {
         const reference = generatePaymentReference();
+        const amountInCents = Math.round(total * 100);
+        // Se pide la firma ANTES de crear el pedido: si Wompi no está listo
+        // para cobrar (falla de configuración o de red), nunca se llega a
+        // crear un pedido "fantasma" ni a avisarte de un pedido nuevo que la
+        // clienta en realidad no pudo pagar.
+        const signature = await getWompiSignature(reference, amountInCents);
+
         const customer = locationUrl ? { ...form, locationUrl } : form;
         const { id, orderNumber } = await createOrder({
           items,
@@ -177,10 +201,13 @@ export default function QuickBuyModal({
           customer,
         });
         notifyOrderByPush({ orderNumber, total, customerName: form.name });
+        trackVisitorPurchase(orderNumber);
+        recordRecentSale(customer, items);
         if (couponApplies) clearCoupon();
-        await redirectToWompiCheckout({
-          amountInCents: Math.round(total * 100),
+        window.location.href = wompiCheckoutUrl({
+          amountInCents,
           reference,
+          signature,
           redirectUrl: `${window.location.origin}/pedido-confirmado/${id}`,
           customerFullName: form.name,
           customerPhone: form.phone,
@@ -212,6 +239,8 @@ export default function QuickBuyModal({
         customer,
       });
       notifyOrderByPush({ orderNumber, total, customerName: form.name });
+      trackVisitorPurchase(orderNumber);
+      recordRecentSale(customer, items);
 
       const waUrl = whatsappLinkTo(
         settings.whatsappNumber,

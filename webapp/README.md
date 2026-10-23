@@ -240,9 +240,15 @@ apuntan a esta página.
 
 ### Activar el pago en línea con Wompi
 
-Sin `NEXT_PUBLIC_WOMPI_PUBLIC_KEY` y `WOMPI_INTEGRITY_SECRET` configuradas,
-el botón "Pagar ahora" simplemente cae de vuelta al flujo de pago contra
-entrega (no se rompe nada). Para activarlo:
+Sin ninguna de las dos (`NEXT_PUBLIC_WOMPI_PUBLIC_KEY` y
+`WOMPI_INTEGRITY_SECRET`), el botón "Pagar en línea" ni siquiera aparece —
+la tienda funciona normal solo con pago contra entrega. **Pero si solo
+agregas la llave pública y te falta la de integridad, el botón SÍ aparece
+y la clienta puede llenar todo el formulario, y el pago le falla justo al
+final** (antes de este arreglo, hasta le aparecía un mensaje de error
+técnico en español). Para que eso nunca te pase sin darte cuenta,
+`/admin/configuracion` muestra un aviso automático mientras falte
+cualquiera de las 3 llaves. Para activarlo:
 
 1. En tu [panel de Wompi](https://comercios.wompi.co) ve a
    **Desarrolladores > Llaves de la API**. Ahí verás TRES valores

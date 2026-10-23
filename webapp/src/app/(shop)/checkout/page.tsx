@@ -13,7 +13,7 @@ import { getActiveCoupon, clearCoupon, redeemCouponCode } from '@/lib/coupon';
 import { markRewardCouponUsed } from '@/lib/reviews';
 import { recordRecentSale } from '@/lib/recentSales';
 import { useSiteSettings } from '@/lib/settings-context';
-import { generatePaymentReference, isWompiConfigured, redirectToWompiCheckout } from '@/lib/wompi';
+import { generatePaymentReference, getWompiSignature, isWompiConfigured, wompiCheckoutUrl } from '@/lib/wompi';
 import { trackPixelEvent } from '@/lib/metaPixel';
 import { trackVisitorCheckout, trackVisitorContact, trackVisitorPurchase } from '@/lib/visitor';
 import type { PaymentMethod } from '@/lib/types';
@@ -149,6 +149,13 @@ export default function CheckoutPage() {
 
       if (method === 'wompi') {
         const reference = generatePaymentReference();
+        const amountInCents = Math.round(wompiTotal * 100);
+        // Se pide la firma ANTES de crear el pedido y de registrar nada
+        // (venta real, cupón gastado, compra en el embudo): si Wompi no
+        // está listo para cobrar, nada de eso debe quedar registrado como
+        // si la clienta ya hubiera pagado.
+        const signature = await getWompiSignature(reference, amountInCents);
+
         const { id, orderNumber } = await createOrder({
           items,
           subtotal: wompiSubtotal,
@@ -179,9 +186,10 @@ export default function CheckoutPage() {
           markRewardCouponUsed(coupon.code, id);
           clearCoupon();
         }
-        await redirectToWompiCheckout({
-          amountInCents: Math.round(wompiTotal * 100),
+        window.location.href = wompiCheckoutUrl({
+          amountInCents,
           reference,
+          signature,
           redirectUrl: `${window.location.origin}/pedido-confirmado/${id}`,
           customerFullName: form.name,
           customerPhone: form.phone,

@@ -6,6 +6,7 @@ import { DEFAULT_SETTINGS, getSiteSettings, updateSiteSettings } from '@/lib/set
 import { uploadProductImage } from '@/lib/storage';
 import { getDepartamentos, getMunicipios } from '@/lib/colombia';
 import { FONT_GROUPS, ALL_CURATED_FONTS, googleFontsHref, fontFamilyValue } from '@/lib/fonts';
+import WompiStatusCard from '@/components/admin/WompiStatusCard';
 import type {
   SiteSettings,
   TrustItem,
@@ -451,6 +452,8 @@ export default function ConfiguracionPage() {
           ↺ Volver a ajustes originales
         </button>
       </div>
+
+      <WompiStatusCard />
 
       <Section title="General" description="Nombre de la tienda, logo y WhatsApp">
         <Field label="Nombre de la tienda">

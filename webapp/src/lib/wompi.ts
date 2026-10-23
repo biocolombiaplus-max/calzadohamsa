@@ -13,31 +13,46 @@ export interface WompiCheckoutParams {
   customerPhone?: string;
 }
 
+// Mensaje genérico y amable para la clienta — el motivo técnico real (falta
+// una llave en el servidor, Wompi no respondió, etc.) queda en la consola
+// para poder diagnosticarlo, pero nunca se le muestra tal cual a quien está
+// comprando.
+const WOMPI_CUSTOMER_ERROR =
+  'No pudimos conectar con el pago en línea en este momento. Prueba con "Pago contra entrega" o escríbenos por WhatsApp.';
+
 /**
- * Redirige al cliente al Checkout Web de Wompi ya firmado. La firma de
- * integridad se calcula en el servidor (ver /api/wompi-signature) para no
- * exponer la llave secreta en el navegador.
+ * Pide al servidor la firma de integridad para una transacción (ver
+ * /api/wompi-signature) — se llama ANTES de crear el pedido o avisar a la
+ * administradora, para que un problema de configuración de Wompi (o una
+ * caída puntual) nunca termine creando un pedido "fantasma" que nadie pagó
+ * ni mandando una alerta de pedido nuevo en falso.
  */
-export async function redirectToWompiCheckout(params: WompiCheckoutParams): Promise<void> {
-  if (!PUBLIC_KEY) {
-    throw new Error(
-      'Wompi no está configurado todavía. Agrega NEXT_PUBLIC_WOMPI_PUBLIC_KEY y WOMPI_INTEGRITY_SECRET (ver README.md).',
-    );
-  }
+export async function getWompiSignature(reference: string, amountInCents: number): Promise<string> {
+  if (!PUBLIC_KEY) throw new Error(WOMPI_CUSTOMER_ERROR);
 
+  try {
+    const res = await fetch('/api/wompi-signature', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reference, amountInCents, currency: 'COP' }),
+    });
+    if (!res.ok) {
+      console.error('[wompi] /api/wompi-signature respondió', res.status, await res.text().catch(() => ''));
+      throw new Error(WOMPI_CUSTOMER_ERROR);
+    }
+    const { signature } = (await res.json()) as { signature: string };
+    return signature;
+  } catch (error) {
+    if (error instanceof Error && error.message === WOMPI_CUSTOMER_ERROR) throw error;
+    console.error('[wompi] Error pidiendo la firma.', error);
+    throw new Error(WOMPI_CUSTOMER_ERROR);
+  }
+}
+
+// Arma la URL del Checkout Web de Wompi — pura, no hace red ni puede
+// fallar, para usarse solo DESPUÉS de que el pedido ya quedó creado.
+export function wompiCheckoutUrl(params: WompiCheckoutParams & { signature: string }): string {
   const currency = 'COP';
-  const res = await fetch('/api/wompi-signature', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ reference: params.reference, amountInCents: params.amountInCents, currency }),
-  });
-
-  if (!res.ok) {
-    const data = await res.json().catch(() => null);
-    throw new Error(data?.error || 'No se pudo iniciar el pago con Wompi.');
-  }
-
-  const { signature } = (await res.json()) as { signature: string };
 
   // Wompi agrega su propio "?id=<transacción>" a esta URL al volver — se le
   // suman también la referencia y el monto que nosotros generamos, para que
@@ -48,17 +63,17 @@ export async function redirectToWompiCheckout(params: WompiCheckoutParams): Prom
   redirectUrl.searchParams.set('wompi_amt', String(params.amountInCents));
 
   const url = new URL('https://checkout.wompi.co/p/');
-  url.searchParams.set('public-key', PUBLIC_KEY);
+  url.searchParams.set('public-key', PUBLIC_KEY ?? '');
   url.searchParams.set('currency', currency);
   url.searchParams.set('amount-in-cents', String(params.amountInCents));
   url.searchParams.set('reference', params.reference);
-  url.searchParams.set('signature:integrity', signature);
+  url.searchParams.set('signature:integrity', params.signature);
   url.searchParams.set('redirect-url', redirectUrl.toString());
   if (params.customerEmail) url.searchParams.set('customer-data:email', params.customerEmail);
   if (params.customerFullName) url.searchParams.set('customer-data:full-name', params.customerFullName);
   if (params.customerPhone) url.searchParams.set('customer-data:phone-number', params.customerPhone);
 
-  window.location.href = url.toString();
+  return url.toString();
 }
 
 export function generatePaymentReference(prefix = 'HAMSA'): string {
