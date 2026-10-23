@@ -55,11 +55,16 @@ export async function deleteOrder(id: string): Promise<void> {
   await deleteDoc(doc(db, COLLECTION, id));
 }
 
-// Escucha en vivo los pedidos nuevos que van llegando mientras el admin
-// tiene el panel abierto (para la campanita de aviso) — ignora la primera
-// tanda de resultados (los pedidos ya existentes) y solo notifica los que
-// se crean después de empezar a escuchar.
-export function subscribeToNewOrders(onNewOrder: (order: Order) => void): () => void {
+// Escucha en vivo los pedidos que van llegando o cambiando mientras el
+// admin tiene el panel abierto (para la campanita de aviso) — ignora la
+// primera tanda de resultados (los pedidos ya existentes) y solo notifica
+// lo que pasa después de empezar a escuchar. Avisa tanto cuando se crea un
+// pedido ("added") como cuando uno existente cambia ("modified", por
+// ejemplo cuando Wompi confirma un pago) — quien escucha decide, con el
+// changeType, si ese cambio merece sonar la alerta.
+export function subscribeToNewOrders(
+  onNewOrder: (order: Order, changeType: 'added' | 'modified') => void,
+): () => void {
   const q = query(collection(db, COLLECTION), orderBy('createdAt', 'desc'), limit(15));
   let isFirstSnapshot = true;
   const unsubscribe = onSnapshot(
@@ -70,8 +75,8 @@ export function subscribeToNewOrders(onNewOrder: (order: Order) => void): () => 
         return;
       }
       snapshot.docChanges().forEach((change) => {
-        if (change.type === 'added') {
-          onNewOrder(toOrder(change.doc.id, change.doc.data()));
+        if (change.type === 'added' || change.type === 'modified') {
+          onNewOrder(toOrder(change.doc.id, change.doc.data()), change.type);
         }
       });
     },

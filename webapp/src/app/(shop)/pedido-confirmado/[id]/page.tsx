@@ -53,6 +53,10 @@ export default function OrderConfirmationPage() {
     sessionStorage.setItem(key, '1');
     trackVisitorPurchase(order.orderNumber);
     recordRecentSale(order.customer, order.items);
+    // El estado del pedido (de "pendiente" a "confirmado") lo actualiza el
+    // servidor en /api/wompi-verify con la cuenta de servicio — el
+    // navegador de la clienta no tiene permiso para escribir eso según las
+    // reglas de Firestore (solo un admin autenticado puede).
     notifyOrderByEmail({
       to: settings.notificationEmail,
       storeName: settings.storeName,
@@ -83,7 +87,7 @@ export default function OrderConfirmationPage() {
     fetch('/api/wompi-verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ transactionId }),
+      body: JSON.stringify({ transactionId, orderId: params.id }),
     })
       .then((res) => res.json())
       .then((data) => {
@@ -103,7 +107,7 @@ export default function OrderConfirmationPage() {
     return () => {
       cancelled = true;
     };
-  }, [searchParams]);
+  }, [searchParams, params.id]);
 
   if (order === undefined) {
     return <div className="container-page py-24 text-center text-muted">Cargando tu pedido...</div>;

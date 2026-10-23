@@ -46,7 +46,27 @@ export default function OrderAlertListener() {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = subscribeToNewOrders((order) => {
+    const alertedIds = new Set<string>();
+    const unsubscribe = subscribeToNewOrders((order, changeType) => {
+      const isUnconfirmedWompi = order.paymentMethod === 'wompi' && order.status !== 'confirmado';
+      if (changeType === 'added') {
+        // Un pedido de Wompi recién creado todavía no significa que la
+        // clienta haya pagado — eso solo se sabe cuando Wompi confirma el
+        // pago y el estado pasa a "confirmado" (ver abajo). Avisar aquí
+        // haría sonar la campanita por un pago que puede ni siquiera
+        // terminar de hacerse.
+        if (isUnconfirmedWompi) return;
+      } else {
+        // "modified": solo nos interesa el momento exacto en que un pedido
+        // de Wompi pasa a "confirmado" (pago ya aprobado), y solo de
+        // pedidos recientes — para no reavisar por una edición cualquiera
+        // (ej. agregar guía de envío) a un pedido viejo ya procesado.
+        const isRecent = Date.now() - order.createdAt < 60 * 60 * 1000;
+        if (order.paymentMethod !== 'wompi' || order.status !== 'confirmado' || !isRecent) return;
+      }
+      if (alertedIds.has(order.id)) return;
+      alertedIds.add(order.id);
+
       setToastOrder(order);
       if (toastTimeout.current) clearTimeout(toastTimeout.current);
       toastTimeout.current = setTimeout(() => setToastOrder(null), 10000);
