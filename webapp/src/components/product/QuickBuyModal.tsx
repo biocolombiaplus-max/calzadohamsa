@@ -186,21 +186,9 @@ export default function QuickBuyModal({
           paymentReference: reference,
           couponCode: couponApplies ? coupon!.code : undefined,
         });
-        notifyOrderByEmail({
-          to: settings.notificationEmail,
-          storeName: settings.storeName,
-          accentColor: settings.colors.primary,
-          orderNumber,
-          items,
-          subtotal,
-          shipping: shippingCost,
-          total,
-          paymentMethod: 'wompi',
-          customer,
-        });
-        notifyOrderByPush({ orderNumber, total, customerName: form.name });
-        // La compra solo se cuenta como real cuando Wompi confirme el pago
-        // (ver pedido-confirmado/[id]/page.tsx) — aquí todavía no ha pagado.
+        // El aviso de "nuevo pedido" (correo y push) y el conteo de venta
+        // real solo se disparan cuando Wompi confirme el pago, en
+        // pedido-confirmado/[id]/page.tsx — aquí todavía no ha pagado.
         if (couponApplies) clearCoupon();
         window.location.href = wompiCheckoutUrl({
           amountInCents,

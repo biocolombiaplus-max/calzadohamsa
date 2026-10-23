@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
-import { getOrderById } from '@/lib/orders';
+import { getOrderById, notifyOrderByEmail, notifyOrderByPush } from '@/lib/orders';
 import { buildOrderWhatsAppMessage, formatPrice, whatsappLinkTo } from '@/lib/utils';
 import { trackPurchaseOnce } from '@/lib/metaPixel';
 import { trackVisitorPurchase } from '@/lib/visitor';
@@ -17,7 +17,8 @@ type WompiCheck = 'checking' | 'approved' | 'declined' | 'pending' | null;
 export default function OrderConfirmationPage() {
   const params = useParams<{ id: string }>();
   const searchParams = useSearchParams();
-  const { whatsappCountryCode, whatsappNumber } = useSiteSettings();
+  const settings = useSiteSettings();
+  const { whatsappCountryCode, whatsappNumber } = settings;
   const [order, setOrder] = useState<Order | null | undefined>(undefined);
   const [wompiCheck, setWompiCheck] = useState<WompiCheck>(null);
 
@@ -37,20 +38,35 @@ export default function OrderConfirmationPage() {
     }
   }, [order]);
 
-  // Para pago contra entrega la compra ya se contó como real al crear el
-  // pedido (no hay un paso de confirmación aparte). Para Wompi, en cambio,
-  // solo se cuenta aquí, una vez Wompi confirma el pago arriba — así el
-  // "compró hace X min" público y el embudo de Visitantes nunca muestran
-  // un intento de pago sin terminar como una venta real. El guard en
-  // sessionStorage evita contarla dos veces si se recarga esta página.
+  // Para pago contra entrega la compra ya se contó como real (y ya se avisó
+  // por correo/push) al crear el pedido, porque ahí no hay un paso de
+  // confirmación aparte. Para Wompi, en cambio, todo eso se dispara solo
+  // aquí, una vez Wompi confirma el pago arriba — así el "compró hace X
+  // min" público, el embudo de Visitantes y el aviso de "nuevo pedido" a
+  // la tienda nunca muestran un intento de pago sin terminar como una
+  // venta real. El guard en sessionStorage evita disparar esto dos veces
+  // si se recarga esta página.
   useEffect(() => {
     if (!order || order.paymentMethod !== 'wompi' || wompiCheck !== 'approved') return;
-    const key = `hamsa_visitor_purchase_${order.id}`;
+    const key = `hamsa_wompi_confirmed_${order.id}`;
     if (sessionStorage.getItem(key)) return;
     sessionStorage.setItem(key, '1');
     trackVisitorPurchase(order.orderNumber);
     recordRecentSale(order.customer, order.items);
-  }, [order, wompiCheck]);
+    notifyOrderByEmail({
+      to: settings.notificationEmail,
+      storeName: settings.storeName,
+      accentColor: settings.colors.primary,
+      orderNumber: order.orderNumber,
+      items: order.items,
+      subtotal: order.subtotal,
+      shipping: order.shipping,
+      total: order.total,
+      paymentMethod: 'wompi',
+      customer: order.customer,
+    });
+    notifyOrderByPush({ orderNumber: order.orderNumber, total: order.total, customerName: order.customer.name });
+  }, [order, wompiCheck, settings]);
 
   // Cuando Wompi redirige de vuelta aquí, trae "?id=<transacción>" — se
   // verifica esa transacción contra la propia API de Wompi (en vez de
