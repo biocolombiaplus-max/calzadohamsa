@@ -17,7 +17,6 @@ import { generatePaymentReference, getWompiSignature, isWompiConfigured, wompiCh
 import { trackPixelEvent } from '@/lib/metaPixel';
 import { trackVisitorCheckout, trackVisitorContact, trackVisitorPurchase } from '@/lib/visitor';
 import type { PaymentMethod } from '@/lib/types';
-import LocationCapture from '@/components/product/LocationCapture';
 import PaymentBadges from '@/components/PaymentBadges';
 
 const DEPARTAMENTOS = getDepartamentos();
@@ -36,7 +35,6 @@ export default function CheckoutPage() {
     isWompiConfigured() ? 'wompi' : 'contra_entrega',
   );
   const [form, setForm] = useState({ name: '', phone: '', address: '', city: '', department: '', note: '' });
-  const [locationUrl, setLocationUrl] = useState('');
   const [coupon, setCoupon] = useState(() => getActiveCoupon());
   const [couponInput, setCouponInput] = useState('');
   const [couponError, setCouponError] = useState('');
@@ -145,7 +143,7 @@ export default function CheckoutPage() {
     // bloqueen como pop-up; se le pone la URL real una vez el pedido exista.
     const waWindow = method === 'contra_entrega' ? window.open('', '_blank') : null;
     try {
-      const customer = locationUrl ? { ...form, locationUrl } : form;
+      const customer = form;
 
       if (method === 'wompi') {
         const reference = generatePaymentReference();
@@ -180,8 +178,8 @@ export default function CheckoutPage() {
           customer,
         });
         notifyOrderByPush({ orderNumber, total: wompiTotal, customerName: form.name });
-        trackVisitorPurchase(orderNumber);
-        recordRecentSale(customer, items);
+        // La compra solo se cuenta como real cuando Wompi confirme el pago
+        // (ver pedido-confirmado/[id]/page.tsx) — aquí todavía no ha pagado.
         if (coupon) {
           markRewardCouponUsed(coupon.code, id);
           clearCoupon();
@@ -374,8 +372,6 @@ export default function CheckoutPage() {
               placeholder="Indicaciones adicionales para tu entrega"
             />
           </div>
-
-          <LocationCapture value={locationUrl} onCapture={setLocationUrl} />
 
           <div>
             <p className="mb-2 text-sm font-semibold text-ink">Método de pago</p>

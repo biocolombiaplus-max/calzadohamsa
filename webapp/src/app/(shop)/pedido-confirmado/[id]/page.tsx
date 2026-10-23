@@ -6,6 +6,8 @@ import { useParams, useSearchParams } from 'next/navigation';
 import { getOrderById } from '@/lib/orders';
 import { buildOrderWhatsAppMessage, formatPrice, whatsappLinkTo } from '@/lib/utils';
 import { trackPurchaseOnce } from '@/lib/metaPixel';
+import { trackVisitorPurchase } from '@/lib/visitor';
+import { recordRecentSale } from '@/lib/recentSales';
 import { useSiteSettings } from '@/lib/settings-context';
 import PostPurchaseUpsell from '@/components/product/PostPurchaseUpsell';
 import type { Order } from '@/lib/types';
@@ -34,6 +36,21 @@ export default function OrderConfirmationPage() {
       trackPurchaseOnce(order);
     }
   }, [order]);
+
+  // Para pago contra entrega la compra ya se contó como real al crear el
+  // pedido (no hay un paso de confirmación aparte). Para Wompi, en cambio,
+  // solo se cuenta aquí, una vez Wompi confirma el pago arriba — así el
+  // "compró hace X min" público y el embudo de Visitantes nunca muestran
+  // un intento de pago sin terminar como una venta real. El guard en
+  // sessionStorage evita contarla dos veces si se recarga esta página.
+  useEffect(() => {
+    if (!order || order.paymentMethod !== 'wompi' || wompiCheck !== 'approved') return;
+    const key = `hamsa_visitor_purchase_${order.id}`;
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, '1');
+    trackVisitorPurchase(order.orderNumber);
+    recordRecentSale(order.customer, order.items);
+  }, [order, wompiCheck]);
 
   // Cuando Wompi redirige de vuelta aquí, trae "?id=<transacción>" — se
   // verifica esa transacción contra la propia API de Wompi (en vez de

@@ -14,7 +14,6 @@ import { generatePaymentReference, getWompiSignature, wompiCheckoutUrl } from '@
 import { trackVisitorCheckout, trackVisitorContact, trackVisitorPurchase } from '@/lib/visitor';
 import { recordRecentSale } from '@/lib/recentSales';
 import type { CartItem } from '@/lib/types';
-import LocationCapture from './LocationCapture';
 
 const DEPARTAMENTOS = getDepartamentos();
 
@@ -38,7 +37,6 @@ export default function QuickBuyModal({
   const router = useRouter();
   const settings = useSiteSettings();
   const [form, setForm] = useState({ name: '', phone: '', address: '', city: '', department: '', note: '' });
-  const [locationUrl, setLocationUrl] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
@@ -176,7 +174,7 @@ export default function QuickBuyModal({
         // clienta en realidad no pudo pagar.
         const signature = await getWompiSignature(reference, amountInCents);
 
-        const customer = locationUrl ? { ...form, locationUrl } : form;
+        const customer = form;
         const { id, orderNumber } = await createOrder({
           items,
           subtotal,
@@ -201,8 +199,8 @@ export default function QuickBuyModal({
           customer,
         });
         notifyOrderByPush({ orderNumber, total, customerName: form.name });
-        trackVisitorPurchase(orderNumber);
-        recordRecentSale(customer, items);
+        // La compra solo se cuenta como real cuando Wompi confirme el pago
+        // (ver pedido-confirmado/[id]/page.tsx) — aquí todavía no ha pagado.
         if (couponApplies) clearCoupon();
         window.location.href = wompiCheckoutUrl({
           amountInCents,
@@ -215,7 +213,7 @@ export default function QuickBuyModal({
         return;
       }
 
-      const customer = locationUrl ? { ...form, locationUrl } : form;
+      const customer = form;
       const { id, orderNumber } = await createOrder({
         items,
         subtotal,
@@ -485,8 +483,6 @@ export default function QuickBuyModal({
             onChange={(e) => updateField('note', e.target.value)}
             className="w-full rounded-lg border border-border px-4 py-3 text-sm focus:border-primary focus:outline-none"
           />
-
-          <LocationCapture value={locationUrl} onCapture={setLocationUrl} />
 
           {error && <p className="rounded-lg bg-urgent/10 p-3 text-sm text-urgent">{error}</p>}
 
