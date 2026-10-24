@@ -15,16 +15,18 @@ export default function FloatingBadge({ href = '/oferta-2x1' }: { href?: string 
       <div className="relative">
         <Link
           href={href}
-          className="relative flex w-[4.75rem] flex-col items-center justify-center gap-1 border border-ink bg-ink py-3.5 shadow-soft transition-transform hover:scale-105"
+          className="relative flex w-20 flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-urgent bg-ink py-4 shadow-lift transition-transform hover:scale-105 animate-glow-urgent"
         >
-          <span className="text-[8px] font-bold uppercase tracking-wider text-cream/80">Oferta</span>
-          <span className="text-xl font-bold leading-none text-cream">2×1</span>
+          <span className="rounded-full bg-urgent px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white">
+            Oferta
+          </span>
+          <span className="text-2xl font-extrabold leading-none text-cream">2×1</span>
         </Link>
 
         <button
           onClick={() => setDismissed(true)}
           aria-label="Cerrar"
-          className="absolute -left-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full border border-border bg-white text-[10px] text-ink shadow-soft"
+          className="absolute -left-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full border border-border bg-white text-[10px] text-ink shadow-soft"
         >
           ✕
         </button>
