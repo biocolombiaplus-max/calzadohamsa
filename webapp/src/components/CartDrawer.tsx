@@ -6,7 +6,7 @@ import { useCartStore } from '@/lib/cart-store';
 import { useSiteSettings } from '@/lib/settings-context';
 import { computeBundlePricing } from '@/lib/bundle';
 import { buildCartWhatsAppMessage, cloudinaryFill, formatPrice, whatsappLinkTo } from '@/lib/utils';
-import { trackVisitorWhatsAppPhone } from '@/lib/visitor';
+import { trackVisitorCartContact, trackVisitorWhatsAppPhone } from '@/lib/visitor';
 import BundleUpsellBanner from '@/components/BundleUpsellBanner';
 import SafeImage from '@/components/SafeImage';
 import WhatsAppPhoneModal from '@/components/product/WhatsAppPhoneModal';
@@ -14,6 +14,8 @@ import WhatsAppPhoneModal from '@/components/product/WhatsAppPhoneModal';
 export default function CartDrawer() {
   const [mounted, setMounted] = useState(false);
   const [showPhoneModal, setShowPhoneModal] = useState(false);
+  const [showSavePhoneModal, setShowSavePhoneModal] = useState(false);
+  const [phoneSaved, setPhoneSaved] = useState(false);
   const { items, isOpen, close, removeItem, updateQuantity } = useCartStore();
   const settings = useSiteSettings();
   const bundle = computeBundlePricing(items, settings.bundle2x1.price);
@@ -132,6 +134,31 @@ export default function CartDrawer() {
             >
               💬 O termina tu compra por WhatsApp
             </button>
+
+            {/* Si no deja el WhatsApp aquí, no queda ningún dato de contacto
+                si se va sin empezar el pago — y ese carrito nunca podría
+                recuperarse por remarketing. */}
+            <div className="mt-3 rounded-card border border-border bg-white p-3">
+              {phoneSaved ? (
+                <p className="text-center text-xs font-semibold text-primary">
+                  ✓ ¡Listo! Te escribimos si necesitas algo.
+                </p>
+              ) : (
+                <>
+                  <p className="text-xs font-semibold text-ink">📱 ¿Tienes dudas de talla?</p>
+                  <p className="mt-0.5 text-[11px] text-muted">
+                    Deja tu WhatsApp y te ayudamos a elegir — también te avisamos si hay descuento.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setShowSavePhoneModal(true)}
+                    className="mt-2 w-full rounded-lg border border-ink py-2 text-xs font-bold text-ink transition-colors hover:bg-ink hover:text-cream"
+                  >
+                    Dejar mi WhatsApp
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -144,6 +171,21 @@ export default function CartDrawer() {
             trackVisitorWhatsAppPhone(phone);
             setShowPhoneModal(false);
             window.open(whatsappLinkTo(settings.whatsappNumber, buildCartWhatsAppMessage(items), settings.whatsappCountryCode), '_blank');
+          }}
+        />
+      )}
+
+      {showSavePhoneModal && (
+        <WhatsAppPhoneModal
+          countryCode={settings.whatsappCountryCode}
+          title="Guarda tu carrito"
+          description="Te ayudamos a elegir talla y color por WhatsApp, y te avisamos si hay descuento. Nada más."
+          buttonLabel="Guardar mi número"
+          onClose={() => setShowSavePhoneModal(false)}
+          onSubmit={(phone) => {
+            trackVisitorCartContact(phone);
+            setShowSavePhoneModal(false);
+            setPhoneSaved(true);
           }}
         />
       )}

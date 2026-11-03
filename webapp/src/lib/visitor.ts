@@ -258,6 +258,22 @@ export function trackVisitorWhatsAppPhone(phone: string) {
   );
 }
 
+// Se llama al dejar el WhatsApp en el banner "Guarda tu carrito" (dentro
+// del carrito, sin salir a WhatsApp ni empezar el pago) — hasta ahora, si
+// alguien solo agregaba al carrito y se iba sin escribir nada en el
+// checkout ni tocar "termina tu compra por WhatsApp", quedaba sin ningún
+// dato de contacto y era imposible hacerle remarketing de carrito
+// abandonado. No sube la etapa a "checkout" (no inició el pago, solo dejó
+// su número) para no inflar ese número en el embudo.
+export function trackVisitorCartContact(phone: string) {
+  update(
+    (p) => {
+      p.phone = phone.replace(/[^\d+]/g, '').slice(0, 20);
+    },
+    { immediate: true },
+  );
+}
+
 // Nombre y celular apenas los escribe en el checkout: así se puede ayudar
 // por WhatsApp a quien no terminó su compra.
 export function trackVisitorContact(name: string, phone: string) {
