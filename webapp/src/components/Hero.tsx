@@ -61,10 +61,6 @@ export default function Hero() {
           />
         ))}
 
-        {/* Degradado oscuro abajo para que el texto blanco siempre se lea
-            bien, sea cual sea la foto que suba el admin. */}
-        <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />
-
         <div className="absolute right-3 top-3 z-10 rounded-lg bg-white/95 px-2.5 py-1.5 shadow-soft">
           <p className="text-[10px] font-bold leading-tight text-ink">🆕 Nuevo ingreso</p>
           <p className="text-[9px] leading-tight text-muted">+2.400 clientas nos recomiendan</p>
@@ -84,40 +80,46 @@ export default function Hero() {
           </div>
         )}
 
-        <div className="absolute inset-x-0 bottom-0 z-10 p-6 sm:p-10 lg:p-14">
-          <span className="mb-3 inline-block rounded-full bg-white/15 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-white backdrop-blur-sm">
-            {hero.eyebrow}
-          </span>
-          <h1
-            className={classNames(
-              'font-heading font-medium italic leading-[1.05] tracking-tight text-white drop-shadow-sm',
-              TITLE_SIZE_CLASSES[hero.titleSize] ?? TITLE_SIZE_CLASSES.md,
-            )}
-          >
-            {hero.heading}
-          </h1>
-          <p
-            className={classNames(
-              'mt-3 max-w-md text-white/90',
-              SUBTEXT_SIZE_CLASSES[hero.subtextSize] ?? SUBTEXT_SIZE_CLASSES.md,
-            )}
-          >
-            {hero.subtext}
-          </p>
+        {/* El texto va centrado en la mitad de la foto, dentro de su
+            propio panel oscuro semitransparente — así no depende de qué
+            tan clara u oscura sea la foto que suba el admin, y deja la
+            cara y las sandalias completamente libres arriba y abajo. */}
+        <div className="absolute inset-x-0 top-1/2 z-10 flex -translate-y-1/2 justify-center px-4">
+          <div className="max-w-lg rounded-card bg-ink/55 p-6 text-center shadow-lift backdrop-blur-sm sm:p-10">
+            <span className="mb-3 inline-block rounded-full bg-white/15 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-white">
+              {hero.eyebrow}
+            </span>
+            <h1
+              className={classNames(
+                'font-heading font-medium italic leading-[1.05] tracking-tight text-white',
+                TITLE_SIZE_CLASSES[hero.titleSize] ?? TITLE_SIZE_CLASSES.md,
+              )}
+            >
+              {hero.heading}
+            </h1>
+            <p
+              className={classNames(
+                'mx-auto mt-3 max-w-md text-white/90',
+                SUBTEXT_SIZE_CLASSES[hero.subtextSize] ?? SUBTEXT_SIZE_CLASSES.md,
+              )}
+            >
+              {hero.subtext}
+            </p>
 
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link
-              href={hero.button1Url}
-              className="rounded-full bg-white px-6 py-3 text-sm font-bold text-ink shadow-lift transition-transform hover:scale-105"
-            >
-              {hero.button1Text}
-            </Link>
-            <Link
-              href={hero.button2Url}
-              className="rounded-full border-2 border-white px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-white hover:text-ink"
-            >
-              {hero.button2Text}
-            </Link>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Link
+                href={hero.button1Url}
+                className="rounded-full bg-white px-6 py-3 text-sm font-bold text-ink shadow-lift transition-transform hover:scale-105"
+              >
+                {hero.button1Text}
+              </Link>
+              <Link
+                href={hero.button2Url}
+                className="rounded-full border-2 border-white px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-white hover:text-ink"
+              >
+                {hero.button2Text}
+              </Link>
+            </div>
           </div>
         </div>
       </div>
