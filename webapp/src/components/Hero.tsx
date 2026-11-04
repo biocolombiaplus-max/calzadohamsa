@@ -85,13 +85,13 @@ export default function Hero() {
             tan clara u oscura sea la foto que suba el admin, y deja la
             cara y las sandalias completamente libres arriba y abajo. */}
         <div className="absolute inset-x-0 top-1/2 z-10 flex -translate-y-1/2 justify-center px-4">
-          <div className="max-w-lg rounded-card bg-ink/55 p-6 text-center shadow-lift backdrop-blur-sm sm:p-10">
-            <span className="mb-3 inline-block rounded-full bg-white/15 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-white">
+          <div className="max-w-[20rem] rounded-card bg-white/75 p-5 text-center shadow-soft backdrop-blur-md sm:max-w-sm sm:p-7">
+            <span className="mb-2.5 inline-block rounded-full bg-ink/8 px-3.5 py-1 text-[10px] font-bold uppercase tracking-wide text-ink sm:text-xs">
               {hero.eyebrow}
             </span>
             <h1
               className={classNames(
-                'font-heading font-medium italic leading-[1.05] tracking-tight text-white',
+                'font-heading font-medium italic leading-[1.05] tracking-tight text-ink',
                 TITLE_SIZE_CLASSES[hero.titleSize] ?? TITLE_SIZE_CLASSES.md,
               )}
             >
@@ -99,23 +99,23 @@ export default function Hero() {
             </h1>
             <p
               className={classNames(
-                'mx-auto mt-3 max-w-md text-white/90',
+                'mx-auto mt-2.5 max-w-xs text-muted',
                 SUBTEXT_SIZE_CLASSES[hero.subtextSize] ?? SUBTEXT_SIZE_CLASSES.md,
               )}
             >
               {hero.subtext}
             </p>
 
-            <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <div className="mt-5 flex flex-wrap justify-center gap-2.5">
               <Link
                 href={hero.button1Url}
-                className="rounded-full bg-white px-6 py-3 text-sm font-bold text-ink shadow-lift transition-transform hover:scale-105"
+                className="rounded-full bg-ink px-5 py-2.5 text-xs font-bold text-white shadow-soft transition-transform hover:scale-105 sm:text-sm"
               >
                 {hero.button1Text}
               </Link>
               <Link
                 href={hero.button2Url}
-                className="rounded-full border-2 border-white px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-white hover:text-ink"
+                className="rounded-full border border-ink px-5 py-2.5 text-xs font-bold text-ink transition-colors hover:bg-ink hover:text-white sm:text-sm"
               >
                 {hero.button2Text}
               </Link>
