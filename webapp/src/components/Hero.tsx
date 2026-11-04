@@ -99,7 +99,7 @@ export default function Hero() {
           </span>
           <h1
             className={classNames(
-              'font-heading font-bold italic leading-[1.05] tracking-tight text-white drop-shadow-sm',
+              'font-heading font-medium italic leading-[1.05] tracking-tight text-white drop-shadow-sm',
               TITLE_SIZE_CLASSES[hero.titleSize] ?? TITLE_SIZE_CLASSES.md,
             )}
           >
