@@ -85,7 +85,7 @@ export default function Hero() {
             tan clara u oscura sea la foto que suba el admin, y deja la
             cara y las sandalias completamente libres arriba y abajo. */}
         <div className="absolute inset-x-0 top-1/2 z-10 flex -translate-y-1/2 justify-center px-4">
-          <div className="max-w-[20rem] rounded-card bg-white/75 p-5 text-center shadow-soft backdrop-blur-md sm:max-w-sm sm:p-7">
+          <div className="max-w-[20rem] rounded-card border border-white/40 bg-white/25 p-5 text-center shadow-lift backdrop-blur-xl sm:max-w-sm sm:p-7">
             <span className="mb-2.5 inline-block rounded-full bg-ink/8 px-3.5 py-1 text-[10px] font-bold uppercase tracking-wide text-ink sm:text-xs">
               {hero.eyebrow}
             </span>
