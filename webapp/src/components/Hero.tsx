@@ -83,15 +83,18 @@ export default function Hero() {
         {/* El texto va centrado en la mitad de la foto, dentro de su
             propio panel oscuro semitransparente — así no depende de qué
             tan clara u oscura sea la foto que suba el admin, y deja la
-            cara y las sandalias completamente libres arriba y abajo. */}
-        <div className="absolute inset-x-0 top-1/2 z-10 flex -translate-y-1/2 justify-center px-4">
-          <div className="max-w-[20rem] rounded-card border border-white/40 bg-white/25 p-5 text-center shadow-lift backdrop-blur-xl sm:max-w-sm sm:p-7">
-            <span className="mb-2.5 inline-block rounded-full bg-ink/8 px-3.5 py-1 text-[10px] font-bold uppercase tracking-wide text-ink sm:text-xs">
+            cara y las sandalias completamente libres arriba y abajo. Sin
+            ninguna caja ni panel detrás — el texto va directo sobre la
+            foto, con una sombra marcada para que siempre se lea bien
+            (la misma técnica que usan las marcas de moda grandes). */}
+        <div className="absolute inset-x-0 top-1/2 z-10 flex -translate-y-1/2 justify-center px-6 text-center">
+          <div className="max-w-sm">
+            <span className="mb-2.5 inline-block text-[10px] font-bold uppercase tracking-[0.2em] text-white [text-shadow:0_1px_6px_rgba(0,0,0,0.65)] sm:text-xs">
               {hero.eyebrow}
             </span>
             <h1
               className={classNames(
-                'font-heading font-medium italic leading-[1.05] tracking-tight text-ink',
+                'font-heading font-medium italic leading-[1.05] tracking-tight text-white [text-shadow:0_2px_14px_rgba(0,0,0,0.55)]',
                 TITLE_SIZE_CLASSES[hero.titleSize] ?? TITLE_SIZE_CLASSES.md,
               )}
             >
@@ -99,7 +102,7 @@ export default function Hero() {
             </h1>
             <p
               className={classNames(
-                'mx-auto mt-2.5 max-w-xs text-muted',
+                'mx-auto mt-2.5 max-w-xs text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.6)]',
                 SUBTEXT_SIZE_CLASSES[hero.subtextSize] ?? SUBTEXT_SIZE_CLASSES.md,
               )}
             >
@@ -109,13 +112,13 @@ export default function Hero() {
             <div className="mt-5 flex flex-wrap justify-center gap-2.5">
               <Link
                 href={hero.button1Url}
-                className="rounded-full bg-ink px-5 py-2.5 text-xs font-bold text-white shadow-soft transition-transform hover:scale-105 sm:text-sm"
+                className="rounded-full bg-white px-5 py-2.5 text-xs font-bold text-ink shadow-lift transition-transform hover:scale-105 sm:text-sm"
               >
                 {hero.button1Text}
               </Link>
               <Link
                 href={hero.button2Url}
-                className="rounded-full border border-ink px-5 py-2.5 text-xs font-bold text-ink transition-colors hover:bg-ink hover:text-white sm:text-sm"
+                className="rounded-full border border-white px-5 py-2.5 text-xs font-bold text-white shadow-soft transition-colors hover:bg-white hover:text-ink sm:text-sm"
               >
                 {hero.button2Text}
               </Link>
