@@ -85,6 +85,13 @@ const config: Config = {
           '30%': { opacity: '1' },
           '100%': { transform: 'translateY(-40px) scale(1.1)', opacity: '0' },
         },
+        // Un brillo que cruza el botón de lado a lado y se queda quieto el
+        // resto del ciclo (en vez de estar sin parar) — para botones de
+        // llamada a la acción importantes, sin verse ruidoso.
+        buttonSheen: {
+          '0%, 20%': { transform: 'translateX(-150%) skewX(-20deg)' },
+          '40%, 100%': { transform: 'translateX(500%) skewX(-20deg)' },
+        },
       },
       animation: {
         marquee: 'marquee 28s linear infinite',
@@ -98,6 +105,7 @@ const config: Config = {
         attention: 'attention 5s ease-in-out infinite',
         twinkle: 'twinkle 1.4s ease-in-out infinite',
         sparkle: 'sparkle 1.2s ease-out infinite',
+        'button-sheen': 'buttonSheen 3.5s ease-in-out infinite',
       },
     },
   },

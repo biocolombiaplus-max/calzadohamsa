@@ -22,17 +22,20 @@ function useRotatingIndex(length: number): number {
   return index;
 }
 
+// La fuente script (Great Vibes) se ve visualmente más chica que una
+// serif en el mismo tamaño de letra — por eso estos tamaños van un
+// escalón más grande que antes, para que el título nunca se pierda.
 const TITLE_SIZE_CLASSES: Record<string, string> = {
-  sm: 'text-3xl sm:text-4xl lg:text-5xl',
-  md: 'text-4xl sm:text-5xl lg:text-6xl',
-  lg: 'text-5xl sm:text-6xl lg:text-7xl',
-  xl: 'text-6xl sm:text-7xl lg:text-8xl',
+  sm: 'text-4xl sm:text-5xl lg:text-6xl',
+  md: 'text-5xl sm:text-6xl lg:text-7xl',
+  lg: 'text-6xl sm:text-7xl lg:text-8xl',
+  xl: 'text-7xl sm:text-8xl lg:text-9xl',
 };
 
 const SUBTEXT_SIZE_CLASSES: Record<string, string> = {
-  sm: 'text-sm sm:text-base',
-  md: 'text-base sm:text-lg',
-  lg: 'text-lg sm:text-xl',
+  sm: 'text-base sm:text-lg',
+  md: 'text-lg sm:text-xl',
+  lg: 'text-xl sm:text-2xl',
 };
 
 // Foto a todo el ancho con la tipografía superpuesta encima (estilo
@@ -89,12 +92,16 @@ export default function Hero() {
             (la misma técnica que usan las marcas de moda grandes). */}
         <div className="absolute inset-x-0 top-1/2 z-10 flex -translate-y-1/2 justify-center px-6 text-center">
           <div className="max-w-sm">
-            <span className="mb-2.5 inline-block text-[10px] font-bold uppercase tracking-[0.2em] text-white [text-shadow:0_1px_6px_rgba(0,0,0,0.65)] sm:text-xs">
+            <span className="mb-3 inline-block text-[10px] font-bold uppercase tracking-[0.2em] text-white [text-shadow:0_1px_6px_rgba(0,0,0,0.75)] sm:text-xs">
               {hero.eyebrow}
             </span>
+            {/* Tipografía script (como "Nueva Colección" de la
+                referencia) solo para el título del Hero — sombra fuerte
+                de respaldo para que nunca se pierda, sea cual sea la
+                foto de fondo. */}
             <h1
               className={classNames(
-                'font-heading font-medium italic leading-[1.05] tracking-tight text-white [text-shadow:0_2px_14px_rgba(0,0,0,0.55)]',
+                "font-['Great_Vibes'] leading-[1.15] text-white [text-shadow:0_3px_18px_rgba(0,0,0,0.75)]",
                 TITLE_SIZE_CLASSES[hero.titleSize] ?? TITLE_SIZE_CLASSES.md,
               )}
             >
@@ -102,19 +109,22 @@ export default function Hero() {
             </h1>
             <p
               className={classNames(
-                'mx-auto mt-2.5 max-w-xs text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.6)]',
+                'mx-auto mt-3 max-w-xs font-semibold text-white [text-shadow:0_1px_10px_rgba(0,0,0,0.7)]',
                 SUBTEXT_SIZE_CLASSES[hero.subtextSize] ?? SUBTEXT_SIZE_CLASSES.md,
               )}
             >
               {hero.subtext}
             </p>
 
-            <div className="mt-5 flex flex-wrap justify-center gap-2.5">
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <Link
                 href={hero.button1Url}
-                className="rounded-full bg-white px-5 py-2.5 text-xs font-bold text-ink shadow-lift transition-transform hover:scale-105 sm:text-sm"
+                className="group relative overflow-hidden rounded-full bg-white px-8 py-3.5 text-sm font-bold text-ink shadow-lift transition-transform hover:scale-105 sm:text-base"
               >
-                {hero.button1Text}
+                {/* Brillo que cruza el botón cada pocos segundos — el CTA
+                    principal del Hero, así que es el único que lo lleva. */}
+                <span className="pointer-events-none absolute inset-y-0 left-0 w-1/4 animate-button-sheen bg-gradient-to-r from-transparent via-ink/40 to-transparent" />
+                <span className="relative">{hero.button1Text}</span>
               </Link>
               <Link
                 href={hero.button2Url}

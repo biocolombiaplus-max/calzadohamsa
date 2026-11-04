@@ -24,8 +24,10 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
       {/* El logo, la foto del hero y la tipografía ya llegan resueltos en
           este mismo HTML — así el navegador empieza a descargarlos de una
           vez, sin esperar a un viaje extra a la base de datos desde el
-          cliente antes de saber qué imagen mostrar. */}
-      <link rel="stylesheet" href={googleFontsHref([settings.fonts.headingFont, settings.fonts.bodyFont])} />
+          cliente antes de saber qué imagen mostrar. "Great Vibes" es fija
+          (no depende de lo que el admin elija en Configuración) — es la
+          fuente script del título del Hero, ver Hero.tsx. */}
+      <link rel="stylesheet" href={googleFontsHref([settings.fonts.headingFont, settings.fonts.bodyFont, 'Great Vibes'])} />
       <SiteChrome initialSettings={settings}>{children}</SiteChrome>
     </>
   );
