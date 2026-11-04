@@ -13,6 +13,7 @@ import { buildOrderWhatsAppMessage, classNames, formatPrice, whatsappLinkTo } fr
 import { generatePaymentReference, getWompiSignature, wompiCheckoutUrl } from '@/lib/wompi';
 import { trackVisitorCheckout, trackVisitorContact, trackVisitorPurchase } from '@/lib/visitor';
 import { recordRecentSale } from '@/lib/recentSales';
+import { trackPixelEvent } from '@/lib/metaPixel';
 import type { CartItem } from '@/lib/types';
 
 const DEPARTAMENTOS = getDepartamentos();
@@ -67,10 +68,20 @@ export default function QuickBuyModal({
   }, [attemptedSubmit, hasErrors]);
 
   // Abrir este modal YA es haber llegado al pago (igual que entrar a
-  // /checkout) — antes no quedaba registrado en el embudo de Visitantes,
-  // así que las compras hechas por "Comprar ya" no se veían reflejadas ahí.
+  // /checkout) — antes no quedaba registrado en el embudo de Visitantes
+  // ni en Meta Pixel, así que las compras hechas por "Comprar ya"
+  // (probablemente el flujo más usado) no le daban esta señal a Meta
+  // para optimizar los anuncios, y tampoco se veían en Visitantes.
   useEffect(() => {
     trackVisitorCheckout();
+    trackPixelEvent('InitiateCheckout', {
+      content_ids: items.map((i) => i.productId),
+      content_type: 'product',
+      value: subtotal,
+      currency: 'COP',
+      num_items: items.reduce((sum, i) => sum + i.quantity, 0),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Nombre y celular, apenas los escribe — así se puede ayudar por
