@@ -53,7 +53,7 @@ export default function Hero() {
           <Image
             key={src + i}
             src={src}
-            alt={storeName}
+            alt={`${storeName} — sandalias y zapatos de moda para mujer`}
             fill
             unoptimized
             priority={i === 0}

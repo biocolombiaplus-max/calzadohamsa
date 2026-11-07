@@ -17,7 +17,7 @@ export default function ProductCard({ product, priority = false }: { product: Pr
       <div className="relative aspect-square overflow-hidden rounded-card bg-white shadow-soft">
         <SafeImage
           src={product.images[0] ? (isFull ? cloudinaryOriginal(product.images[0]) : cloudinaryFill(product.images[0], 800)) : ''}
-          alt={product.title}
+          alt={`${product.title} — sandalia para mujer`}
           fill
           priority={priority}
           sizes="(max-width: 768px) 50vw, 25vw"
