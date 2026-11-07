@@ -112,7 +112,14 @@ export default function BuyBox({
 
       {product.stock > 0 && product.stock <= 15 && (
         <div>
-          <p className="mb-1.5 text-xs font-semibold text-urgent">Quedan {product.stock} unidades en esta talla</p>
+          {/* El texto sube de intensidad solo cuando el stock real ya está
+              crítico — no hay un umbral falso ni un "quedan pocas" cuando
+              en realidad hay de sobra. */}
+          <p className="mb-1.5 text-xs font-semibold text-urgent">
+            {product.stock <= 3
+              ? `¡Solo queda${product.stock === 1 ? '' : 'n'} ${product.stock}! Se puede agotar hoy`
+              : `Quedan ${product.stock} unidades en esta talla`}
+          </p>
           <div className="h-1 w-full overflow-hidden bg-border">
             <div className="h-full bg-urgent" style={{ width: `${100 - stockPct}%` }} />
           </div>
