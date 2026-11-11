@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useSiteSettings } from '@/lib/settings-context';
+import { cloudinaryScale } from '@/lib/utils';
 import SafeImage from '@/components/SafeImage';
 
 // Capturas reales de WhatsApp de clientas felices, dentro de un marco de
@@ -35,7 +36,7 @@ export default function ChatProofs() {
             >
               <span className="relative block aspect-[9/17] overflow-hidden rounded-[24px] bg-[#0b141a]">
                 <span className="absolute left-1/2 top-1.5 z-10 h-4 w-16 -translate-x-1/2 rounded-full bg-black" />
-                <SafeImage src={src} alt="Mensaje de una clienta por WhatsApp" fill sizes="240px" className="object-cover object-top" />
+                <SafeImage src={cloudinaryScale(src, 400)} alt="Mensaje de una clienta por WhatsApp" fill sizes="240px" className="object-cover object-top" />
               </span>
               <span className="absolute -bottom-2 left-1/2 flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-full bg-whatsapp px-2.5 py-1 text-[10px] font-extrabold text-white shadow-soft">
                 ✓ Clienta real
@@ -54,7 +55,7 @@ export default function ChatProofs() {
           onClick={() => setOpen(null)}
         >
           <span className="relative block h-[88vh] w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
-            <SafeImage src={photos[open]} alt="Mensaje de una clienta por WhatsApp" fill sizes="420px" className="object-contain" />
+            <SafeImage src={cloudinaryScale(photos[open], 900)} alt="Mensaje de una clienta por WhatsApp" fill sizes="420px" className="object-contain" />
           </span>
           {photos.length > 1 && (
             <>

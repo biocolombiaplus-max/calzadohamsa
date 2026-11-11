@@ -174,6 +174,18 @@ export function cloudinaryFill(url: string, size: number): string {
   return url.replace('/upload/', `/upload/c_fill,g_auto,w_${size},h_${size},q_auto,f_auto/`);
 }
 
+// Achica la foto SIN forzar ningún recorte cuadrado (a diferencia de
+// cloudinaryFill) — para fotos de ancho completo con su propio aspect-ratio
+// (el Hero, que cambia de proporción según el tamaño de pantalla), donde el
+// recorte real lo hace el CSS (object-cover) y aquí solo hace falta bajar el
+// peso del archivo. Sin esto, una foto subida directo del celular (varios
+// MB, resolución de cámara) se descarga completa en cada visita — el
+// archivo más pesado de toda la portada.
+export function cloudinaryScale(url: string, maxWidth: number): string {
+  if (!url.includes('res.cloudinary.com') || !url.includes('/upload/')) return url;
+  return url.replace('/upload/', `/upload/c_limit,w_${maxWidth},q_auto,f_auto/`);
+}
+
 // Recupera la foto ORIGINAL sin recortar, incluso para fotos subidas antes
 // de este cambio (cuando el recorte a cuadrado se guardaba para siempre en
 // la URL) — el archivo real en Cloudinary nunca se tocó, solo se le pedía

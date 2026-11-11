@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useSiteSettings } from '@/lib/settings-context';
+import { cloudinaryFill, cloudinaryScale } from '@/lib/utils';
 import SafeImage from '@/components/SafeImage';
 
 // "Entregas reales": fotos de pedidos empacados/entregados que sube la
@@ -26,7 +27,7 @@ export default function RealDeliveries() {
               className="relative h-44 w-44 shrink-0 snap-start overflow-hidden rounded-card bg-cream-alt shadow-soft sm:h-56 sm:w-56"
               aria-label="Ver foto de entrega"
             >
-              <SafeImage src={src} alt={`Entrega real de ${storeName}`} fill sizes="224px" className="object-cover" />
+              <SafeImage src={cloudinaryFill(src, 400)} alt={`Entrega real de ${storeName}`} fill sizes="224px" className="object-cover" />
             </button>
           ))}
         </div>
@@ -39,7 +40,7 @@ export default function RealDeliveries() {
           aria-label="Cerrar"
         >
           <span className="relative block h-[80vh] w-full max-w-lg">
-            <SafeImage src={open} alt="Entrega real" fill sizes="512px" className="object-contain" />
+            <SafeImage src={cloudinaryScale(open, 1200)} alt="Entrega real" fill sizes="512px" className="object-contain" />
           </span>
         </button>
       )}

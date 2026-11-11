@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useSiteSettings } from '@/lib/settings-context';
-import { classNames } from '@/lib/utils';
+import { classNames, cloudinaryScale } from '@/lib/utils';
 
 const ROTATE_MS = 4500;
 
@@ -52,7 +52,7 @@ export default function Hero() {
         {images.map((src, i) => (
           <Image
             key={src + i}
-            src={src}
+            src={cloudinaryScale(src, 1600)}
             alt={`${storeName} — sandalias y zapatos de moda para mujer`}
             fill
             unoptimized

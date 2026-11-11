@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { useCartStore } from '@/lib/cart-store';
 import { useSiteSettings } from '@/lib/settings-context';
+import { cloudinaryScale } from '@/lib/utils';
 
 const NAV_LINKS = [
   { href: '/', label: 'Inicio' },
@@ -102,7 +103,7 @@ export default function Header() {
         <Link href="/" className="flex items-center justify-center">
           {logoUrl ? (
             <span className="relative block" style={{ height: logoHeight, width: logoBoxWidth }}>
-              <Image src={logoUrl} alt={storeName} fill priority unoptimized className="object-contain" />
+              <Image src={cloudinaryScale(logoUrl, 400)} alt={storeName} fill priority unoptimized className="object-contain" />
             </span>
           ) : (
             <span
