@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { Product } from '@/lib/types';
-import { classNames, cloudinaryFill, formatPrice, resolveColorImage } from '@/lib/utils';
+import { classNames, cloudinaryFill, cloudinaryOriginal, formatPrice, resolveColorImage } from '@/lib/utils';
 import SafeImage from '@/components/SafeImage';
 
 export interface BundleSelection {
@@ -76,7 +76,18 @@ export default function BundleSlotPicker({
               <button key={p.id} type="button" onClick={() => selectProduct(p)} className="group text-left">
                 <div className="relative aspect-square overflow-hidden bg-cream-alt ring-1 ring-border transition-all group-hover:ring-2 group-hover:ring-ink">
                   {p.images[0] ? (
-                    <SafeImage src={cloudinaryFill(p.images[0], 400)} alt={p.title} fill className="object-cover" />
+                    (() => {
+                      const isFull = p.noCropImages?.includes(p.images[0]);
+                      return (
+                        <SafeImage
+                          src={isFull ? cloudinaryOriginal(p.images[0]) : cloudinaryFill(p.images[0], 400)}
+                          alt={p.title}
+                          fill
+                          className={isFull ? 'object-contain' : 'object-cover'}
+                          style={isFull ? { transform: `scale(${(p.imageScale?.[p.images[0]] ?? 100) / 100})` } : undefined}
+                        />
+                      );
+                    })()
                   ) : (
                     <div className="flex h-full items-center justify-center text-2xl">👡</div>
                   )}
@@ -111,9 +122,17 @@ export default function BundleSlotPicker({
             {(() => {
               const displayImage =
                 resolveColorImage(selection.product, selection.color) || selection.product.images[0];
-              return displayImage ? (
-                <SafeImage src={cloudinaryFill(displayImage, 800)} alt={selection.product.title} fill className="object-cover" />
-              ) : null;
+              if (!displayImage) return null;
+              const isFull = selection.product.noCropImages?.includes(displayImage);
+              return (
+                <SafeImage
+                  src={isFull ? cloudinaryOriginal(displayImage) : cloudinaryFill(displayImage, 800)}
+                  alt={selection.product.title}
+                  fill
+                  className={isFull ? 'object-contain' : 'object-cover'}
+                  style={isFull ? { transform: `scale(${(selection.product.imageScale?.[displayImage] ?? 100) / 100})` } : undefined}
+                />
+              );
             })()}
           </div>
           <div className="mt-3 flex items-start justify-between gap-2">

@@ -112,8 +112,39 @@ export default function Oferta2x1Client({ products }: { products: Product[] }) {
           </div>
         </div>
 
+        {/* Indicador de pasos grande y llamativo — el que faltaba por elegir
+            "late" en rojo pulsante, para que sea obvio de un vistazo que
+            hay que escoger DOS pares, no solo uno. */}
+        {products.length > 0 && (
+          <div className="mx-auto mt-7 flex max-w-xs items-center justify-center">
+            <div className="flex flex-col items-center gap-1.5">
+              <span
+                className={classNames(
+                  'flex h-11 w-11 items-center justify-center rounded-full text-lg font-bold transition-all',
+                  slot1 ? 'bg-ink text-cream' : 'animate-glow-urgent bg-urgent text-white',
+                )}
+              >
+                {slot1 ? '✓' : '1'}
+              </span>
+              <span className="text-[11px] font-bold uppercase tracking-wide text-ink">Par 1</span>
+            </div>
+            <div className={classNames('mx-2 h-0.5 w-16 transition-colors sm:w-24', slot1 ? 'bg-ink' : 'bg-border')} />
+            <div className="flex flex-col items-center gap-1.5">
+              <span
+                className={classNames(
+                  'flex h-11 w-11 items-center justify-center rounded-full text-lg font-bold transition-all',
+                  slot2 ? 'bg-ink text-cream' : slot1 ? 'animate-glow-urgent bg-urgent text-white' : 'border-2 border-border text-muted',
+                )}
+              >
+                {slot2 ? '✓' : '2'}
+              </span>
+              <span className="text-[11px] font-bold uppercase tracking-wide text-ink">Par 2</span>
+            </div>
+          </div>
+        )}
+
         {onlyOneSelected && (
-          <div className="mx-auto mt-6 max-w-md border border-urgent bg-urgent/5 px-4 py-3 text-center">
+          <div className="mx-auto mt-5 max-w-md border border-urgent bg-urgent/5 px-4 py-3 text-center">
             <p className="text-sm font-bold text-ink">
               🎉 ¡Ya llevas 1 de 2! Elige tu segundo par y ahorras hasta {formatPrice(estimatedSavings)} + envío gratis.
             </p>
