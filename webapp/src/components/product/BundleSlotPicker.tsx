@@ -80,6 +80,11 @@ export default function BundleSlotPicker({
                   ) : (
                     <div className="flex h-full items-center justify-center text-2xl">👡</div>
                   )}
+                  {/* Marca de "toca para elegir" — sin esto, nada en la
+                      tarjeta deja claro que es un botón y no solo una foto. */}
+                  <span className="absolute bottom-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-ink/85 text-xs font-bold text-white shadow-soft transition-transform group-hover:scale-110">
+                    +
+                  </span>
                 </div>
                 <p className="mt-1 truncate text-[11px] font-semibold text-ink">{p.title}</p>
                 <p className="text-[11px] font-bold text-ink">{formatPrice(p.price)}</p>
@@ -98,27 +103,31 @@ export default function BundleSlotPicker({
         </div>
       ) : (
         <div>
-          <div className="flex gap-3">
-            <div className="relative h-20 w-20 shrink-0 overflow-hidden bg-cream-alt">
-              {(() => {
-                const displayImage =
-                  resolveColorImage(selection.product, selection.color) || selection.product.images[0];
-                return displayImage ? (
-                  <SafeImage src={cloudinaryFill(displayImage, 500)} alt={selection.product.title} fill className="object-cover" />
-                ) : null;
-              })()}
-            </div>
-            <div className="flex-1">
+          {/* Foto grande (no miniatura) una vez elegido el par — para que
+              se vean bien los detalles reales (textura, hebillas, color)
+              antes de confirmar talla y color, como en una ficha de
+              producto normal. */}
+          <div className="relative aspect-square w-full max-h-72 overflow-hidden bg-cream-alt">
+            {(() => {
+              const displayImage =
+                resolveColorImage(selection.product, selection.color) || selection.product.images[0];
+              return displayImage ? (
+                <SafeImage src={cloudinaryFill(displayImage, 800)} alt={selection.product.title} fill className="object-cover" />
+              ) : null;
+            })()}
+          </div>
+          <div className="mt-3 flex items-start justify-between gap-2">
+            <div>
               <p className="text-sm font-bold text-ink">{selection.product.title}</p>
               <p className="text-sm font-bold text-ink">{formatPrice(selection.product.price)}</p>
-              <button
-                type="button"
-                onClick={() => setPickingProduct(true)}
-                className="mt-1 text-xs font-semibold text-muted underline hover:text-ink"
-              >
-                Cambiar modelo
-              </button>
             </div>
+            <button
+              type="button"
+              onClick={() => setPickingProduct(true)}
+              className="shrink-0 text-xs font-semibold text-muted underline hover:text-ink"
+            >
+              Cambiar modelo
+            </button>
           </div>
 
           {selection.product.sizes.length > 0 && (

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Product, CartItem } from '@/lib/types';
-import { formatPrice, resolveColorImage } from '@/lib/utils';
+import { classNames, formatPrice, resolveColorImage } from '@/lib/utils';
 import { useSiteSettings } from '@/lib/settings-context';
 import BundleSlotPicker, { type BundleSelection } from '@/components/product/BundleSlotPicker';
 import QuickBuyModal from '@/components/product/QuickBuyModal';
@@ -47,8 +47,15 @@ export default function Oferta2x1Client({ products }: { products: Product[] }) {
   }, []);
 
   const bothSelected = !!slot1 && !!slot2;
+  const onlyOneSelected = !!slot1 !== !!slot2;
   const bundlePrice = settings.bundle2x1.price;
   const referencePrice = slot1?.product.price ?? products[0]?.price ?? Math.round(bundlePrice / 2 + 10000);
+  // Estimado "hasta" para motivar a completar el segundo par — asume que
+  // cuesta igual al primero (el caso más común, casi todo el catálogo al
+  // mismo precio); nunca promete un número que no se vaya a cumplir porque
+  // dice "hasta", no "ahorras exactamente".
+  const oneSelected = slot1 ?? slot2;
+  const estimatedSavings = oneSelected ? Math.max(0, oneSelected.product.price * 2 - bundlePrice) : 0;
 
   const { normalTotal, savings, discountedTotal, wompiTotal } = useMemo(() => {
     if (!slot1 || !slot2) {
@@ -94,11 +101,24 @@ export default function Oferta2x1Client({ products }: { products: Product[] }) {
           </p>
           <div className="mx-auto mt-4 flex max-w-sm items-center justify-center gap-3 text-xs text-muted">
             <span className="border border-border bg-white px-3 py-1">1 par: {formatPrice(referencePrice)} + envío</span>
-            <span className="border border-ink bg-ink px-3 py-1 font-bold text-cream">
+            <span
+              className={classNames(
+                'border border-ink bg-ink px-3 py-1 font-bold text-cream',
+                onlyOneSelected && 'animate-glow',
+              )}
+            >
               2 pares: {formatPrice(bundlePrice)} + envío gratis
             </span>
           </div>
         </div>
+
+        {onlyOneSelected && (
+          <div className="mx-auto mt-6 max-w-md border border-urgent bg-urgent/5 px-4 py-3 text-center">
+            <p className="text-sm font-bold text-ink">
+              🎉 ¡Ya llevas 1 de 2! Elige tu segundo par y ahorras hasta {formatPrice(estimatedSavings)} + envío gratis.
+            </p>
+          </div>
+        )}
 
         {products.length === 0 ? (
           <p className="mt-10 text-center text-muted">Todavía no hay productos disponibles para esta oferta.</p>
