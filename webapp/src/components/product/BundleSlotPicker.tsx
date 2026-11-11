@@ -135,7 +135,7 @@ export default function BundleSlotPicker({
               );
             })()}
           </div>
-          <div className="mt-3 flex items-start justify-between gap-2">
+          <div className="mt-3 flex flex-wrap items-start justify-between gap-2">
             <div>
               <p className="text-sm font-bold text-ink">{selection.product.title}</p>
               <p className="text-sm font-bold text-ink">{formatPrice(selection.product.price)}</p>
@@ -145,7 +145,7 @@ export default function BundleSlotPicker({
               onClick={() => setPickingProduct(true)}
               className="flex shrink-0 items-center gap-1 rounded-full border border-ink px-3 py-1.5 text-xs font-bold text-ink transition-colors hover:bg-ink hover:text-cream"
             >
-              🔄 Cambiar
+              🔄 Cambiar modelo
             </button>
           </div>
 
