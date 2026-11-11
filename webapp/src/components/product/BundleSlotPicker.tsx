@@ -143,9 +143,9 @@ export default function BundleSlotPicker({
             <button
               type="button"
               onClick={() => setPickingProduct(true)}
-              className="shrink-0 text-xs font-semibold text-muted underline hover:text-ink"
+              className="flex shrink-0 items-center gap-1 rounded-full border border-ink px-3 py-1.5 text-xs font-bold text-ink transition-colors hover:bg-ink hover:text-cream"
             >
-              Cambiar modelo
+              🔄 Cambiar
             </button>
           </div>
 
@@ -189,16 +189,27 @@ export default function BundleSlotPicker({
                         className={classNames('block h-7 w-7 rounded-full border transition-colors', selected ? 'border-ink' : 'border-border')}
                         style={{ backgroundColor: c.hex }}
                       />
-                      {thumb && (
-                        <span
-                          className={classNames(
-                            'relative block h-8 w-8 overflow-hidden border transition-colors',
-                            selected ? 'border-ink' : 'border-border',
-                          )}
-                        >
-                          <SafeImage src={cloudinaryFill(thumb, 80)} alt={c.name} fill sizes="32px" className="object-cover" />
-                        </span>
-                      )}
+                      {thumb &&
+                        (() => {
+                          const isFull = selection.product.noCropImages?.includes(thumb);
+                          return (
+                            <span
+                              className={classNames(
+                                'relative block h-8 w-8 overflow-hidden border transition-colors',
+                                selected ? 'border-ink' : 'border-border',
+                              )}
+                            >
+                              <SafeImage
+                                src={isFull ? cloudinaryOriginal(thumb) : cloudinaryFill(thumb, 80)}
+                                alt={c.name}
+                                fill
+                                sizes="32px"
+                                className={isFull ? 'object-contain' : 'object-cover'}
+                                style={isFull ? { transform: `scale(${(selection.product.imageScale?.[thumb] ?? 100) / 100})` } : undefined}
+                              />
+                            </span>
+                          );
+                        })()}
                     </button>
                   );
                 })}
