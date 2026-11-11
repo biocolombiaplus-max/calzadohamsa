@@ -39,7 +39,9 @@ export default function ProductForm({ product }: { product?: Product }) {
   const [customSize, setCustomSize] = useState('');
   const [customColorName, setCustomColorName] = useState('');
   const [customColorHex, setCustomColorHex] = useState('#A9673A');
-  const [newReview, setNewReview] = useState<ProductReview>({ name: '', city: '', rating: 5, text: '' });
+  const [newReview, setNewReview] = useState<ProductReview>({ name: '', city: '', rating: 5, text: '', photos: [] });
+  const [uploadingReviewPhoto, setUploadingReviewPhoto] = useState(false);
+  const [reviewPhotoError, setReviewPhotoError] = useState('');
 
   function handleTitleChange(value: string) {
     setTitle(value);
@@ -94,11 +96,42 @@ export default function ProductForm({ product }: { product?: Product }) {
   function addReview() {
     if (!newReview.name.trim() || !newReview.text.trim()) return;
     setReviews((r) => [...r, { ...newReview, name: newReview.name.trim(), text: newReview.text.trim() }]);
-    setNewReview({ name: '', city: '', rating: 5, text: '' });
+    setNewReview({ name: '', city: '', rating: 5, text: '', photos: [] });
   }
 
   function removeReview(index: number) {
     setReviews((r) => r.filter((_, i) => i !== index));
+  }
+
+  // Foto de respaldo de la reseña — la captura de pantalla de lo que
+  // escribió la clienta por WhatsApp/Instagram, o una foto que ella misma
+  // mandó. Con foto, una reseña genera mucha más confianza que solo texto.
+  async function handleReviewPhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setReviewPhotoError('');
+    const queued = Array.from(files);
+    e.target.value = '';
+
+    setUploadingReviewPhoto(true);
+    try {
+      for (const original of queued) {
+        try {
+          const resized = await resizeForUpload(original);
+          const uploadFile = new File([resized], original.name || 'resena.jpg', { type: 'image/jpeg' });
+          const url = await uploadProductImage(uploadFile, slug || 'resenas');
+          setNewReview((r) => ({ ...r, photos: [...(r.photos ?? []), url] }));
+        } catch (err) {
+          setReviewPhotoError(err instanceof Error ? err.message : 'No se pudo subir la foto. Intenta de nuevo.');
+        }
+      }
+    } finally {
+      setUploadingReviewPhoto(false);
+    }
+  }
+
+  function removeReviewPhoto(url: string) {
+    setNewReview((r) => ({ ...r, photos: (r.photos ?? []).filter((p) => p !== url) }));
   }
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -507,6 +540,15 @@ export default function ProductForm({ product }: { product?: Product }) {
                     {r.city && <span className="font-normal text-muted"> · {r.city}</span>}
                   </p>
                   <p className="mt-0.5 text-sm text-muted">{r.text}</p>
+                  {!!r.photos?.length && (
+                    <div className="mt-2 flex gap-1.5">
+                      {r.photos.map((url) => (
+                        <span key={url} className="relative block h-12 w-12 overflow-hidden rounded-lg bg-cream-alt">
+                          <Image src={cloudinaryFill(url, 100)} alt="Foto de la reseña" fill unoptimized className="object-cover" />
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <button
                   type="button"
@@ -553,6 +595,33 @@ export default function ProductForm({ product }: { product?: Product }) {
               className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
             />
           </div>
+
+          <div className="sm:col-span-2">
+            <p className="mb-1.5 text-xs font-semibold text-ink">
+              Foto (opcional) — captura de WhatsApp/Instagram o foto que te mandó la clienta
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              {(newReview.photos ?? []).map((url) => (
+                <span key={url} className="relative block h-16 w-16 overflow-hidden rounded-lg bg-cream-alt">
+                  <Image src={cloudinaryFill(url, 150)} alt="Foto de la reseña" fill unoptimized className="object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removeReviewPhoto(url)}
+                    aria-label="Quitar foto"
+                    className="absolute right-0.5 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-ink/80 text-xs text-white"
+                  >
+                    ✕
+                  </button>
+                </span>
+              ))}
+              <label className="flex h-16 w-16 cursor-pointer items-center justify-center rounded-lg border border-dashed border-border text-xs font-semibold text-muted hover:border-ink hover:text-ink">
+                {uploadingReviewPhoto ? '...' : '+ Foto'}
+                <input type="file" accept="image/*" multiple hidden onChange={handleReviewPhotoUpload} disabled={uploadingReviewPhoto} />
+              </label>
+            </div>
+            {reviewPhotoError && <p className="mt-1.5 text-xs font-semibold text-urgent">{reviewPhotoError}</p>}
+          </div>
+
           <button
             type="button"
             onClick={addReview}
