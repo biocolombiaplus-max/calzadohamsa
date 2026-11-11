@@ -135,30 +135,24 @@ export default function CartDrawer() {
               💬 O termina tu compra por WhatsApp
             </button>
 
-            {/* Si no deja el WhatsApp aquí, no queda ningún dato de contacto
-                si se va sin empezar el pago — y ese carrito nunca podría
-                recuperarse por remarketing. */}
-            <div className="mt-3 rounded-card border border-border bg-white p-3">
+            {/* A propósito MUY discreto (un solo link, sin caja ni botón
+                propio): es una opción secundaria para quien duda de talla,
+                no debe competir visualmente con "Finalizar compra" — antes
+                era una tarjeta con su propio botón y le quitaba fuerza al
+                CTA principal justo en el momento clave de la compra. Igual
+                sirve para no perder el contacto de quien se va sin pagar. */}
+            <p className="mt-3 text-center text-[11px] text-muted">
               {phoneSaved ? (
-                <p className="text-center text-xs font-semibold text-primary">
-                  ✓ ¡Listo! Te escribimos si necesitas algo.
-                </p>
+                <span className="font-semibold text-primary">✓ Listo, te escribimos si necesitas algo</span>
               ) : (
                 <>
-                  <p className="text-xs font-semibold text-ink">📱 ¿Tienes dudas de talla?</p>
-                  <p className="mt-0.5 text-[11px] text-muted">
-                    Deja tu WhatsApp y te ayudamos a elegir — también te avisamos si hay descuento.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setShowSavePhoneModal(true)}
-                    className="mt-2 w-full rounded-lg border border-ink py-2 text-xs font-bold text-ink transition-colors hover:bg-ink hover:text-cream"
-                  >
-                    Dejar mi WhatsApp
+                  ¿Dudas de talla?{' '}
+                  <button type="button" onClick={() => setShowSavePhoneModal(true)} className="font-semibold text-ink underline underline-offset-2">
+                    Deja tu WhatsApp
                   </button>
                 </>
               )}
-            </div>
+            </p>
           </div>
         )}
       </div>
