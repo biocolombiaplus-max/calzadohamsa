@@ -8,7 +8,9 @@ export default function FloatingBadge({ href = '/oferta-2x1' }: { href?: string 
   const [dismissed, setDismissed] = useState(false);
   const pathname = usePathname();
   const hasStickyBuyBar = pathname?.startsWith('/producto/');
-  if (dismissed) return null;
+  // Dentro de la propia página de la oferta no tiene sentido (la página
+  // entera ya ES la oferta) y tapaba fotos de producto justo ahí.
+  if (dismissed || pathname === href) return null;
 
   return (
     <div className={`fixed bottom-5 right-5 z-30 animate-float ${hasStickyBuyBar ? 'hidden lg:block' : ''}`}>

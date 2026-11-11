@@ -13,11 +13,13 @@ export interface BundleSelection {
 
 export default function BundleSlotPicker({
   label,
+  step,
   products,
   selection,
   onChange,
 }: {
   label: string;
+  step: number;
   products: Product[];
   selection: BundleSelection | null;
   onChange: (selection: BundleSelection | null) => void;
@@ -45,9 +47,26 @@ export default function BundleSlotPicker({
     setPickingProduct(false);
   }
 
+  const isComplete = !!selection && !pickingProduct;
+
   return (
-    <div className="border border-dashed border-border bg-white p-4">
-      <p className="mb-3 text-xs font-bold uppercase tracking-widest text-primary">{label}</p>
+    <div
+      className={classNames(
+        'border bg-white p-4 transition-colors',
+        isComplete ? 'border-ink' : 'border-border',
+      )}
+    >
+      <div className="mb-3 flex items-center gap-2">
+        <span
+          className={classNames(
+            'flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold',
+            isComplete ? 'bg-ink text-cream' : 'border border-border text-muted',
+          )}
+        >
+          {isComplete ? '✓' : step}
+        </span>
+        <p className="text-xs font-bold uppercase tracking-widest text-primary">{label}</p>
+      </div>
 
       {!selection || pickingProduct ? (
         <div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Product, CartItem } from '@/lib/types';
 import { formatPrice, resolveColorImage } from '@/lib/utils';
 import { useSiteSettings } from '@/lib/settings-context';
@@ -28,6 +28,8 @@ export default function Oferta2x1Client({ products }: { products: Product[] }) {
   const [slot1, setSlot1] = useState<BundleSelection | null>(null);
   const [slot2, setSlot2] = useState<BundleSelection | null>(null);
   const [modal, setModal] = useState<'cod' | 'wompi' | null>(null);
+  const summaryRef = useRef<HTMLDivElement>(null);
+  const justCompleted = useRef(false);
 
   // Si llega desde "Elegir mi segundo par" (ver QuickBuyModal), el primer
   // par ya elegido en la ficha de producto viene en la URL — así no toca
@@ -65,6 +67,18 @@ export default function Oferta2x1Client({ products }: { products: Product[] }) {
   const items = bothSelected ? [toCartItem(slot1 as BundleSelection), toCartItem(slot2 as BundleSelection)] : [];
   const discountLabel = `🎉 Precio 2×1 aplicado — 2 pares por ${formatPrice(discountedTotal)}`;
 
+  // Apenas queda listo el segundo par, se baja solo hasta el resumen de
+  // pago — así no toca que la clienta busque a mano dónde sigue después
+  // de elegir, igual que guían las tiendas grandes paso a paso.
+  useEffect(() => {
+    if (bothSelected && !justCompleted.current) {
+      justCompleted.current = true;
+      summaryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else if (!bothSelected) {
+      justCompleted.current = false;
+    }
+  }, [bothSelected]);
+
   return (
     <div className="bg-cream">
       <div className="container-page py-10">
@@ -91,12 +105,12 @@ export default function Oferta2x1Client({ products }: { products: Product[] }) {
         ) : (
           <>
             <div className="mx-auto mt-8 grid max-w-3xl gap-5 sm:grid-cols-2">
-              <BundleSlotPicker label="Par 1" products={products} selection={slot1} onChange={setSlot1} />
-              <BundleSlotPicker label="Par 2" products={products} selection={slot2} onChange={setSlot2} />
+              <BundleSlotPicker label="Par 1" step={1} products={products} selection={slot1} onChange={setSlot1} />
+              <BundleSlotPicker label="Par 2" step={2} products={products} selection={slot2} onChange={setSlot2} />
             </div>
 
             {bothSelected && (
-              <div className="mx-auto mt-8 max-w-md border border-ink bg-white p-6 text-center">
+              <div ref={summaryRef} className="mx-auto mt-8 max-w-md border border-ink bg-white p-6 text-center scroll-mt-24">
                 {savings > 0 && <p className="text-sm text-muted line-through">{formatPrice(normalTotal)}</p>}
                 <p className="font-heading text-3xl font-bold text-ink">{formatPrice(discountedTotal)}</p>
                 <p className="mt-1 text-sm font-bold text-urgent">
