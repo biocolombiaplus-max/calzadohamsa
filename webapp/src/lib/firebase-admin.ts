@@ -17,12 +17,16 @@ let debugReason = '';
 function buildApp(): App | undefined {
   if (getApps().length) return getApp();
 
-  const projectId = process.env.FIREBASE_ADMIN_PROJECT_ID;
-  const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL;
+  const projectId = process.env.FIREBASE_ADMIN_PROJECT_ID?.trim();
+  const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL?.trim();
   // La clave privada viene con saltos de línea reales en el JSON original,
   // pero las variables de entorno de Vercel los guardan como "\n" literales
-  // — hay que convertirlos de vuelta antes de usarla.
-  const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n');
+  // — hay que convertirlos de vuelta antes de usarla. También se tolera que
+  // al pegarla en Vercel hayan quedado comillas o espacios de sobra, un
+  // error común al copiarla a mano.
+  const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY?.trim()
+    .replace(/^['"]|['"]$/g, '')
+    .replace(/\\n/g, '\n');
 
   const missing = [
     !projectId && 'FIREBASE_ADMIN_PROJECT_ID',
