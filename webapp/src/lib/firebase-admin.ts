@@ -12,6 +12,8 @@ import { getAuth, type Auth } from 'firebase-admin/auth';
 // (Firebase Console > Configuración del proyecto > Cuentas de servicio >
 // Generar nueva clave privada) — ver README.md.
 
+let debugReason = '';
+
 function buildApp(): App | undefined {
   if (getApps().length) return getApp();
 
@@ -22,11 +24,21 @@ function buildApp(): App | undefined {
   // — hay que convertirlos de vuelta antes de usarla.
   const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n');
 
-  if (!projectId || !clientEmail || !privateKey) return undefined;
+  const missing = [
+    !projectId && 'FIREBASE_ADMIN_PROJECT_ID',
+    !clientEmail && 'FIREBASE_ADMIN_CLIENT_EMAIL',
+    !privateKey && 'FIREBASE_ADMIN_PRIVATE_KEY',
+  ].filter(Boolean);
+  if (missing.length > 0) {
+    debugReason = `Faltan estas variables de entorno (o están vacías): ${missing.join(', ')}.`;
+    return undefined;
+  }
 
   try {
     return initializeApp({ credential: cert({ projectId, clientEmail, privateKey }) });
   } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    debugReason = `La cuenta de servicio no se pudo inicializar (revisa que FIREBASE_ADMIN_PRIVATE_KEY esté completa y bien copiada): ${message}`;
     console.error('[firebase-admin] No se pudo inicializar la cuenta de servicio.', error);
     return undefined;
   }
@@ -39,3 +51,7 @@ export const adminAuth = (app ? getAuth(app) : undefined) as Auth;
 
 export const ADMIN_SDK_CONFIG_ERROR =
   'Falta configurar la cuenta de servicio de Firebase (FIREBASE_ADMIN_PROJECT_ID, FIREBASE_ADMIN_CLIENT_EMAIL, FIREBASE_ADMIN_PRIVATE_KEY). Ver README.md.';
+
+// Detalle de por qué falló, para mostrar solo en pantallas ya protegidas
+// por otra clave (ej. /admin/agencia) — nunca en una ruta pública.
+export const ADMIN_SDK_DEBUG_REASON = debugReason;

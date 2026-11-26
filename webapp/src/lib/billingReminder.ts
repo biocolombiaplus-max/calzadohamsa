@@ -1,4 +1,4 @@
-import { adminDb } from './firebase-admin';
+import { adminDb, ADMIN_SDK_DEBUG_REASON } from './firebase-admin';
 
 // Colección deliberadamente separada de `siteSettings` (que se lee desde un
 // endpoint público sin autenticación) — este es un aviso interno, solo de
@@ -36,7 +36,9 @@ export async function getBillingReminder(): Promise<BillingReminder> {
 }
 
 export async function updateBillingReminder(partial: Partial<BillingReminder>) {
-  if (!adminDb) throw new Error('Firebase admin no está configurado.');
+  if (!adminDb) {
+    throw new Error(ADMIN_SDK_DEBUG_REASON || 'Firebase admin no está configurado.');
+  }
   const fields = Object.keys(partial);
   if (fields.length === 0) return;
   await adminDb.collection(COLLECTION).doc(DOC_ID).set(partial, { mergeFields: fields });
